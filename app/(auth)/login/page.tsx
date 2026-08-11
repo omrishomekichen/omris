@@ -41,7 +41,7 @@ export default function Login() {
       setLoading(false);
 
       if (response?.status === "success") {
-        router.push("/dashboard");
+        router.push("/dashboa0rd");
         return;
       }
 
@@ -53,10 +53,7 @@ export default function Login() {
     }
   };
 
-  const handleDemoFill = () => {
-    setForm({ email: "demo@omriskitchen.com", password: "Password123!" });
-    setError("");
-  };
+ 
 
   return (
     <div className="auth-page">
@@ -226,13 +223,7 @@ export default function Login() {
                 <span className="checkbox-label">Keep me signed in</span>
               </label>
 
-              <button
-                type="button"
-                className="demo-fill-btn"
-                onClick={handleDemoFill}
-              >
-                Autofill Demo Credentials
-              </button>
+            
             </div>
 
             <button className="auth-btn" type="submit" disabled={loading}>
