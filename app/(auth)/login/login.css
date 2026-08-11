@@ -15,16 +15,12 @@
 /* Page Layout */
 .auth-page {
   position: relative;
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  padding-top: 2.5rem;
   background-color: var(--background);
-  background-image: 
-    radial-gradient(circle at 10% 15%, rgba(254, 209, 110, 0.22), transparent 40%),
-    radial-gradient(circle at 90% 85%, rgba(101, 7, 0, 0.08), transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(255, 248, 243, 0.8), transparent 60%);
+  
   overflow: hidden;
 }
 

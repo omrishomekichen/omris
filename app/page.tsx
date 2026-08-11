@@ -1,27 +1,35 @@
 'use client';
 
-import { useEffect } from "react";
+import { useEffect,useState } from "react";
 import { useRouter } from "next/navigation";
 import Api from './__apis/api';
 import './globals.css';
+import { usePathname } from 'next/navigation';
+
 
 
 export default function Home() {
   const router = useRouter();
-
+  const pathname = usePathname();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
     useEffect(() => {
+      Api.health().catch(console.error);
 
-        Api.health().catch(console.error);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const user = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
 
-        const token = localStorage.getItem('token');
-        const user = localStorage.getItem('user');
+      const authenticated = Boolean(token && user);
+      setIsAuthenticated(authenticated);
 
-        if (token && user) {
-            router.replace('/dashboard');
-        } else {
-            router.replace('/login');
+      if (pathname === '/' && isAuthenticated) {
+        router.push('/dashboard');
+        } else if (pathname === '/' && !isAuthenticated) {
+            router.push('/login');
         }
-    }, [router]);
+    }, [router, pathname]);
+
+
+    
 
     return null;
 }

@@ -29,6 +29,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sentotp,setsentotp] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -140,7 +141,7 @@ export default function Login() {
           </div>
         </aside>
 
-        {/* Right Form Panel */}
+        {!sentotp ? (
         <main className="auth-form-panel">
           <div className="auth-form-head">
             <div className="auth-welcome-pill">
@@ -282,6 +283,16 @@ export default function Login() {
             </Link>
           </p>
         </main>
+        ) : (
+          <main className="auth-form-panel">
+            <div className="auth-form-head">
+              <div className="auth-welcome-pill">
+                <ChefHat size={15} />
+              </div>
+            </div>
+          </main>
+        )}
+
       </div>
     </div>
   );
