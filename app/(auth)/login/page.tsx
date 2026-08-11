@@ -76,12 +76,13 @@ export default function Login() {
     try{
        const res = await Api.verifyLogin(
         FormData.email,
-        verificationCode,
+        verificationCode,   
       );
      if (res.status === 'success') {
         router.push('/dashboard');
         localStorage.setItem('token', res.token);
-        
+        localStorage.setItem('user', res.user);
+
       } else {
         setError(res.message || 'Unable to verify your login. Please try again.');
       }

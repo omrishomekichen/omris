@@ -22,7 +22,7 @@ const workSans = Work_Sans({
   display: "swap",
 });
 
-const PUBLIC_ROUTES = ["/login", "/signup","/forgot-password"];
+const PUBLIC_ROUTES = ["/login", "/signup", "/forgot-password"];
 
 export function AuthGuard({
   children,

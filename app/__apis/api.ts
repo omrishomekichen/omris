@@ -42,6 +42,14 @@ const Api = {
     });
     return response.json();
   },
+    forgotPassword: async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return response.json();
+  }
 };
 
 export default Api;

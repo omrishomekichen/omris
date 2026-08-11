@@ -240,14 +240,69 @@ authRouter.post("/verify-login", async (req: Request, res: Response) => {
 
     await Otp.deleteMany({ email: user.email });
     const token = randomUUID();
+    const updatedUser = await User.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { $set: { token } },
+      { new: true },
+    );
 
     return res.status(200).json({
       status: "success",
       token,
+      updatedUser,
       user: buildUserResponse(user),
     });
   } catch (error) {
     console.error("Login verification error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+authRouter.post("/forgot-password", async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email is required",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await Otp.deleteMany({ email: user.email });
+    await Otp.create({ email: user.email, code: resetCode, expiresAt });
+
+    try {
+      await sendMail(
+        user.email,
+        "Your password reset code",
+        `Your password reset OTP is ${resetCode}. It expires in 15 minutes.`,
+      );
+    } catch (mailError) {
+      console.error("Password reset email error:", mailError);
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Password reset code sent to your email.",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
