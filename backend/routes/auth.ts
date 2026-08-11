@@ -1,0 +1,258 @@
+import express, { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
+import { User } from "../model/model";
+import { Otp } from "../model/otp";
+import { sendMail } from "../ulits/mail";
+
+const authRouter = express.Router();
+
+const buildUserResponse = (user: any) => ({
+  id: user._id,
+  name: `${user.firstName} ${user.lastName}`.trim(),
+  email: user.email,
+  verified: user.verified,
+});
+
+authRouter.post("/register", async (req: Request, res: Response) => {
+  const { fullName, email, password, agreeToTerms } = req.body;
+
+  if (!fullName || !email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Missing required registration fields",
+    });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({
+        status: "error",
+        message: "Email already registered",
+      });
+    }
+
+    const [firstName, ...rest] = fullName.trim().split(" ");
+    const lastName = rest.join(" ");
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    const user = new User({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
+      verified: false,
+    });
+
+    await user.save();
+
+    await Otp.deleteMany({ email: user.email });
+    await Otp.create({
+      email: user.email,
+      code: verificationCode,
+      expiresAt: verificationExpires,
+    });
+
+    try {
+      await sendMail(
+        user.email,
+        "Your verification code",
+        `Your OTP is ${verificationCode}. It expires in 15 minutes.`,
+      );
+    } catch (mailError) {
+      console.error("Verification email error:", mailError);
+    }
+
+    return res.status(201).json({
+      status: "success",
+      message: "User registered successfully. Check your email for the verification code.",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+authRouter.post("/verify", async (req: Request, res: Response) => {
+  const { email, verificationCode } = req.body;
+
+  if (!email || !verificationCode) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and verification code are required",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    if (user.verified) {
+      return res.status(400).json({
+        status: "error",
+        message: "Email already verified",
+      });
+    }
+
+    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
+    if (!otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid verification code",
+      });
+    }
+
+    if (new Date() > otp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "Verification code expired",
+      });
+    }
+
+    user.verified = true;
+    await user.save();
+    await Otp.deleteMany({ email: user.email });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Email verified successfully",
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    console.error("Verification error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+authRouter.post("/login", async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Missing email or password",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await Otp.deleteMany({ email: user.email });
+    await Otp.create({ email: user.email, code: verificationCode, expiresAt });
+
+    try {
+      await sendMail(
+        user.email,
+        "Your login verification code",
+        `Your login OTP is ${verificationCode}. It expires in 15 minutes.`,
+      );
+    } catch (mailError) {
+      console.error("Login OTP email error:", mailError);
+    }
+
+    return res.status(200).json({
+      status: "pending",
+      message: "Login verification code sent to your email.",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+authRouter.post("/verify-login", async (req: Request, res: Response) => {
+  const { email, verificationCode } = req.body;
+
+  if (!email || !verificationCode) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and verification code are required",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    if (!user.verified) {
+      return res.status(403).json({
+        status: "error",
+        message: "Email not verified yet",
+      });
+    }
+
+    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
+    if (!otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid verification code",
+      });
+    }
+
+    if (new Date() > otp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "Verification code expired",
+      });
+    }
+
+    await Otp.deleteMany({ email: user.email });
+    const token = randomUUID();
+
+    return res.status(200).json({
+      status: "success",
+      token,
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    console.error("Login verification error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+export default authRouter;

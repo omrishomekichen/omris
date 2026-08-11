@@ -1,70 +1,47 @@
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
+).replace(/\/$/, "");
 
 const Api = {
-health: async () => {
-        try {
-            const response = await fetch('/api/health');
-            const contentType = response.headers.get('content-type') || '';
-            if (!response.ok) {
-                const text = await response.text();
-                return { status: 'error', message: text || response.statusText };
-            }
-            if (!contentType.includes('application/json')) {
-                const text = await response.text();
-                return { status: 'error', message: 'Unexpected response: ' + text };
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('API health check error:', error);
-            return { status: 'error', message: 'An error occurred while checking health.' };
-        }
-    },
+  health: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/health`);
+    return response.json();
+  },
 
-    login: async (email: string, password: string) => {
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-            const contentType = response.headers.get('content-type') || '';
-            if (!contentType.includes('application/json')) {
-                const text = await response.text();
-                return { status: 'error', message: text || response.statusText };
-            }
-            const data = await response.json();
-            if (!response.ok) return { status: 'error', message: data?.message || response.statusText };
-            return data;
-        } catch (error) {
-            console.error('API login error:', error);
-            return { status: 'error', message: 'An error occurred while logging in.' };
-        }
-    },
-    register: async (name: string, email: string, password: string) => {
-        try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password }),
-            });
-            const contentType = response.headers.get('content-type') || '';
-            if (!contentType.includes('application/json')) {
-                const text = await response.text();
-                return { status: 'error', message: text || response.statusText };
-            }
-            const data = await response.json();
-            if (!response.ok) return { status: 'error', message: data?.message || response.statusText };
-            return data;
-        } catch (error) {
-            console.error('API register error:', error);
-            return { status: 'error', message: 'An error occurred while registering.' };
-        }
-    }
+  login: async (email: string, password: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    return response.json();
+  },
 
-}
+  register: async (fullName: string, email: string, password: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fullName, email, password }),
+    });
+    return response.json();
+  },
+  verifyEmail: async (email: string, verificationCode: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, verificationCode }),
+    });
+    return response.json();
+  },
 
+  verifyLogin: async (email: string, verificationCode: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/verify-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), verificationCode: verificationCode.trim() }),
+    });
+    return response.json();
+  },
+};
 
 export default Api;

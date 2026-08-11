@@ -21,37 +21,74 @@ import {
   Leaf
 } from "lucide-react";
 import "./login.css";
+import styles from "../auth-pages.module.css";
 
 export default function Login() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [FormData, setFormData] = useState({ email: "", password: "" , verificationCode: ""});
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sentotp,setsentotp] = useState(false);
 
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
+  }
+
+
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     setLoading(true);
-
-    try {
-      const response = await Api.login(form.email, form.password);
-      setLoading(false);
-
-      if (response?.status === "success") {
-        router.push("/dashboa0rd");
-        return;
+    try{
+       const res = await Api.login(
+        FormData.email,
+        FormData.password,
+      );
+     if (res.status === 'pending') {
+        setsentotp(true);
+      } else {
+        setError(res.message || 'Unable to login to your account. Please try again.');
       }
-
-      setError(response?.message || "Unable to sign in. Please verify your credentials and try again.");
-    } catch (err: unknown) {
+    } catch (error) {
+      setError('Unable to login to your account. Please try again.');
+    } finally {
       setLoading(false);
-      const errorMessage = err instanceof Error ? err.message : "A network error occurred. Please check your connection.";
-      setError(errorMessage);
     }
+   
+
   };
+  const handleverifySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const verificationCode = FormData.verificationCode.trim();
+    if (!/^\d{6}$/.test(verificationCode)) {
+      setError("Enter the six-digit verification code sent to your email.");
+      return;
+    }
+
+    setLoading(true);
+    try{
+       const res = await Api.verifyLogin(
+        FormData.email,
+        verificationCode,
+      );
+     if (res.status === 'success') {
+        router.push('/dashboard');
+      } else {
+        setError(res.message || 'Unable to verify your login. Please try again.');
+      }
+    } catch (error) {
+      setError('Unable to verify your login. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
  
 
@@ -172,8 +209,8 @@ export default function Login() {
                 <input
                   type="email"
                   name="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={FormData.email}
+                  onChange={handleInputChange}
                   placeholder="name@example.com"
                   autoComplete="off"
                   required
@@ -193,8 +230,8 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  value={FormData.password}
+                  onChange={handleInputChange}
                   placeholder="••••••••••••"
                   autoComplete="new-password"
                   required
@@ -276,11 +313,57 @@ export default function Login() {
         </main>
         ) : (
           <main className="auth-form-panel">
-            <div className="auth-form-head">
-              <div className="auth-welcome-pill">
-                <ChefHat size={15} />
+         <div className={styles.formPanel}>
+          <span className={styles.pill}>
+            <ChefHat size={14} /> Join the family
+          </span>
+
+          <h2>
+            Verify your email
+          </h2>
+
+          <p className={styles.intro}>
+            We’ve sent a verification code to your email. Please enter it below to complete your registration.
+          </p>
+
+          <form className={styles.form} onSubmit={handleverifySubmit}>
+            <label className={styles.field}>
+              Verification Code
+              <div className={styles.inputWrap}>
+                <input
+                  name="verificationCode"
+                  value={FormData.verificationCode}
+                  className={styles.input}
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  placeholder="Enter code"
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
-            </div>
+            </label>
+
+            <button
+              type="submit"
+              className={styles.button}
+              
+            >
+              Verify Email
+              <ArrowRight size={18} />
+            </button>
+          </form>
+
+          <p className={styles.footer}>
+            Didn't receive the code?{" "}
+            <Link
+              href="/resend-code"
+              className={styles.textLink}
+            >
+              Resend Code
+            </Link>
+          </p>
+        </div>
           </main>
         )}
 

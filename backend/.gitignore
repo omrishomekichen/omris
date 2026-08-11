@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# environment variables and credentials
+.env
+.env.*
+!.env.example
+
+# build and TypeScript output
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# local tooling
+.DS_Store
+.vscode/
+.idea/

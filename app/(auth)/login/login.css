@@ -1,4 +1,5 @@
 @import "../../globals.css";
+@import "../auth-pages.module.css";
 
 /* Base reset & typography defaults for login page */
 .auth-page button,
