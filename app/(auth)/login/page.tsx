@@ -80,6 +80,8 @@ export default function Login() {
       );
      if (res.status === 'success') {
         router.push('/dashboard');
+        localStorage.setItem('token', res.token);
+        
       } else {
         setError(res.message || 'Unable to verify your login. Please try again.');
       }
