@@ -21,7 +21,6 @@ const workSans = Work_Sans({
   display: "swap",
 });
 
-
 export default function RootLayout({
   children,
 }: {
