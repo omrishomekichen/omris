@@ -412,12 +412,20 @@
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
-  transition: transform 200ms ease, color 200ms ease, text-decoration 200ms ease;
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: transform 200ms ease, color 200ms ease, background 200ms ease;
 }
 
 .backLink:hover {
   text-decoration: underline;
   transform: translateX(-3px);
+  background: rgba(101, 7, 0, 0.05);
 }
 
 .helpCard {
@@ -433,6 +441,11 @@
   font-size: 0.82rem;
   line-height: 1.45;
   transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.helpCard + .button,
+.helpCard + button {
+  margin-top: 1.75rem;
 }
 
 .helpCard:hover {

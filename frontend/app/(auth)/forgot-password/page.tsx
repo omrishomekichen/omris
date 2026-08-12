@@ -185,8 +185,8 @@ export default function ForgotPasswordPage() {
 
             <p>
               Enter the email connected to your account
-              and we’ll help you reset your password
-              securely.
+              and we’ll send a 6-digit verification code to
+              reset your password securely.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export default function ForgotPasswordPage() {
             </span>
 
             <span>
-              Reset links are private and expire for
+              Reset codes are private and expire for
               your protection.
             </span>
           </div>
@@ -218,7 +218,7 @@ export default function ForgotPasswordPage() {
             </h2>
 
             <p className={styles.intro}>
-              No worries. We’ll email you a link to
+              No worries. We’ll email you a 6-digit code to
               choose a new one.
             </p>
 
@@ -276,15 +276,19 @@ export default function ForgotPasswordPage() {
 
               <button
                 type="submit"
-                className={styles.button}
+                className={`${styles.button} ${loading ? styles.loading : ""}`}
                 disabled={loading}
               >
-                {loading
-                  ? "Sending..."
-                  : "Send reset link"}
-
-                {!loading && (
-                  <ArrowRight size={18} />
+                {loading ? (
+                  <span className={styles.btnLoadingState}>
+                    <span className={styles.spinner} />
+                    Sending code...
+                  </span>
+                ) : (
+                  <span className={styles.btnContent}>
+                    <span>Send verification code</span>
+                    <ArrowRight size={18} className={styles.btnArrow} />
+                  </span>
                 )}
               </button>
             </form>
@@ -297,7 +301,7 @@ export default function ForgotPasswordPage() {
                   Check your inbox
                 </strong>
 
-                We’ll send the reset instructions to
+                We’ll send a 6-digit reset code to
                 the email address you enter.
               </div>
             </div>
@@ -326,7 +330,7 @@ export default function ForgotPasswordPage() {
             </h2>
 
             <p className={styles.intro}>
-              We’ve sent a password reset link to:
+              We’ve sent a 6-digit password reset code to:
             </p>
 
             <p>
@@ -341,8 +345,7 @@ export default function ForgotPasswordPage() {
                   Check your inbox
                 </strong>
 
-                We’ve sent the reset instructions to
-                the email address you entered.
+                Enter the 6-digit verification code in the next step to set your new password.
               </div>
             </div>
 
@@ -351,8 +354,10 @@ export default function ForgotPasswordPage() {
               className={styles.button}
               onClick={handleContinue}
             >
-            Enter  Continue
-              <ArrowRight size={18} />
+              <span className={styles.btnContent}>
+                <span>Enter Code to Reset Password</span>
+                <ArrowRight size={18} className={styles.btnArrow} />
+              </span>
             </button>
 
             <Link
@@ -490,15 +495,19 @@ export default function ForgotPasswordPage() {
 
               <button
                 type="submit"
-                className={styles.button}
+                className={`${styles.button} ${loading ? styles.loading : ""}`}
                 disabled={loading}
               >
-                {loading
-                  ? "Resetting..."
-                  : "Reset password"}
-
-                {!loading && (
-                  <ArrowRight size={18} />
+                {loading ? (
+                  <span className={styles.btnLoadingState}>
+                    <span className={styles.spinner} />
+                    Resetting password...
+                  </span>
+                ) : (
+                  <span className={styles.btnContent}>
+                    <span>Reset password</span>
+                    <ArrowRight size={18} className={styles.btnArrow} />
+                  </span>
                 )}
               </button>
             </form>

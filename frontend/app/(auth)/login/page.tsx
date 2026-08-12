@@ -349,11 +349,20 @@ export default function Login() {
 
             <button
               type="submit"
-              className={styles.button}
-              
+              className={`${styles.button} ${loading ? styles.loading : ""}`}
+              disabled={loading}
             >
-              Verify Email
-              <ArrowRight size={18} />
+              {loading ? (
+                <span className={styles.btnLoadingState}>
+                  <span className={styles.spinner} />
+                  Verifying Email...
+                </span>
+              ) : (
+                <span className={styles.btnContent}>
+                  <span>Verify Email</span>
+                  <ArrowRight size={18} className={styles.btnArrow} />
+                </span>
+              )}
             </button>
           </form>
 
