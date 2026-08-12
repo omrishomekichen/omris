@@ -570,10 +570,21 @@
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(45, 42, 38, 0.08);
   border: 1px solid var(--card-border);
+  max-height: 480px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   opacity: 0;
   transform: translateX(-35px);
   will-change: opacity, transform;
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.story-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .story-image.is-visible {

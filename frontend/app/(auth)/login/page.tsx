@@ -78,11 +78,12 @@ export default function Login() {
         FormData.email,
         verificationCode,   
       );
-     if (res.status === 'success') {
-        router.push('/dashboard');
+      if (res.status === 'success') {
         localStorage.setItem('token', res.token);
-        localStorage.setItem('user', res.user);
-
+        if (res.user) {
+          localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
+        }
+        router.push('/dashboard');
       } else {
         setError(res.message || 'Unable to verify your login. Please try again.');
       }

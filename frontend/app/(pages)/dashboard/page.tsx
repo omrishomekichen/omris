@@ -19,7 +19,7 @@ const PRODUCTS = [
   {
     id: 'mango-avakaya',
     name: 'Classic Avakaya Mango Pickle',
-    price: '$12.00',
+    price: '₹350',
     description: 'Crisp green raw mangoes prepared with hand-ground spices and traditional sesame oil.',
     image: '/images/mango_pickle.png',
     tag: 'Popular',
@@ -28,7 +28,7 @@ const PRODUCTS = [
   {
     id: 'chicken-pickle',
     name: 'Spicy Country Chicken Pickle',
-    price: '$18.00',
+    price: '₹499',
     description: 'Tender boneless chicken slow-cooked with curry leaves and authentic roasted spices.',
     image: '/images/chicken_pickle.png',
     tag: 'Specialty',
@@ -37,7 +37,7 @@ const PRODUCTS = [
   {
     id: 'garlic-pickle',
     name: 'Roasted Garlic & Herb Pickle',
-    price: '$14.00',
+    price: '₹399',
     description: 'Mellow roasted garlic cloves steeped in herb-infused mustard oil and fenugreek.',
     image: '/images/garlic_pickle.png',
     tag: 'Mild',
@@ -119,7 +119,7 @@ export default function DashboardPage() {
                   <span className="card-sub">Sun-Dried Mangoes & Sesame Oil</span>
                 </div>
                 <div className="card-price-box">
-                  <span className="card-price">$12.00</span>
+                  <span className="card-price">₹350</span>
                   <button 
                     className="card-quick-add"
                     onClick={() => handleUpdateQuantity('mango-avakaya', 1)}

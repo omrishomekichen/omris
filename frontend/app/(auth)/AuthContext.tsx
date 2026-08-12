@@ -28,10 +28,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already logged in
     const token = localStorage.getItem('token');
-    if (token) {
-      // Verify the token and set the user
+    const savedUser = localStorage.getItem('user');
+    if (token && savedUser) {
+      try {
+        if (savedUser.startsWith('{')) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          setUser({ id: '1', email: savedUser, name: savedUser });
+        }
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+      }
     }
     setLoading(false);
   }, []);
@@ -41,7 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await Api.login(email, password);
       if (response.status === 'success') {
         localStorage.setItem('token', response.token);
-        setUser(response.user);
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+          setUser(response.user);
+        }
         router.push('/dashboard');
       }
       return response;
@@ -56,7 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await Api.register(name, email, password);
       if (response.status === 'success') {
         localStorage.setItem('token', response.token);
-        setUser(response.user);
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+          setUser(response.user);
+        }
         router.push('/dashboard');
       }
       return response;
@@ -68,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
     router.push('/login');
   };
