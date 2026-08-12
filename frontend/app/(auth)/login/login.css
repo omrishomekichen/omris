@@ -61,7 +61,16 @@
     0 24px 64px -16px rgba(101, 7, 0, 0.12),
     0 8px 24px -8px rgba(45, 42, 38, 0.05);
   overflow: hidden;
-  transition: box-shadow 0.3s ease;
+  animation: authCardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.auth-card:hover {
+  transform: translateY(-4px) scale(1.002);
+  box-shadow: 
+    0 32px 80px -16px rgba(101, 7, 0, 0.18),
+    0 12px 32px -8px rgba(45, 42, 38, 0.08);
 }
 
 /* Left Hero Panel (Editorial & Artisanal) */
@@ -102,6 +111,12 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  animation: fadeInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  transition: transform 0.25s ease;
+}
+
+.auth-brand-link:hover {
+  transform: translateX(3px);
 }
 
 .auth-brand-logo-wrapper {
@@ -112,6 +127,12 @@
   border: 2px solid rgba(254, 209, 110, 0.4);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.auth-brand-link:hover .auth-brand-logo-wrapper {
+  transform: rotate(-5deg) scale(1.08);
+  border-color: #fed16e;
 }
 
 .auth-brand-logo {
@@ -155,10 +176,18 @@
   font-weight: 600;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
+  animation: fadeInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.auth-badge:hover {
+  transform: translateY(-2px) scale(1.03);
+  background: rgba(254, 209, 110, 0.24);
 }
 
 .badge-icon {
   color: #fed16e;
+  animation: pulseBadgeIcon 2.5s ease-in-out infinite;
 }
 
 /* Editorial Copy */
@@ -168,6 +197,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
 }
 
 .editorial-kicker {
@@ -209,6 +239,24 @@
   display: flex;
   align-items: flex-start;
   gap: 1rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.feature-item:nth-child(1) {
+  animation-delay: 0.35s;
+}
+
+.feature-item:nth-child(2) {
+  animation-delay: 0.45s;
+}
+
+.feature-item:nth-child(3) {
+  animation-delay: 0.55s;
+}
+
+.feature-item:hover {
+  transform: translateX(6px);
 }
 
 .feature-icon {
@@ -221,6 +269,13 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+  transform: scale(1.12) rotate(4deg);
+  background: rgba(254, 209, 110, 0.3);
+  border-color: rgba(254, 209, 110, 0.5);
 }
 
 .feature-content h3 {
@@ -242,6 +297,7 @@
   position: relative;
   z-index: 2;
   margin-top: 0.5rem;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.65s both;
 }
 
 .showcase-frame {
@@ -252,6 +308,12 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.showcase-frame:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42);
 }
 
 .showcase-frame img {
@@ -263,7 +325,7 @@
 }
 
 .showcase-frame:hover img {
-  transform: scale(1.04);
+  transform: scale(1.06);
 }
 
 .showcase-overlay {
@@ -790,5 +852,27 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.6rem;
+  }
+}
+
+@keyframes authCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseBadgeIcon {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.25) rotate(12deg);
+    opacity: 1;
   }
 }

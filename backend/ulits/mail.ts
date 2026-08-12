@@ -8,20 +8,15 @@ const mailrouter = express.Router();
 
 mailrouter.use(express.json());
 
-
 // ===============================
 // Check Gmail Configuration
 // ===============================
 
-if (
-  !process.env.GMAIL_USER ||
-  !process.env.GMAIL_APP_PASSWORD
-) {
+if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
   console.warn(
-    "GMAIL_USER and GMAIL_APP_PASSWORD are not set. Mail sending will fail until they are provided in backend/.env."
+    "GMAIL_USER and GMAIL_APP_PASSWORD are not set. Mail sending will fail until they are provided in backend/.env.",
   );
 }
-
 
 // ===============================
 // Gmail Transporter
@@ -38,16 +33,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
 // ===============================
 // Send Mail Function
 // ===============================
 
-export const sendMail = async (
-  to: string,
-  subject: string,
-  text: string
-) => {
+export const sendMail = async (to: string, subject: string, text: string) => {
   try {
     const info = await transporter.sendMail({
       from: `"Omri's Home Kitchen" <${process.env.GMAIL_USER}>`,
@@ -74,14 +64,11 @@ export const sendMail = async (
       success: true,
       messageId: info.messageId,
     };
-
   } catch (error) {
     console.error("❌ Mail error:", error);
 
     throw error;
   }
 };
-
-
 
 export default mailrouter;
