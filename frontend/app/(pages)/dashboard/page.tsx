@@ -1,0 +1,289 @@
+'use client';
+
+import React, { useState } from 'react';
+import "../css/dashboard.css";
+import { 
+  Sparkles, 
+  Heart, 
+  Leaf, 
+  Package, 
+  Plus, 
+  Minus, 
+  ArrowRight, 
+  PhoneCall, 
+  ShoppingBag,
+  Star
+} from 'lucide-react';
+
+const PRODUCTS = [
+  {
+    id: 'mango-avakaya',
+    name: 'Classic Avakaya Mango Pickle',
+    price: '$12.00',
+    description: 'Crisp green raw mangoes prepared with hand-ground spices and traditional sesame oil.',
+    image: '/images/mango_pickle.png',
+    tag: 'Popular',
+    spiceLevel: '🌶️🌶️ Medium-Spicy',
+  },
+  {
+    id: 'chicken-pickle',
+    name: 'Spicy Country Chicken Pickle',
+    price: '$18.00',
+    description: 'Tender boneless chicken slow-cooked with curry leaves and authentic roasted spices.',
+    image: '/images/chicken_pickle.png',
+    tag: 'Specialty',
+    spiceLevel: '🌶️🌶️🌶️ Spicy',
+  },
+  {
+    id: 'garlic-pickle',
+    name: 'Roasted Garlic & Herb Pickle',
+    price: '$14.00',
+    description: 'Mellow roasted garlic cloves steeped in herb-infused mustard oil and fenugreek.',
+    image: '/images/garlic_pickle.png',
+    tag: 'Mild',
+    spiceLevel: '🌶️ Mild & Flavorful',
+  },
+];
+
+export default function DashboardPage() {
+  const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
+
+  const handleUpdateQuantity = (productId: string, delta: number) => {
+    setCartCountMap((prev) => {
+      const current = prev[productId] || 0;
+      const next = Math.max(0, current + delta);
+      return { ...prev, [productId]: next };
+    });
+  };
+
+  return (
+    <div className="dashboard-root">
+      
+      {/* 1. SIMPLE HERO SECTION */}
+      <section className="simple-hero">
+        <div className="section-container hero-grid">
+          
+          {/* Left Text */}
+          <div className="hero-text">
+            <div className="simple-badge">
+              <Sparkles size={14} />
+              <span>Traditional Home Kitchen</span>
+            </div>
+
+            <h1 className="hero-heading">
+              Taste the Heritage of <br />
+              <span className="accent-text">Omri's Home Kitchen</span>
+            </h1>
+
+            <p className="hero-subtext">
+              Authentic, home-made pickles slow-crafted in fresh, small quantities using sun-dried ingredients, 
+              cold-pressed sesame oil, and secret family recipes. 100% natural with zero chemical preservatives.
+            </p>
+
+            {/* Feature Pills Row */}
+            <div className="hero-feature-row">
+              <span className="feature-pill">🏡 Family Recipe</span>
+              <span className="feature-pill">🌿 100% Natural</span>
+              <span className="feature-pill">🚚 Doorstep Shipping</span>
+              <span className="feature-pill">📞 +91 98765 43210</span>
+            </div>
+
+            <div className="hero-actions">
+              <a href="#pickles" className="primary-btn">
+                <span>Order Pickles Now</span>
+                <ArrowRight size={18} />
+              </a>
+
+              <a href="#story" className="secondary-btn">
+                <span>Our Story</span>
+              </a>
+            </div>
+
+            {/* Trust Note */}
+            <div className="simple-trust-note">
+              <Heart size={16} className="heart-icon" />
+              <span>Handcrafted in small quantities • Loved by 1,000+ homes</span>
+            </div>
+          </div>
+
+          {/* Right Hero Image Card */}
+          <div className="hero-image-box">
+            <div className="hero-card">
+              <div className="hero-card-img-wrapper">
+                <img src="/images/mango_pickle.png" alt="Fresh Avakaya Mango Pickle" />
+                <span className="hero-card-badge">⭐ Signature Recipe</span>
+              </div>
+              <div className="hero-card-info">
+                <div>
+                  <h3>Classic Avakaya Mango</h3>
+                  <span className="card-sub">Sun-Dried Mangoes & Sesame Oil</span>
+                </div>
+                <div className="card-price-box">
+                  <span className="card-price">$12.00</span>
+                  <button 
+                    className="card-quick-add"
+                    onClick={() => handleUpdateQuantity('mango-avakaya', 1)}
+                  >
+                    + Add ({cartCountMap['mango-avakaya'] || 0})
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 2. THREE SIMPLE PROMISES */}
+      <section className="promises-section">
+        <div className="section-container promises-grid">
+          
+          <div className="promise-card">
+            <div className="icon-circle">
+              <Heart size={22} />
+            </div>
+            <h3>100% Home-Made</h3>
+            <p>Crafted in our family kitchen with personal care and hygienic preparation.</p>
+          </div>
+
+          <div className="promise-card">
+            <div className="icon-circle">
+              <Leaf size={22} />
+            </div>
+            <h3>Pure Ingredients</h3>
+            <p>Made with natural sea salt, cold-pressed oils, and zero artificial colors.</p>
+          </div>
+
+          <div className="promise-card">
+            <div className="icon-circle">
+              <Package size={22} />
+            </div>
+            <h3>Fresh & Safely Packed</h3>
+            <p>Packed carefully in leak-proof glass jars to keep the authentic taste intact.</p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 3. SIGNATURE PICKLES (BEST SELLERS) */}
+      <section id="pickles" className="pickles-section">
+        <div className="section-container">
+          
+          <div className="simple-heading">
+            <h2>Our Home-Made Pickles</h2>
+            <p>Pick your favorite jar below. Every jar is made fresh and delivered with care.</p>
+          </div>
+
+          <div className="products-grid">
+            {PRODUCTS.map((product) => {
+              const qty = cartCountMap[product.id] || 0;
+
+              return (
+                <div key={product.id} className="simple-product-card">
+                  
+                  <div className="product-img-frame">
+                    <img src={product.image} alt={product.name} />
+                    <span className="product-tag">{product.tag}</span>
+                  </div>
+
+                  <div className="product-details">
+                    <span className="product-spice">{product.spiceLevel}</span>
+                    <h3 className="product-title">{product.name}</h3>
+                    <p className="product-desc">{product.description}</p>
+
+                    <div className="product-action-row">
+                      <span className="product-price">{product.price}</span>
+
+                      {qty === 0 ? (
+                        <button
+                          className="add-btn"
+                          onClick={() => handleUpdateQuantity(product.id, 1)}
+                        >
+                          <Plus size={16} />
+                          <span>Add to Order</span>
+                        </button>
+                      ) : (
+                        <div className="qty-control">
+                          <button onClick={() => handleUpdateQuantity(product.id, -1)}>
+                            <Minus size={14} />
+                          </button>
+                          <span>{qty}</span>
+                          <button onClick={() => handleUpdateQuantity(product.id, 1)}>
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. OUR STORY SECTION */}
+      <section id="story" className="story-section">
+        <div className="section-container story-flex">
+          
+          <div className="story-image">
+            <img src="/images/kitchen_craft.png" alt="Family spice preparation" />
+          </div>
+
+          <div className="story-content">
+            <span className="simple-badge">
+              <span>About Omri's Home Kitchen</span>
+            </span>
+
+            <h2>From Our Kitchen to Your Dining Table</h2>
+
+            <p>
+              Omri’s Home Kitchen is a small family-run business born out of a love for authentic, 
+              home-style pickles. We started making pickles for our family and neighbors using traditional 
+              recipes handed down by our elders.
+            </p>
+
+            <p>
+              We don't mass-produce in factories. Every single jar is made with hand-ground spices, 
+              sun-dried ingredients, and patience—giving you that warm, comforting flavor of home.
+            </p>
+
+            <div className="story-highlights">
+              <div className="highlight-item">
+                <strong>Handcrafted</strong>
+                <span>Small batch care</span>
+              </div>
+              <div className="highlight-item">
+                <strong>Natural</strong>
+                <span>No preservatives</span>
+              </div>
+              <div className="highlight-item">
+                <strong>Fresh</strong>
+                <span>Pure sesame & mustard oil</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 5. SIMPLE ORDER & CONTACT BANNER */}
+      <section className="contact-banner">
+        <div className="section-container banner-box">
+          <h2>Have Questions or Special Bulk Orders?</h2>
+          <p>We are a growing home kitchen and love connecting with our customers directly!</p>
+
+          <div className="banner-actions">
+            <a href="tel:+919876543210" className="phone-btn">
+              <PhoneCall size={18} />
+              <span>Call / Inquiry: +91 98765 43210</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  );
+}
