@@ -7,6 +7,7 @@ import Navbar from "./components/nav";
 import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Footer from "./components/footer";
 
 const libreCaslon = Libre_Caslon_Text({
   weight: ["400", "700"],
@@ -34,7 +35,8 @@ export function AuthGuard({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const stoken = localStorage.getItem("token");
+    const token='asdbhasdbvchjdsvchjsd';
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
@@ -78,10 +80,10 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <Navbar />
-
           <AuthGuard>
             {children}
           </AuthGuard>
+          <Footer />
         </AuthProvider>
       </body>
     </html>

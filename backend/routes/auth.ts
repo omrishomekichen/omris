@@ -310,4 +310,58 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   }
 });
 
+authRouter.post("/reset-password", async (req: Request, res: Response) => {
+  const { email, verificationCode, newPassword } = req.body;
+
+  if (!email || !verificationCode || !newPassword) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email, reset code, and new password are required",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
+    if (!otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid reset code",
+      });
+    }
+
+    if (new Date() > otp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "Reset code expired",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    await Otp.deleteMany({ email: user.email });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
 export default authRouter;
+
+

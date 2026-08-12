@@ -1,0 +1,940 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@400;600&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap');
+
+
+.home-page {
+  --surface: #fff8f3;
+  --on-surface: #1e1b17;
+  --background: #fff8f3;
+
+  --primary: #650700;
+  --primary-container: #8c1404;
+  --on-primary: #ffffff;
+
+  --secondary: #785a00;
+  --secondary-container: #fed16e;
+  --on-secondary-fixed: #251a00;
+  --on-secondary-container: #775800;
+
+  --surface-container-low: #faf2ec;
+  --surface-container: #f4ede6;
+  --surface-container-high: #eee7e1;
+  --surface-container-highest: #e8e1db;
+
+  --on-surface-variant: #59413c;
+
+  --outline: #8d706b;
+  --outline-variant: #e1bfb8;
+
+  --error: #ba1a1a;
+
+  background: var(--background);
+  color: var(--on-surface);
+
+  font-family: "Work Sans", sans-serif;
+
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+
+
+
+.home-page * {
+  box-sizing: border-box;
+}
+
+.home-page button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.home-page a {
+  text-decoration: none;
+}
+
+.home-page img {
+  display: block;
+}
+
+
+
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 200,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+
+
+
+.home-page .shadow-ambient {
+  box-shadow: 0 4px 24px rgba(45, 42, 38, 0.05);
+}
+
+.home-page .shadow-float {
+  box-shadow: 0 12px 32px rgba(45, 42, 38, 0.08);
+}
+
+
+
+
+.top-nav {
+  background: var(--surface);
+
+  width: 100%;
+
+  z-index: 50;
+
+  position: sticky;
+  top: 0;
+
+  border-bottom: 1px solid var(--outline-variant);
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.top-nav-inner {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+  max-width: 1280px;
+
+  margin: 0 auto;
+
+  padding: 16px;
+}
+
+
+
+
+.logo {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 36px;
+
+  line-height: 42px;
+
+  font-weight: 700;
+
+  letter-spacing: -0.02em;
+
+  color: var(--primary);
+
+  font-style: italic;
+}
+
+
+
+
+.desktop-nav {
+  display: none;
+
+  align-items: center;
+
+  gap: 24px;
+}
+
+.desktop-nav a {
+  color: var(--on-surface-variant);
+
+  font-size: 16px;
+
+  line-height: 24px;
+
+  font-weight: 400;
+
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.desktop-nav a:hover {
+  color: var(--primary);
+
+  background: var(--surface-container-low);
+
+  transform: scale(0.95);
+}
+
+.desktop-nav .nav-active {
+  color: var(--primary);
+
+  border-bottom: 2px solid var(--primary);
+
+  font-weight: 700;
+
+  padding-bottom: 4px;
+}
+
+
+
+
+.nav-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.nav-actions button {
+  width: 40px;
+  height: 40px;
+
+  padding: 8px;
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: 9999px;
+
+  color: var(--primary);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 150ms ease;
+}
+
+.nav-actions button:hover {
+  background: var(--surface-container-low);
+}
+
+
+
+
+.hero-section {
+  position: relative;
+
+  background: var(--surface-container-low);
+
+  padding-top: 80px;
+  padding-bottom: 96px;
+
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 1280px;
+
+  margin: 0 auto;
+
+  padding: 0 16px;
+
+  position: relative;
+
+  z-index: 10;
+
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 48px;
+
+  align-items: center;
+}
+
+
+
+
+.hero-content {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 24px;
+}
+
+.premium-label {
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 12px;
+
+  line-height: 16px;
+
+  letter-spacing: 0.1em;
+
+  font-weight: 600;
+
+  color: var(--secondary);
+
+  text-transform: uppercase;
+}
+
+.hero-content h1 {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 36px;
+
+  line-height: 42px;
+
+  letter-spacing: -0.02em;
+
+  font-weight: 700;
+
+  color: var(--on-surface);
+
+  margin: 0;
+}
+
+.hero-content p {
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 18px;
+
+  line-height: 28px;
+
+  font-weight: 400;
+
+  color: var(--on-surface-variant);
+
+  max-width: 448px;
+
+  margin: 0;
+}
+
+
+
+
+.hero-button-container {
+  padding-top: 12px;
+}
+
+.shop-button {
+  background: var(--primary);
+
+  color: var(--on-primary);
+
+  border: none;
+
+  padding: 16px 32px;
+
+  border-radius: 9999px;
+
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 12px;
+
+  line-height: 16px;
+
+  letter-spacing: 0.1em;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  transition:
+    box-shadow 300ms ease,
+    transform 300ms ease;
+}
+
+.shop-button:hover {
+  box-shadow: 0 12px 32px rgba(45, 42, 38, 0.08);
+
+  transform: translateY(-4px);
+}
+
+
+
+
+.hero-image-container {
+  position: relative;
+
+  height: 400px;
+
+  overflow: hidden;
+
+  border-radius: 9999px 9999px 64px 64px;
+
+  border: 1px solid var(--outline-variant);
+
+  box-shadow: 0 4px 24px rgba(45, 42, 38, 0.05);
+}
+
+.hero-image-container img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+
+
+.hero-decoration-right {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  width: 33.333333%;
+
+  height: 100%;
+
+  background: var(--secondary-container);
+
+  opacity: 0.1;
+
+  border-radius: 9999px 0 0 9999px;
+
+  filter: blur(48px);
+
+  z-index: 0;
+}
+
+.hero-decoration-left {
+  position: absolute;
+
+  bottom: 0;
+  left: 40px;
+
+  width: 256px;
+  height: 256px;
+
+  background: var(--primary-container);
+
+  opacity: 0.05;
+
+  border-radius: 9999px;
+
+  filter: blur(32px);
+
+  z-index: 0;
+}
+
+
+
+
+.best-sellers {
+  padding: 80px 0;
+
+  background: var(--background);
+}
+
+.section-container {
+  width: 100%;
+
+  max-width: 1280px;
+
+  margin: 0 auto;
+
+  padding: 0 16px;
+}
+
+.section-heading {
+  text-align: center;
+
+  margin-bottom: 48px;
+}
+
+.section-heading h2 {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 32px;
+
+  line-height: 40px;
+
+  font-weight: 600;
+
+  color: var(--on-surface);
+
+  margin: 0 0 12px;
+}
+
+.section-heading p {
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 16px;
+
+  line-height: 24px;
+
+  font-weight: 400;
+
+  color: var(--on-surface-variant);
+
+  max-width: 672px;
+
+  margin: 0 auto;
+}
+
+
+
+
+.products-grid {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 24px;
+}
+
+.product-card {
+  background: var(--surface);
+
+  border-radius: 12px;
+
+  padding: 12px;
+
+  border: 1px solid rgba(225, 191, 184, 0.3);
+
+  box-shadow: 0 4px 24px rgba(45, 42, 38, 0.05);
+
+  transition:
+    box-shadow 300ms ease,
+    transform 300ms ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 12px 32px rgba(45, 42, 38, 0.08);
+}
+
+
+
+
+.product-image-container {
+  position: relative;
+
+  height: 256px;
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  margin-bottom: 12px;
+
+  background: var(--surface-container-high);
+}
+
+.product-image-container img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition: transform 500ms ease;
+}
+
+.product-card:hover .product-image-container img {
+  transform: scale(1.05);
+}
+
+
+
+
+.product-badge {
+  position: absolute;
+
+  top: 12px;
+  left: 12px;
+
+  padding: 4px 12px;
+
+  border-radius: 9999px;
+
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 12px;
+
+  line-height: 16px;
+
+  letter-spacing: 0.1em;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.bg-secondary {
+  background: var(--secondary);
+
+  color: var(--on-secondary-fixed);
+}
+
+.bg-primary {
+  background: var(--primary);
+
+  color: var(--on-primary);
+}
+
+
+
+
+.product-content {
+  padding: 12px;
+}
+
+.product-content h3 {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 24px;
+
+  line-height: 32px;
+
+  font-weight: 600;
+
+  color: var(--on-surface);
+
+  margin: 0 0 4px;
+}
+
+.product-content p {
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 14px;
+
+  line-height: 20px;
+
+  font-weight: 400;
+
+  color: var(--on-surface-variant);
+
+  margin: 0 0 24px;
+}
+
+
+
+
+.product-bottom {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.product-price {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 24px;
+
+  line-height: 32px;
+
+  font-weight: 600;
+
+  color: var(--primary);
+}
+
+.add-button {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 9999px;
+
+  border: 1px solid var(--outline);
+
+  background: transparent;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: var(--primary);
+
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.add-button:hover {
+  background: var(--primary);
+
+  color: var(--on-primary);
+}
+
+
+
+
+.view-menu-container {
+  text-align: center;
+
+  margin-top: 48px;
+}
+
+.view-menu-button {
+  background: transparent;
+
+  color: var(--on-surface);
+
+  border: none;
+
+  border-bottom: 2px solid var(--primary);
+
+  padding-bottom: 4px;
+
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 12px;
+
+  line-height: 16px;
+
+  letter-spacing: 0.1em;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  transition: color 150ms ease;
+}
+
+.view-menu-button:hover {
+  color: var(--primary);
+}
+
+
+
+
+.brand-story {
+  padding: 80px 0;
+
+  background: var(--surface-container-low);
+
+  border-top: 1px solid rgba(225, 191, 184, 0.5);
+
+  border-bottom: 1px solid rgba(225, 191, 184, 0.5);
+}
+
+.brand-grid {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 80px;
+
+  align-items: center;
+}
+
+
+
+
+.story-image-wrapper {
+  position: relative;
+}
+
+.story-image {
+  aspect-ratio: 1 / 1;
+
+  border-radius: 32px;
+
+  overflow: hidden;
+
+  box-shadow: 0 12px 32px rgba(45, 42, 38, 0.08);
+}
+
+.story-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+
+
+.tradition-badge {
+  display: none;
+
+  position: absolute;
+
+  right: -32px;
+  bottom: -32px;
+
+  width: 192px;
+  height: 192px;
+
+  background: var(--secondary-container);
+
+  border-radius: 9999px;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px;
+
+  box-shadow: 0 4px 24px rgba(45, 42, 38, 0.05);
+}
+
+.tradition-badge p {
+  text-align: center;
+
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 24px;
+
+  line-height: 32px;
+
+  font-weight: 600;
+
+  color: var(--on-secondary-container);
+
+  font-style: italic;
+
+  margin: 0;
+}
+
+
+
+
+.story-content {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 24px;
+}
+
+.story-content h2 {
+  font-family: "Libre Caslon Text", serif;
+
+  font-size: 32px;
+
+  line-height: 40px;
+
+  font-weight: 600;
+
+  color: var(--on-surface);
+
+  margin: 0;
+}
+
+.story-content p {
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 16px;
+
+  line-height: 24px;
+
+  font-weight: 400;
+
+  color: var(--on-surface-variant);
+
+  line-height: 1.6;
+
+  margin: 0;
+}
+
+.story-button-container {
+  padding-top: 12px;
+}
+
+.story-button {
+  background: transparent;
+
+  border: none;
+
+  border-bottom: 1px solid var(--primary);
+
+  padding-bottom: 4px;
+
+  color: var(--primary);
+
+  font-family: "Work Sans", sans-serif;
+
+  font-size: 12px;
+
+  line-height: 16px;
+
+  letter-spacing: 0.1em;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  transition: color 150ms ease;
+}
+
+.story-button:hover {
+  color: var(--on-surface);
+}
+
+
+@media (min-width: 768px) {
+
+ 
+
+  .top-nav-inner {
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+
+  .logo {
+    font-size: 48px;
+
+    line-height: 56px;
+  }
+
+  .desktop-nav {
+    display: flex;
+  }
+
+
+ 
+
+  .hero-section {
+    padding-top: 80px;
+
+    padding-bottom: 128px;
+  }
+
+  .hero-container {
+    grid-template-columns: repeat(2, 1fr);
+
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+
+  .hero-content h1 {
+    font-size: 48px;
+
+    line-height: 56px;
+  }
+
+  .hero-image-container {
+    height: 600px;
+  }
+
+
+ 
+
+  .section-container {
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+
+
+ 
+
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+
+ 
+
+  .brand-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tradition-badge {
+    display: flex;
+  }
+
+
+}
