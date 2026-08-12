@@ -8,6 +8,7 @@ import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Footer from "./components/footer";
+import Loading from "./components/loading";
 
 const libreCaslon = Libre_Caslon_Text({
   weight: ["400", "700"],
@@ -61,7 +62,7 @@ export function AuthGuard({
   }, [pathname, router]);
 
   if (checking) {
-    return null;
+    return <Loading showSlowNote={false} seconds={0} />;
   }
 
   return <>{children}</>;
