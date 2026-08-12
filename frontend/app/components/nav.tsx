@@ -29,6 +29,7 @@ export default function Navbar() {
             <span className="brand-subtitle">Home Kitchen</span>
           </div>
         </Link>
+        <div className="navbar-spacer" >
 
         {/* Desktop Navigation Links */}
         <nav className="navbar-links">
@@ -71,6 +72,7 @@ export default function Navbar() {
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
+      </div>
       </div>
 
       {/* Mobile Drawer Dropdown */}
