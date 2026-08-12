@@ -15,7 +15,9 @@
   border-bottom: 1px solid rgba(225, 191, 184, 0.5);
   box-shadow: 0 4px 20px -5px rgba(45, 42, 38, 0.04);
   box-sizing: border-box;
-  animation: fadeInDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.navbar-spacer{
+  display: flex;
 }
 
 .navbar-spacer {
