@@ -3,12 +3,9 @@
 import "./globals.css";
 import { AuthProvider } from "./(auth)/AuthContext";
 import Navbar from "./components/nav";
-import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Footer from "./components/footer";
-import Loading from "./components/loading";
 import ScrollReveal from "./components/ScrollReveal";
+import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
+import Footer from "./components/footer";
 
 const libreCaslon = Libre_Caslon_Text({
   weight: ["400", "700"],
@@ -24,7 +21,6 @@ const workSans = Work_Sans({
   display: "swap",
 });
 
-const PUBLIC_ROUTES = ["/login", "/signup", "/forgot-password"];
 
 export default function RootLayout({
   children,
@@ -38,11 +34,9 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <ScrollReveal />
           <Navbar />
-          <main className="app-main">
-            {children}
-          </main>
+          <ScrollReveal />
+          <main className="app-main">{children}</main>
           <Footer />
         </AuthProvider>
       </body>

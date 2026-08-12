@@ -61,6 +61,11 @@
   gap: 0.75rem;
   text-decoration: none;
   width: fit-content;
+  transition: transform 0.25s ease;
+}
+
+.footer-brand-link:hover {
+  transform: translateX(3px);
 }
 
 .footer-logo-wrapper {
@@ -72,6 +77,12 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
   background: #ffffff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.footer-brand-link:hover .footer-logo-wrapper {
+  transform: rotate(-5deg) scale(1.08);
+  border-color: #fed16e;
 }
 
 .footer-logo-img {
@@ -129,6 +140,12 @@
   color: #fed16e;
   font-size: 0.75rem;
   font-weight: 600;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.footer-trust-pill:hover {
+  transform: translateY(-2px);
+  background: rgba(254, 209, 110, 0.22);
 }
 
 /* Headings & Lists */
@@ -167,13 +184,13 @@
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 400;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
   display: inline-block;
 }
 
 .footer-nav-list a:hover {
   color: #fed16e;
-  transform: translateX(3px);
+  transform: translateX(5px);
 }
 
 /* Contact Info Column */
@@ -191,11 +208,12 @@
   color: rgba(255, 248, 243, 0.8);
   font-size: 0.88rem;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.25s ease, transform 0.25s ease;
 }
 
 a.contact-item:hover {
   color: #fed16e;
+  transform: translateX(4px);
 }
 
 .contact-icon {
@@ -221,14 +239,14 @@ a.contact-item:hover {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .social-btn:hover {
   background: #fed16e;
   color: #3f0300;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(254, 209, 110, 0.25);
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(254, 209, 110, 0.3);
 }
 
 /* Bottom Bar */
@@ -240,7 +258,6 @@ a.contact-item:hover {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   gap: 1rem;
   flex-wrap: wrap;
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
 }
 
 .footer-copyright {
@@ -270,7 +287,7 @@ a.contact-item:hover {
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.25s ease, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
   min-height: 40px;
 }
 
@@ -278,6 +295,7 @@ a.contact-item:hover {
   background: rgba(254, 209, 110, 0.2);
   color: #fed16e;
   border-color: rgba(254, 209, 110, 0.4);
+  transform: translateY(-2px);
 }
 
 /* Responsive Media Queries */

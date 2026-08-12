@@ -4,18 +4,15 @@ import { useEffect } from 'react';
 
 export default function ScrollReveal() {
   useEffect(() => {
-    // Select all elements configured for scroll reveal
     const selectors = [
-      '.reveal',
-      '.reveal-scale',
-      '.reveal-left',
-      '.reveal-right',
       '.promise-card',
+      '.simple-heading',
       '.simple-product-card',
       '.story-image',
       '.story-content',
       '.banner-box',
-      '.footer-grid > div'
+      '.footer-grid > div',
+      '.scroll-reveal'
     ];
 
     const observer = new IntersectionObserver(
@@ -23,39 +20,27 @@ export default function ScrollReveal() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            // Unobserve after animating once
             observer.unobserve(entry.target);
           }
         });
       },
-      {
-        threshold: 0.12,
-        rootMargin: '0px 0px -40px 0px'
-      }
+      { threshold: 0.1 }
     );
 
-    const observeElements = () => {
-      const elements = document.querySelectorAll(selectors.join(', '));
-      elements.forEach((el) => {
-        if (!el.classList.contains('is-visible')) {
+    const timer = setTimeout(() => {
+      document.querySelectorAll(selectors.join(', ')).forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('is-visible');
+        } else {
           observer.observe(el);
         }
       });
-    };
-
-    // Run initial observation
-    observeElements();
-
-    // Re-observe if DOM updates dynamically
-    const mutationObserver = new MutationObserver(() => {
-      observeElements();
-    });
-
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       observer.disconnect();
-      mutationObserver.disconnect();
     };
   }, []);
 
