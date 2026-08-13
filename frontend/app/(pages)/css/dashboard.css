@@ -113,28 +113,70 @@
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 
+
 .hero-feature-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-top: 0.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  max-width: 620px;
+
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
 }
 
 .feature-pill {
-  background: rgba(101, 7, 0, 0.05);
-  border: 1px solid rgba(101, 7, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+
+  min-height: 52px;
+  padding: 0.7rem 1rem;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 250, 247, 0.95),
+    rgba(249, 232, 225, 0.8)
+  );
+
+  border: 1px solid rgba(101, 7, 0, 0.13);
+  border-radius: 16px;
+
   color: var(--primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.35rem 0.75rem;
-  border-radius: 99px;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+
+  box-shadow:
+    0 4px 14px rgba(101, 7, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
 
 .feature-pill:hover {
-  transform: translateY(-2px);
-  background: rgba(101, 7, 0, 0.1);
+  transform: translateY(-3px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 252, 250, 1),
+    rgba(247, 225, 216, 0.95)
+  );
+
+  border-color: rgba(101, 7, 0, 0.22);
+
+  box-shadow:
+    0 8px 20px rgba(101, 7, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Icon / emoji */
+.feature-pill:first-child {
+  font-size: 0.95rem;
 }
 
 .hero-actions {
@@ -777,20 +819,19 @@
     margin-bottom: 1.25rem;
   }
 
-  .hero-feature-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+.hero-feature-row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
     width: 100%;
-    margin-bottom: 1.25rem;
+    max-width: 100%;
   }
 
   .feature-pill {
-    justify-content: center;
-    text-align: center;
-    white-space: nowrap;
-    font-size: 0.76rem;
-    padding: 0.4rem 0.5rem;
+    min-height: 48px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    border-radius: 14px;
+  }padding: 0.4rem 0.5rem;
   }
 
   .hero-actions {
