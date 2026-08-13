@@ -100,13 +100,18 @@
   gap: 2rem;
 }
 
+.navbar-links a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .nav-link {
   position: relative;
   font-family: var(--font-body), "Work Sans", sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--on-surface-variant);
-  text-decoration: none;
+  text-decoration: none !important;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   transition: color 0.2s ease, background-color 0.2s ease;
@@ -269,6 +274,12 @@
   margin: 0.4rem 0;
 }
 
+.profile-dropdown-item,
+.profile-dropdown-item a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
 .profile-dropdown-item {
   display: flex;
   align-items: center;
@@ -312,7 +323,7 @@
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 700;
-  text-decoration: none;
+  text-decoration: none !important;
   transition: background 0.2s ease, transform 0.2s ease;
   box-shadow: 0 4px 12px rgba(101, 7, 0, 0.15);
 }
@@ -375,11 +386,16 @@
   gap: 0.65rem;
 }
 
+.mobile-nav-links a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .mobile-nav-link {
   font-size: 1rem;
   font-weight: 500;
   color: var(--on-surface);
-  text-decoration: none;
+  text-decoration: none !important;
   padding: 0.85rem 1.1rem;
   border-radius: 12px;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -404,7 +420,7 @@
   background: var(--primary);
   color: #ffffff;
   border-radius: 12px;
-  text-decoration: none;
+  text-decoration: none !important;
   font-weight: 700;
   font-size: 0.95rem;
   box-shadow: 0 4px 14px rgba(101, 7, 0, 0.2);
@@ -412,6 +428,45 @@
 
 .mobile-nav-cta:hover {
   background: var(--primary-container);
+}
+
+/* Mobile Horizontal Subnav */
+.mobile-horizontal-subnav {
+  display: none;
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-bottom: 1px solid var(--outline-variant);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
+  flex-direction: row;
+  z-index: 998;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+}
+
+.mobile-subnav-item {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  background: var(--surface-container-low);
+  border-radius: 20px;
+  color: var(--on-surface-variant);
+  text-decoration: none !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.mobile-subnav-item:hover,
+.mobile-subnav-item.active {
+  background: var(--primary);
+  color: #ffffff;
 }
 
 @keyframes slideDownNav {
@@ -432,6 +487,10 @@
   }
 
   .mobile-menu-btn {
+    display: flex;
+  }
+
+  .mobile-horizontal-subnav {
     display: flex;
   }
 }
