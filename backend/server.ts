@@ -94,7 +94,8 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 
-const PORT: number = 3000;
+// Render supplies the port through PORT. Keep 3000 solely for local runs.
+const PORT = Number(process.env.PORT ?? 3000);
 
 
 const HOST = "0.0.0.0";
