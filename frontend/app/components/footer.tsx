@@ -62,25 +62,11 @@ export default function Footer() {
 
           {/* Col 2: Navigation Links */}
           <div className="footer-col">
-            <h4 className="footer-col-heading">Explore Menu</h4>
+            <h4 className="footer-col-heading">Explore</h4>
             <ul className="footer-nav-list">
               <li><Link href="/">Home Page</Link></li>
-              <li><Link href="/menu">Full Pickle Menu</Link></li>
               <li><Link href="/#story">Our Family Story</Link></li>
               <li><Link href="/#pickles">Best Sellers</Link></li>
-              <li><Link href="/orders">Track My Order</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 3: Customer Care & Policies */}
-          <div className="footer-col">
-            <h4 className="footer-col-heading">Customer Care</h4>
-            <ul className="footer-nav-list">
-              <li><Link href="/faq">Frequently Asked Questions</Link></li>
-              <li><Link href="/shipping">Doorstep Shipping Info</Link></li>
-              <li><Link href="/privacy">Privacy Policy</Link></li>
-              <li><Link href="/terms">Terms of Service</Link></li>
-              <li><Link href="/contact">Bulk / Catering Inquiry</Link></li>
             </ul>
           </div>
 
