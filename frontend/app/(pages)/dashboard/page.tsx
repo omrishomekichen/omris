@@ -15,9 +15,7 @@ import {
 } from 'lucide-react';
 
 
-/* =========================================================
-   PRODUCTS
-   ========================================================= */
+
 
 const PRODUCTS = [
   {
@@ -53,17 +51,13 @@ const PRODUCTS = [
 ];
 
 
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
+
 
 export default function DashboardPage() {
   const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
 
 
-  /* =======================================================
-     UPDATE CART QUANTITY
-     ======================================================= */
+ 
 
   const handleUpdateQuantity = (
     productId: string,
@@ -454,10 +448,73 @@ export default function DashboardPage() {
           3. SIGNATURE PICKLES
           ===================================================== */}
 
-      <section
-        id="pickles"
-        className="pickles-section"
-      >
+      {/* =====================================================
+          POPULAR PICKS
+          ===================================================== */}
+
+      <section id="popular" className="popular-section">
+
+        <div className="section-container">
+
+          <div className="simple-heading">
+
+            <h2>
+              Popular Picks
+            </h2>
+
+            <p>
+              Our customers love these jars — freshly made and frequently ordered.
+            </p>
+
+          </div>
+
+          <div className="popular-grid">
+
+            {PRODUCTS.map((product) => {
+              const qty = cartCountMap[product.id] || 0;
+              return (
+                <div key={product.id} className="simple-product-card">
+                  <div className="product-img-frame">
+                    <img src={product.image} alt={product.name} />
+                    <span className="product-tag">{product.tag}</span>
+                  </div>
+
+                  <div className="product-details">
+                    <span className="product-spice">{product.spiceLevel}</span>
+                    <h3 className="product-title">{product.name}</h3>
+                    <p className="product-desc">{product.description}</p>
+
+                    <div className="product-action-row">
+                      <span className="product-price">{product.price}</span>
+                      {qty === 0 ? (
+                        <button type="button" className="add-btn" onClick={() => handleUpdateQuantity(product.id, 1)}>
+                          <Plus size={16} />
+                          <span>Add to Order</span>
+                        </button>
+                      ) : (
+                        <div className="qty-control">
+                          <button type="button" aria-label={`Decrease ${product.name} quantity`} onClick={() => handleUpdateQuantity(product.id, -1)}>
+                            <Minus size={14} />
+                          </button>
+                          <span>{qty}</span>
+                          <button type="button" aria-label={`Increase ${product.name} quantity`} onClick={() => handleUpdateQuantity(product.id, 1)}>
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section id="pickles" className="pickles-section">
 
         <div className="section-container">
 

@@ -1,3 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+.DS_Store
+npm-debug.log*
+.idea/
+.vscode/
+.cache/
+logs/
+*.log
+coverage/
+*.local
 # dependencies
 node_modules/
 

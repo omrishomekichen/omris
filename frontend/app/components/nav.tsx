@@ -115,7 +115,7 @@ export default function Navbar() {
               aria-label="Shopping cart"
             >
               <ShoppingCart size={19} strokeWidth={2} />
-              <span className="cart-badge">1</span>
+              <span className="cart-badge">0</span>
             </Link>
 
             <div className="profile-wrapper">

@@ -243,7 +243,7 @@ authRouter.post("/verify-login", async (req: Request, res: Response) => {
     const updatedUser = await User.findOneAndUpdate(
       { email: email.toLowerCase() },
       { $set: { token } },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
     return res.status(200).json({

@@ -8,9 +8,9 @@ const mailrouter: express.Router = express.Router();
 
 mailrouter.use(express.json());
 
-// ===============================
-// Check Gmail Configuration
-// ===============================
+
+
+
 
 if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
   console.warn(
@@ -18,13 +18,13 @@ if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
   );
 }
 
-// ===============================
-// Gmail Transporter
-// ===============================
+
+
+
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
+  port: 465,
   secure: false,
 
   auth: {
@@ -33,9 +33,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ===============================
-// Send Mail Function
-// ===============================
+
+
+
 
 export const sendMail = async (to: string, subject: string, text: string) => {
   try {
