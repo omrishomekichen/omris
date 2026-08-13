@@ -232,6 +232,25 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Horizontal Scroll Menu Bar */}
+      <div className="mobile-horizontal-subnav">
+        <Link href="/" className={`mobile-subnav-item ${isActive("/") ? "active" : ""}`}>
+          Home
+        </Link>
+        <Link href="#pickles" className={`mobile-subnav-item ${isActive("#pickles") ? "active" : ""}`}>
+          Our Pickles
+        </Link>
+        <Link href="/about" className={`mobile-subnav-item ${isActive("/about") ? "active" : ""}`}>
+          About Us
+        </Link>
+        <Link href="/orders" className={`mobile-subnav-item ${isActive("/orders") ? "active" : ""}`}>
+          Orders
+        </Link>
+        <Link href="/cart" className={`mobile-subnav-item ${isActive("/cart") ? "active" : ""}`}>
+          Cart (1)
+        </Link>
+      </div>
+
       {/* Mobile Drawer Dropdown */}
       {mobileMenuOpen && (
         <div className="mobile-drawer">

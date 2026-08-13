@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 
 dotenv.config();
 
-const mailrouter = express.Router();
+const mailrouter: express.Router = express.Router();
 
 mailrouter.use(express.json());
 

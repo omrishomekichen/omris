@@ -6,7 +6,7 @@ import authRouter from "./routes/auth";
 
 dotenv.config();
 
-const app = express();
+const app: express.Express = express();
 app.set("trust proxy", 1);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -94,9 +94,9 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 
-const PORT: number = Number(process.env.HOST_port);
+const PORT: number = Number(process.env.PORT || 3000);
 
-const HOST: string = process.env.HOST ;
+const HOST: string = process.env.HOST || "localhost";
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running on ${HOST}:${PORT}`);

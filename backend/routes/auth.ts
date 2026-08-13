@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
-import { User } from "../model/model";
+import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
 
-const authRouter = express.Router();
+const authRouter: express.Router = express.Router();
 
 const buildUserResponse = (user: any) => ({
   id: user._id,
