@@ -94,14 +94,18 @@ app.get("/api/health", (req: Request, res: Response) => {
 });
 
 
-const PORT: number = Number(process.env.PORT || 3000);
+const PORT: number = 3000;
 
-// Cloud platforms such as Render must be able to reach the listener from
-// outside the container, so do not default to the loopback interface.
-const HOST: string = process.env.HOST || "0.0.0.0";
 
-app.listen(PORT, HOST, () => {
+const HOST = "0.0.0.0";
+
+const server = app.listen(PORT, HOST, () => {
   console.log(`Server running on ${HOST}:${PORT}`);
+});
+
+server.on("error", (error: NodeJS.ErrnoException) => {
+  console.error(`Unable to listen on ${HOST}:${PORT}:`, error);
+  process.exit(1);
 });
 
 export default app;
