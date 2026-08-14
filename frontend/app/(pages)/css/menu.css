@@ -1,0 +1,355 @@
+/* Menu Page Styling - Omri's Home Kitchen */
+
+.menu-page-root {
+  background-color: #fff8f3;
+  color: #1e1b17;
+  min-height: 100vh;
+  font-family: var(--font-sans, "Work Sans", system-ui, sans-serif);
+  padding-bottom: 4rem;
+}
+
+.menu-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.menu-header-block {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.menu-header-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #650700;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.menu-header-sub {
+  font-size: 1.1rem;
+  color: #59413c;
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Sort & Filter Bar */
+.menu-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid #e1bfb8;
+  padding-bottom: 1.25rem;
+}
+
+.menu-category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.menu-tab-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #e1bfb8;
+  background: #ffffff;
+  color: #59413c;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.menu-tab-btn:hover {
+  background: #f4ede6;
+  color: #650700;
+}
+
+.menu-tab-btn.active {
+  background: #650700;
+  color: #ffffff;
+  border-color: #650700;
+  box-shadow: 0 4px 12px rgba(101, 7, 0, 0.18);
+}
+
+.menu-sort-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sort-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #59413c;
+}
+
+.sort-select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e1bfb8;
+  background: #ffffff;
+  color: #1e1b17;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.sort-select:focus {
+  border-color: #650700;
+}
+
+/* Category Sections */
+.menu-section {
+  margin-bottom: 4rem;
+}
+
+.category-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 2px solid #650700;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.category-title-row h2 {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #650700;
+  margin: 0;
+}
+
+.category-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8d706b;
+}
+
+/* Horizontal Horizontal Scrolling Row or Responsive Grid */
+.menu-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.75rem;
+}
+
+/* Menu Product Card */
+.menu-product-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e1bfb8;
+  box-shadow: 0 4px 12px rgba(45, 42, 38, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.menu-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(45, 42, 38, 0.1);
+  border-color: #650700;
+}
+
+.menu-card-img-wrapper {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.menu-card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.menu-product-card:hover .menu-card-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.menu-card-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.badge-bestseller {
+  background: #fed16e;
+  color: #775800;
+}
+
+.badge-hot {
+  background: #ffdad6;
+  color: #93000a;
+}
+
+.badge-featured {
+  background: #650700;
+  color: #ffffff;
+}
+
+.menu-card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.menu-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.menu-card-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.menu-fav-btn {
+  background: none;
+  border: none;
+  color: #8d706b;
+  cursor: pointer;
+  padding: 0.2rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-fav-btn:hover {
+  color: #ba1a1a;
+  transform: scale(1.15);
+}
+
+.menu-fav-btn.active {
+  color: #ba1a1a;
+}
+
+.menu-card-desc {
+  font-size: 0.88rem;
+  color: #59413c;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+  flex-grow: 1;
+}
+
+.menu-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e8e1db;
+  margin-top: auto;
+}
+
+.menu-card-price {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #650700;
+}
+
+.menu-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #650700;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(101, 7, 0, 0.2);
+}
+
+.menu-add-btn:hover {
+  background: #8c1404;
+  transform: translateY(-1px);
+}
+
+.menu-qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #650700;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+}
+
+.menu-qty-control button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+.menu-qty-control button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-qty-count {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Empty State */
+.menu-empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px dashed #e1bfb8;
+  color: #59413c;
+}
+
+@media (max-width: 640px) {
+  .menu-header-title {
+    font-size: 2.1rem;
+  }
+  .menu-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .menu-products-grid {
+    grid-template-columns: 1fr;
+  }
+}
