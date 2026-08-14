@@ -19,7 +19,6 @@ import Api from "../../__apis/api";
 export default function DashboardPage() {
   const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
   const [products, setProducts] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,24 +31,28 @@ export default function DashboardPage() {
           ? response.data
           : [];
 
-        // Format ALL menu items from database into single scrolling row
-        const formatted = list.map((item: any) => {
+        // Strictly show ONLY menu items where isFeatured is true
+        const featuredList = list.filter(
+          (item: any) => item.isFeatured === true,
+        );
+
+        const formatted = featuredList.map((item: any) => {
           const cat = item.category || "veg";
           let defaultImg = "/images/mango_pickle.png";
-          let tagLabel = item.isFeatured ? "★ FEATURED" : "HOMEMADE";
+          let tagLabel = "★ FEATURED VEG";
 
           if (cat === "nonVeg") {
             defaultImg = "/images/chicken_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED NON-VEG" : "NON-VEG";
+            tagLabel = "★ FEATURED NON-VEG";
           } else if (cat === "veg") {
             defaultImg = "/images/mango_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED VEG" : "VEG";
+            tagLabel = "★ FEATURED VEG";
           } else if (cat === "spicedPowder") {
             defaultImg = "/images/garlic_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED POWDER" : "SPICED POWDER";
+            tagLabel = "★ FEATURED POWDER";
           } else if (cat === "combo" || cat === "offer") {
             defaultImg = "/images/kitchen_craft.png";
-            tagLabel = item.isFeatured ? "★ SPECIAL OFFER" : "SPECIAL COMBO";
+            tagLabel = "★ SPECIAL OFFER";
           }
 
           return {
@@ -57,7 +60,7 @@ export default function DashboardPage() {
             menuId: item.menuId,
             name: item.name,
             category: cat,
-            isFeatured: Boolean(item.isFeatured),
+            isFeatured: true,
             price: item.priceOptions?.[0]?.price
               ? `₹${item.priceOptions[0].price}`
               : item.price || "₹299",
@@ -97,18 +100,6 @@ export default function DashboardPage() {
   };
 
   const productList = Array.isArray(products) ? products : [];
-
-  const filteredProducts = productList.filter((product: any) => {
-    if (selectedCategory === "all") return true;
-    if (selectedCategory === "featured") return product.isFeatured === true;
-    if (selectedCategory === "nonVeg") return product.category === "nonVeg";
-    if (selectedCategory === "veg") return product.category === "veg";
-    if (selectedCategory === "spicedPowder")
-      return product.category === "spicedPowder";
-    if (selectedCategory === "combo")
-      return product.category === "combo" || product.category === "offer";
-    return true;
-  });
 
   return (
     <div className="dashboard-root">
@@ -274,10 +265,10 @@ export default function DashboardPage() {
         <div className="section-container">
           <div className="pickles-header-row">
             <div>
-              <h2>Our Home-Made Pickles & Delicacies</h2>
+              <h2>Featured Home-Made Delicacies</h2>
               <p>
-                Explore our full selection below — freshly crafted and
-                delivered directly to your doorstep.
+                Handpicked customer favorites & special offers — freshly made and
+                delivered with care.
               </p>
             </div>
 
@@ -301,32 +292,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="category-tabs-bar">
-            {[
-              { key: "all", label: `All Items (${productList.length})` },
-              { key: "featured", label: "⭐ Featured" },
-              { key: "nonVeg", label: "🍗 Non-Veg" },
-              { key: "veg", label: "🥭 Veg Pickles" },
-              { key: "spicedPowder", label: "🧄 Spiced Powders" },
-              { key: "combo", label: "🎁 Combos & Offers" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`tab-pill ${
-                  selectedCategory === tab.key ? "active" : ""
-                }`}
-                onClick={() => setSelectedCategory(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           <div className="products-wrapper" ref={scrollRef}>
             <div className="products-grid">
-              {Array.isArray(filteredProducts) &&
-                filteredProducts.map((product: any) => {
+              {Array.isArray(productList) &&
+                productList.map((product: any) => {
                   const qty = cartCountMap[product.id] || 0;
                   return (
                     <div
