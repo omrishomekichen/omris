@@ -17,16 +17,20 @@ import {
   LogIn
 } from "lucide-react";
 import { useAuth } from "../(auth)/AuthContext";
+import { useCart } from "./CartContext";
+import CartDrawer from "./CartDrawer";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [localUser, setLocalUser] = useState<{ name?: string; email?: string } | null>(null);
 
   const auth = useAuth();
   const user = auth?.user;
   const logout = auth?.logout;
+  const { itemCount } = useCart();
 
   useEffect(() => {
     const saved = localStorage.getItem('user');
@@ -109,14 +113,16 @@ export default function Navbar() {
 
           {/* Action Buttons */}
           <div className="navbar-actions">
-            <Link
-              href="/cart"
+            <button
+              type="button"
               className="nav-icon-button"
               aria-label="Shopping cart"
+              aria-expanded={cartOpen}
+              onClick={() => setCartOpen(true)}
             >
               <ShoppingCart size={19} strokeWidth={2} />
-              <span className="cart-badge">0</span>
-            </Link>
+              {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+            </button>
 
             <div className="profile-wrapper">
               <button
@@ -275,6 +281,7 @@ export default function Navbar() {
           </nav>
         </div>
       )}
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );
 }

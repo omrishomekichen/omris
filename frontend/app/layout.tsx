@@ -6,6 +6,7 @@ import Navbar from "./components/nav";
 import ScrollReveal from "./components/ScrollReveal";
 import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
 import Footer from "./components/footer";
+import { CartProvider } from "./components/CartContext";
 
 const libreCaslon = Libre_Caslon_Text({
   weight: ["400", "700"],
@@ -33,10 +34,12 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
-          <Navbar />
-          <ScrollReveal />
-          <main className="app-main">{children}</main>
-          <Footer />
+          <CartProvider>
+            <Navbar />
+            <ScrollReveal />
+            <main className="app-main">{children}</main>
+            <Footer />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

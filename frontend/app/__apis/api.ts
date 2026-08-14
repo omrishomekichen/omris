@@ -1,13 +1,16 @@
 const API_BASE_URL = (
-  typeof window !== "undefined"
-    ? process.env.NEXT_PUBLIC_API_BASE_URL || ""
-    : process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
 const Api = {
   health: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/health`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/health`);
+      return await response.json();
+    } catch (error) {
+      console.error("Health check failed:", error);
+      return { status: "error" };
+    }
   },
 
   login: async (email: string, password: string) => {
@@ -72,9 +75,18 @@ const Api = {
   },
 
   menu: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/menu`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/menu`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching menu items:", error);
+      return [];
+    }
   },
 };
 
 export default Api;
+

@@ -12,17 +12,29 @@ import {
   Filter,
   Search,
   X,
+  Info,
+  ChevronDown,
+  ShieldCheck,
+  Star,
+  Tag,
 } from "lucide-react";
 import Api from "../../__apis/api";
+import { useCart } from "../../components/CartContext";
 
 export default function MenuPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
   const [favoritesMap, setFavoritesMap] = useState<Record<string, boolean>>({});
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>(
+    {},
+  );
+  const [expandedInfoMap, setExpandedInfoMap] = useState<
+    Record<string, boolean>
+  >({});
   const [selectedTab, setSelectedTab] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("popularity");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const { addItem, getQuantity, updateQuantity } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -32,8 +44,8 @@ export default function MenuPage() {
         const list = Array.isArray(response)
           ? response
           : response?.data && Array.isArray(response.data)
-          ? response.data
-          : [];
+            ? response.data
+            : [];
 
         const formatted = list.map((item: any) => {
           const cat = item.category || "veg";
@@ -58,19 +70,45 @@ export default function MenuPage() {
             ? Number(item.priceOptions[0].price)
             : Number(item.price) || 299;
 
+          // Default price options if missing in DB, sorted low-to-high so basic price is FIRST
+          const rawPriceOpts =
+            item.priceOptions && item.priceOptions.length > 0
+              ? item.priceOptions
+              : cat === "combo" || cat === "offer"
+                ? [{ quantity: 1, unit: "piece", price: rawPrice }]
+                : [
+                    {
+                      quantity: 250,
+                      unit: "g",
+                      price: Math.round(rawPrice * 0.52),
+                    },
+                    { quantity: 500, unit: "g", price: rawPrice },
+                    {
+                      quantity: 1,
+                      unit: "kg",
+                      price: Math.round(rawPrice * 1.85),
+                    },
+                  ];
+
+          const priceOpts = [...rawPriceOpts].sort(
+            (a: any, b: any) => Number(a.price) - Number(b.price),
+          );
+
           return {
             id: item._id || item.menuId || item.id,
             menuId: item.menuId,
             name: item.name,
             category: cat,
             isFeatured: Boolean(item.isFeatured),
-            rawPrice: rawPrice,
-            priceFormatted: `₹${rawPrice}`,
+            rawPrice: priceOpts[0]?.price || rawPrice,
+            priceOptions: priceOpts,
+            ingredients: item.ingredients || [],
+            storage: item.storage,
+            comboItems: item.comboItems || [],
             description: item.description,
             image: item.image || defaultImg,
             badge: badgeText,
-            spiceLevel:
-              cat === "nonVeg" ? "🌶️🌶️ Spicy" : "🌶️ Medium-Spicy",
+            spiceLevel: cat === "nonVeg" ? "🌶️🌶️ Spicy" : "🌶️ Medium-Spicy",
           };
         });
 
@@ -84,14 +122,6 @@ export default function MenuPage() {
 
     fetchMenu();
   }, []);
-
-  const handleUpdateQuantity = (productId: string, delta: number) => {
-    setCartCountMap((prev) => {
-      const current = prev[productId] || 0;
-      const next = Math.max(0, current + delta);
-      return { ...prev, [productId]: next };
-    });
-  };
 
   const toggleFavorite = (productId: string) => {
     setFavoritesMap((prev) => ({
@@ -119,14 +149,14 @@ export default function MenuPage() {
       selectedTab === "all"
         ? true
         : selectedTab === "veg"
-        ? p.category === "veg"
-        : selectedTab === "nonVeg"
-        ? p.category === "nonVeg"
-        : selectedTab === "spicedPowder"
-        ? p.category === "spicedPowder"
-        : selectedTab === "combo"
-        ? p.category === "combo" || p.category === "offer"
-        : true;
+          ? p.category === "veg"
+          : selectedTab === "nonVeg"
+            ? p.category === "nonVeg"
+            : selectedTab === "spicedPowder"
+              ? p.category === "spicedPowder"
+              : selectedTab === "combo"
+                ? p.category === "combo" || p.category === "offer"
+                : true;
 
     const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
@@ -143,67 +173,103 @@ export default function MenuPage() {
   // Group by category for section layout
   const vegPickles = sortedProducts.filter((p) => p.category === "veg");
   const nonVegPickles = sortedProducts.filter((p) => p.category === "nonVeg");
-  const spicedPowders = sortedProducts.filter((p) => p.category === "spicedPowder");
+  const spicedPowders = sortedProducts.filter(
+    (p) => p.category === "spicedPowder",
+  );
   const comboPickles = sortedProducts.filter(
     (p) => p.category === "combo" || p.category === "offer",
   );
 
   const renderCard = (product: any) => {
-    const qty = cartCountMap[product.id] || 0;
+    const priceOpts = product.priceOptions || [];
+    const selectedSizeIdx = selectedSizes[product.id] ?? 0;
+    const currentOpt = priceOpts[selectedSizeIdx] ||
+      priceOpts[0] || { quantity: 250, unit: "g", price: product.rawPrice };
+    const sizeLabel = `${currentOpt.quantity}${currentOpt.unit}`;
+    const currentPrice = currentOpt.price;
+    const originalPrice = Math.round(currentPrice * 1.25);
+    const cartItemId = `${product.id}-${sizeLabel}`;
+    const qty = getQuantity(cartItemId);
     const isFav = favoritesMap[product.id] || false;
+    const isInfoOpen = expandedInfoMap[product.id] || false;
 
     let badgeClass = "badge-bestseller";
-    if (product.badge.includes("Hot")) badgeClass = "badge-hot";
-    if (product.badge.includes("Signature") || product.badge.includes("Combo"))
+    if (product.badge?.includes("Hot")) badgeClass = "badge-hot";
+    if (
+      product.badge?.includes("Signature") ||
+      product.badge?.includes("Combo")
+    )
       badgeClass = "badge-featured";
 
     return (
-      <div key={product.id} className="menu-product-card">
+      <div key={product.id} className="menu-product-card is-visible">
         <div className="menu-card-img-wrapper">
           <img src={product.image} alt={product.name} />
-          {product.badge && (
-            <span className={`menu-card-badge ${badgeClass}`}>
-              {product.badge}
+          <div className="menu-card-badges-row">
+            {product.badge && (
+              <span className={`menu-card-badge ${badgeClass}`}>
+                {product.badge}
+              </span>
+            )}
+            <span className="rating-badge">
+              <Star size={11} fill="#775800" color="#775800" />
+              <span>4.9</span>
             </span>
-          )}
+          </div>
         </div>
 
         <div className="menu-card-content">
           <div className="menu-card-header">
-            <h3 className="menu-card-title">{product.name}</h3>
+            <div>
+              <span className="menu-card-spice-tag">{product.spiceLevel}</span>
+              <h3 className="menu-card-title">{product.name}</h3>
+            </div>
             <button
               type="button"
               className={`menu-fav-btn ${isFav ? "active" : ""}`}
               onClick={() => toggleFavorite(product.id)}
               aria-label="Save to favorites"
             >
-              <Heart
-                size={18}
-                fill={isFav ? "#ba1a1a" : "none"}
-              />
+              <Heart size={18} fill={isFav ? "#ba1a1a" : "none"} />
             </button>
           </div>
 
           <p className="menu-card-desc">{product.description}</p>
 
           <div className="menu-card-footer">
-            <span className="menu-card-price">{product.priceFormatted}</span>
+            <div className="price-display-box">
+              <div className="price-values-row">
+                <span className="menu-card-original-price">
+                  ₹{originalPrice}
+                </span>
+                <span className="menu-card-price">₹{currentPrice}</span>
+              </div>
+              <span className="unit-subtext">Basic Price ({sizeLabel})</span>
+            </div>
 
             {qty === 0 ? (
               <button
                 type="button"
                 className="menu-add-btn"
-                onClick={() => handleUpdateQuantity(product.id, 1)}
+                onClick={() =>
+                  addItem({
+                    id: cartItemId,
+                    name: `${product.name} (${sizeLabel})`,
+                    price: currentPrice,
+                    image: product.image,
+                    description: `${sizeLabel} • Handcrafted Home Recipe`,
+                  })
+                }
               >
                 <Plus size={16} />
-                <span>Add</span>
+                <span>Add to Order</span>
               </button>
             ) : (
               <div className="menu-qty-control">
                 <button
                   type="button"
                   aria-label="Decrease quantity"
-                  onClick={() => handleUpdateQuantity(product.id, -1)}
+                  onClick={() => updateQuantity(cartItemId, -1)}
                 >
                   <Minus size={14} />
                 </button>
@@ -211,7 +277,7 @@ export default function MenuPage() {
                 <button
                   type="button"
                   aria-label="Increase quantity"
-                  onClick={() => handleUpdateQuantity(product.id, 1)}
+                  onClick={() => updateQuantity(cartItemId, 1)}
                 >
                   <Plus size={14} />
                 </button>

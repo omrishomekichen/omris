@@ -13,13 +13,21 @@ import {
   PhoneCall,
   ChevronLeft,
   ChevronRight,
+  Info,
+  ChevronDown,
+  ShieldCheck,
+  Flame,
+  Star,
 } from "lucide-react";
 import Api from "../../__apis/api";
+import { useCart } from "../../components/CartContext";
 
 export default function DashboardPage() {
-  const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
   const [products, setProducts] = useState<any[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>({});
+  const [expandedInfoMap, setExpandedInfoMap] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { addItem, getQuantity, updateQuantity } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -58,15 +66,37 @@ export default function DashboardPage() {
             tagLabel = "★ SPECIAL OFFER";
           }
 
+          const rawPrice = item.priceOptions?.[0]?.price
+            ? Number(item.priceOptions[0].price)
+            : Number(item.price) || 299;
+
+          // Default price options if missing in DB, sorted low-to-high (basic price first)
+          const rawPriceOpts =
+            item.priceOptions && item.priceOptions.length > 0
+              ? item.priceOptions
+              : cat === "combo" || cat === "offer"
+              ? [{ quantity: 1, unit: "piece", price: rawPrice }]
+              : [
+                  { quantity: 250, unit: "g", price: Math.round(rawPrice * 0.52) },
+                  { quantity: 500, unit: "g", price: rawPrice },
+                  { quantity: 1, unit: "kg", price: Math.round(rawPrice * 1.85) },
+                ];
+
+          const priceOpts = [...rawPriceOpts].sort(
+            (a: any, b: any) => Number(a.price) - Number(b.price),
+          );
+
           return {
             id: item._id || item.menuId || item.id,
             menuId: item.menuId,
             name: item.name,
             category: cat,
             isFeatured: true,
-            price: item.priceOptions?.[0]?.price
-              ? `₹${item.priceOptions[0].price}`
-              : item.price || "₹299",
+            rawPrice: priceOpts[0]?.price || rawPrice,
+            priceOptions: priceOpts,
+            ingredients: item.ingredients || [],
+            storage: item.storage,
+            comboItems: item.comboItems || [],
             description: item.description,
             image: item.image || defaultImg,
             tag: tagLabel,
@@ -88,17 +118,6 @@ export default function DashboardPage() {
       const scrollAmount = direction === "left" ? -360 : 360;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
-  };
-
-  const handleUpdateQuantity = (productId: string, delta: number) => {
-    setCartCountMap((prev) => {
-      const current = prev[productId] || 0;
-      const next = Math.max(0, current + delta);
-      return {
-        ...prev,
-        [productId]: next,
-      };
-    });
   };
 
   return (
@@ -203,13 +222,24 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="card-price-box">
-                  <span className="card-price">₹350</span>
+                  <div className="price-values-row">
+                    <span className="menu-card-original-price">₹350</span>
+                    <span className="card-price">₹280</span>
+                  </div>
                   <button
                     type="button"
                     className="card-quick-add"
-                    onClick={() => handleUpdateQuantity("mango-avakaya", 1)}
+                    onClick={() =>
+                      addItem({
+                        id: "mango-avakaya-250g",
+                        name: "Classic Avakaya Mango (250g)",
+                        price: 280,
+                        image: "/images/mango_pickle.png",
+                        description: "250g • Sun-Dried Mangoes & Sesame Oil",
+                      })
+                    }
                   >
-                    + Add ({cartCountMap["mango-avakaya"] || 0})
+                    + Add ({getQuantity("mango-avakaya-250g")})
                   </button>
                 </div>
               </div>
@@ -296,7 +326,22 @@ export default function DashboardPage() {
             <div className="products-grid">
               {Array.isArray(products) &&
                 products.map((product: any) => {
-                  const qty = cartCountMap[product.id] || 0;
+                  const priceOpts = product.priceOptions || [];
+                  const selectedSizeIdx = selectedSizes[product.id] ?? 0;
+                  const currentOpt =
+                    priceOpts[selectedSizeIdx] ||
+                    priceOpts[0] || {
+                      quantity: 250,
+                      unit: "g",
+                      price: product.rawPrice,
+                    };
+                  const sizeLabel = `${currentOpt.quantity}${currentOpt.unit}`;
+                  const currentPrice = currentOpt.price;
+                  const originalPrice = Math.round(currentPrice * 1.25);
+                  const cartItemId = `${product.id}-${sizeLabel}`;
+                  const qty = getQuantity(cartItemId);
+                  const isInfoOpen = expandedInfoMap[product.id] || false;
+
                   return (
                     <div
                       key={product.id}
@@ -305,20 +350,148 @@ export default function DashboardPage() {
                       <div className="product-img-frame">
                         <img src={product.image} alt={product.name} />
                         <span className="product-tag">{product.tag}</span>
+                        <span className="dash-rating-badge">
+                          <Star size={11} fill="#775800" color="#775800" />
+                          <span>4.9</span>
+                        </span>
                       </div>
 
                       <div className="product-details">
-                        <span className="product-spice">{product.spiceLevel}</span>
+                        <span className="product-spice">
+                          {product.spiceLevel}
+                        </span>
                         <h3 className="product-title">{product.name}</h3>
                         <p className="product-desc">{product.description}</p>
 
+                        {/* Interactive Pack Size Selector */}
+                        {priceOpts.length > 1 && (
+                          <div className="dash-size-selector-box">
+                            <div className="size-selector-header">
+                              <span className="size-selector-label">
+                                Select Size:
+                              </span>
+                              <span className="starting-price-note">
+                                Basic Price First
+                              </span>
+                            </div>
+                            <div className="size-pills-row">
+                              {priceOpts.map((opt: any, idx: number) => {
+                                const label = `${opt.quantity}${opt.unit}`;
+                                const isSelected = selectedSizeIdx === idx;
+                                return (
+                                  <button
+                                    key={idx}
+                                    type="button"
+                                    className={`size-pill ${
+                                      isSelected ? "selected" : ""
+                                    }`}
+                                    onClick={() =>
+                                      setSelectedSizes((prev) => ({
+                                        ...prev,
+                                        [product.id]: idx,
+                                      }))
+                                    }
+                                  >
+                                    <span className="size-name">{label}</span>
+                                    <span className="size-price">
+                                      ₹{opt.price}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Feature Chips */}
+                        <div className="menu-highlights-chips">
+                          <span className="chip-tag">
+                            <ShieldCheck size={12} />
+                            <span>6 Months Shelf Life</span>
+                          </span>
+                          <span className="chip-tag">
+                            <Flame size={12} />
+                            <span>Cold-Pressed Oil</span>
+                          </span>
+                        </div>
+
+                        {/* Expandable Details Accordion */}
+                        <div className="menu-card-details-expand">
+                          <button
+                            type="button"
+                            className="details-toggle-btn"
+                            onClick={() =>
+                              setExpandedInfoMap((prev) => ({
+                                ...prev,
+                                [product.id]: !prev[product.id],
+                              }))
+                            }
+                          >
+                            <Info size={13} />
+                            <span>
+                              {isInfoOpen
+                                ? "Hide Details"
+                                : "View Ingredients & Storage"}
+                            </span>
+                            <ChevronDown
+                              size={14}
+                              className={`chevron-icon ${
+                                isInfoOpen ? "open" : ""
+                              }`}
+                            />
+                          </button>
+
+                          {isInfoOpen && (
+                            <div className="details-expanded-panel">
+                              <div className="panel-section">
+                                <strong>Ingredients:</strong>
+                                <p>
+                                  {product.ingredients?.length
+                                    ? product.ingredients.join(", ")
+                                    : "Sun-dried fresh pickling spices, cold-pressed sesame oil, sea salt, turmeric & secret masala."}
+                                </p>
+                              </div>
+
+                              <div className="panel-section">
+                                <strong>Storage Instructions:</strong>
+                                <p>
+                                  {product.storage?.instructions ||
+                                    "Store in a clean, dry glass jar. Use a dry spoon."}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Product Price & Action Row */}
                         <div className="product-action-row">
-                          <span className="product-price">{product.price}</span>
+                          <div className="price-display-box">
+                            <div className="price-values-row">
+                              <span className="menu-card-original-price">
+                                ₹{originalPrice}
+                              </span>
+                              <span className="product-price">
+                                ₹{currentPrice}
+                              </span>
+                            </div>
+                            <span className="unit-subtext">
+                              Basic Price ({sizeLabel})
+                            </span>
+                          </div>
+
                           {qty === 0 ? (
                             <button
                               type="button"
                               className="add-btn"
-                              onClick={() => handleUpdateQuantity(product.id, 1)}
+                              onClick={() =>
+                                addItem({
+                                  id: cartItemId,
+                                  name: `${product.name} (${sizeLabel})`,
+                                  price: currentPrice,
+                                  image: product.image,
+                                  description: `${sizeLabel} • Handcrafted Home Recipe`,
+                                })
+                              }
                             >
                               <Plus size={16} />
                               <span>Add to Order</span>
@@ -328,9 +501,7 @@ export default function DashboardPage() {
                               <button
                                 type="button"
                                 aria-label={`Decrease ${product.name} quantity`}
-                                onClick={() =>
-                                  handleUpdateQuantity(product.id, -1)
-                                }
+                                onClick={() => updateQuantity(cartItemId, -1)}
                               >
                                 <Minus size={14} />
                               </button>
@@ -338,8 +509,7 @@ export default function DashboardPage() {
                               <button
                                 type="button"
                                 aria-label={`Increase ${product.name} quantity`}
-                                onClick={() =>
-                                  handleUpdateQuantity(product.id, 1)}
+                                onClick={() => updateQuantity(cartItemId, 1)}
                               >
                                 <Plus size={14} />
                               </button>
