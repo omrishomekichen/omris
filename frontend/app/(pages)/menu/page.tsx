@@ -267,8 +267,10 @@ export default function MenuPage() {
           </div>
         ) : selectedTab !== "all" ? (
           <div className="menu-section">
-            <div className="menu-products-grid">
-              {sortedProducts.map(renderCard)}
+            <div className="menu-products-row-wrapper">
+              <div className="menu-products-grid">
+                {sortedProducts.map(renderCard)}
+              </div>
             </div>
           </div>
         ) : (
@@ -282,8 +284,10 @@ export default function MenuPage() {
                     {vegPickles.length} Items Available
                   </span>
                 </div>
-                <div className="menu-products-grid">
-                  {vegPickles.map(renderCard)}
+                <div className="menu-products-row-wrapper">
+                  <div className="menu-products-grid">
+                    {vegPickles.map(renderCard)}
+                  </div>
                 </div>
               </section>
             )}
@@ -297,8 +301,10 @@ export default function MenuPage() {
                     {nonVegPickles.length} Items Available
                   </span>
                 </div>
-                <div className="menu-products-grid">
-                  {nonVegPickles.map(renderCard)}
+                <div className="menu-products-row-wrapper">
+                  <div className="menu-products-grid">
+                    {nonVegPickles.map(renderCard)}
+                  </div>
                 </div>
               </section>
             )}
@@ -312,8 +318,10 @@ export default function MenuPage() {
                     {spicedPowders.length} Items Available
                   </span>
                 </div>
-                <div className="menu-products-grid">
-                  {spicedPowders.map(renderCard)}
+                <div className="menu-products-row-wrapper">
+                  <div className="menu-products-grid">
+                    {spicedPowders.map(renderCard)}
+                  </div>
                 </div>
               </section>
             )}
@@ -327,8 +335,10 @@ export default function MenuPage() {
                     {comboPickles.length} Items Available
                   </span>
                 </div>
-                <div className="menu-products-grid">
-                  {comboPickles.map(renderCard)}
+                <div className="menu-products-row-wrapper">
+                  <div className="menu-products-grid">
+                    {comboPickles.map(renderCard)}
+                  </div>
                 </div>
               </section>
             )}
