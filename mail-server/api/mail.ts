@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import nodemailer from "nodemailer";
-import serverless from "serverless-http";
 
 dotenv.config();
 
@@ -93,4 +92,30 @@ const handleSendMail = async (req: Request, res: Response) => {
 app.post("/api/mail/send", handleSendMail);
 app.post("/mail/send", handleSendMail);
 
-export default serverless(app as any);
+app.use(
+  (
+    error: unknown,
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) => {
+    const bodyError = error as { type?: string };
+    if (
+      error instanceof SyntaxError ||
+      bodyError.type === "entity.parse.failed" ||
+      bodyError.type === "request.size.invalid"
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Request body is invalid or incomplete",
+      });
+    }
+
+    console.error("Unhandled mail API error:", error);
+    return res.status(500).json({ success: false, error: "Internal server error" });
+  },
+);
+
+// Vercel invokes an Express application directly. Wrapping it with an adapter
+// can cause body-stream handling conflicts with Vercel's native request.
+export default app;
