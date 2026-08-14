@@ -353,3 +353,62 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Entry Animations for Menu Page */
+@keyframes menuFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menuFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes menuFadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.menu-header-block {
+  animation: menuFadeDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.menu-controls-bar {
+  animation: menuFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.category-title-row {
+  animation: menuFadeDown 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.menu-product-card {
+  animation: menuFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered card entrance delays */
+.menu-products-grid .menu-product-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-products-grid .menu-product-card:nth-child(2) { animation-delay: 0.2s; }
+.menu-products-grid .menu-product-card:nth-child(3) { animation-delay: 0.3s; }
+.menu-products-grid .menu-product-card:nth-child(4) { animation-delay: 0.4s; }
+.menu-products-grid .menu-product-card:nth-child(5) { animation-delay: 0.5s; }
+.menu-products-grid .menu-product-card:nth-child(6) { animation-delay: 0.6s; }
+
