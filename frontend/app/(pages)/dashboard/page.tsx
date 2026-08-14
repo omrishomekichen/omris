@@ -18,8 +18,7 @@ import Api from "../../__apis/api";
 
 export default function DashboardPage() {
   const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
-  const [allProducts, setAllProducts] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [products, setProducts] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,26 +28,34 @@ export default function DashboardPage() {
         const list = Array.isArray(response)
           ? response
           : response?.data && Array.isArray(response.data)
-            ? response.data
-            : [];
+          ? response.data
+          : [];
 
-        const formatted = list.map((item: any) => {
+        // Filter strictly for items where isFeatured is true
+        const featuredList = list.filter(
+          (item: any) =>
+            item.isFeatured === true ||
+            item.isFeatured === "true" ||
+            item.isFeatured === 1,
+        );
+
+        const formatted = featuredList.map((item: any) => {
           const cat = item.category || "veg";
           let defaultImg = "/images/mango_pickle.png";
-          let tagLabel = item.isFeatured ? "★ FEATURED" : "HOMEMADE";
+          let tagLabel = "★ FEATURED";
 
           if (cat === "nonVeg") {
             defaultImg = "/images/chicken_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED NON-VEG" : "NON-VEG";
+            tagLabel = "★ FEATURED NON-VEG";
           } else if (cat === "veg") {
             defaultImg = "/images/mango_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED VEG" : "VEG";
+            tagLabel = "★ FEATURED VEG";
           } else if (cat === "spicedPowder") {
             defaultImg = "/images/garlic_pickle.png";
-            tagLabel = item.isFeatured ? "★ FEATURED POWDER" : "SPICED POWDER";
+            tagLabel = "★ FEATURED POWDER";
           } else if (cat === "combo" || cat === "offer") {
             defaultImg = "/images/kitchen_craft.png";
-            tagLabel = item.isFeatured ? "★ SPECIAL OFFER" : "SPECIAL COMBO";
+            tagLabel = "★ SPECIAL OFFER";
           }
 
           return {
@@ -56,7 +63,7 @@ export default function DashboardPage() {
             menuId: item.menuId,
             name: item.name,
             category: cat,
-            isFeatured: Boolean(item.isFeatured),
+            isFeatured: true,
             price: item.priceOptions?.[0]?.price
               ? `₹${item.priceOptions[0].price}`
               : item.price || "₹299",
@@ -67,7 +74,7 @@ export default function DashboardPage() {
           };
         });
 
-        setAllProducts(formatted);
+        setProducts(formatted);
       } catch (error) {
         console.error("Error fetching menu items:", error);
       }
@@ -93,18 +100,6 @@ export default function DashboardPage() {
       };
     });
   };
-
-  const filteredProducts = allProducts.filter((item) => {
-    if (activeCategory === "all") return true;
-    if (activeCategory === "featured") return item.isFeatured;
-    if (activeCategory === "veg") return item.category === "veg";
-    if (activeCategory === "nonVeg") return item.category === "nonVeg";
-    if (activeCategory === "spicedPowder")
-      return item.category === "spicedPowder";
-    if (activeCategory === "combo")
-      return item.category === "combo" || item.category === "offer";
-    return true;
-  });
 
   return (
     <div className="dashboard-root">
@@ -270,10 +265,10 @@ export default function DashboardPage() {
         <div className="section-container">
           <div className="pickles-header-row">
             <div>
-              <h2>Artisanal Kitchen Delicacies</h2>
+              <h2>Featured Home-Made Delicacies</h2>
               <p>
-                Explore our full collection of small-batch pickles, spiced
-                powders & combo offers.
+                Handpicked customer favorites & special offers — freshly made and
+                delivered with care.
               </p>
             </div>
 
@@ -297,33 +292,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="category-tabs-bar">
-            {[
-              { id: "all", label: "All Items" },
-              { id: "featured", label: "⭐ Featured" },
-              { id: "nonVeg", label: "🍗 Non-Veg" },
-              { id: "veg", label: "🥭 Veg Pickles" },
-              { id: "spicedPowder", label: "🧄 Spiced Powders" },
-              { id: "combo", label: "🎁 Combos & Offers" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`tab-pill ${
-                  activeCategory === tab.id ? "active" : ""
-                }`}
-                onClick={() => setActiveCategory(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           <div className="products-wrapper" ref={scrollRef}>
             <div className="products-grid">
-              {Array.isArray(filteredProducts) &&
-                filteredProducts.map((product: any) => {
+              {Array.isArray(products) &&
+                products.map((product: any) => {
                   const qty = cartCountMap[product.id] || 0;
                   return (
                     <div
@@ -336,9 +308,7 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="product-details">
-                        <span className="product-spice">
-                          {product.spiceLevel}
-                        </span>
+                        <span className="product-spice">{product.spiceLevel}</span>
                         <h3 className="product-title">{product.name}</h3>
                         <p className="product-desc">{product.description}</p>
 
@@ -348,9 +318,7 @@ export default function DashboardPage() {
                             <button
                               type="button"
                               className="add-btn"
-                              onClick={() =>
-                                handleUpdateQuantity(product.id, 1)
-                              }
+                              onClick={() => handleUpdateQuantity(product.id, 1)}
                             >
                               <Plus size={16} />
                               <span>Add to Order</span>
@@ -371,8 +339,7 @@ export default function DashboardPage() {
                                 type="button"
                                 aria-label={`Increase ${product.name} quantity`}
                                 onClick={() =>
-                                  handleUpdateQuantity(product.id, 1)
-                                }
+                                  handleUpdateQuantity(product.id, 1)}
                               >
                                 <Plus size={14} />
                               </button>
@@ -413,8 +380,8 @@ export default function DashboardPage() {
 
             <p>
               We don't mass-produce in factories. Every single jar is made with
-              hand-ground spices, sun-dried ingredients, and patience—giving you
-              that warm, comforting flavor of home.
+              hand-ground spices, sun-dried ingredients, and patience—giving
+              you that warm, comforting flavor of home.
             </p>
 
             <div className="story-highlights">
@@ -441,8 +408,8 @@ export default function DashboardPage() {
         <div className="section-container banner-box">
           <h2>Have Questions or Special Bulk Orders?</h2>
           <p>
-            We are a growing home kitchen and love connecting with our customers
-            directly!
+            We are a growing home kitchen and love connecting with our
+            customers directly!
           </p>
 
           <div className="banner-actions">
