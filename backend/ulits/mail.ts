@@ -1,81 +1,48 @@
-import nodemailer, { Transporter } from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const config = {
-  env: process.env.NODE_ENV || "development",
-  mail: {
-    host: process.env.MAIL_HOST || process.env.GMAIL_HOST || "smtp.gmail.com",
-    port: Number(process.env.MAIL_PORT || process.env.GMAIL_PORT || 465),
-    secure: process.env.MAIL_SECURE === "false" ? false : true,
-    hostUser: process.env.MAIL_HOST_USER || process.env.GMAIL_USER || "",
-    hostPass:
-      process.env.MAIL_HOST_PASS || process.env.GMAIL_APP_PASSWORD || "",
-  },
-};
-
-import {
-  otpTemplate,
-  welcomeTemplate,
-  forgotPasswordTemplate,
-  passwordResetSuccessTemplate,
-  loginAlertTemplate,
-  passwordChangeAlertTemplate,
-} from "./templates";
+const MAIL_API_URL =
+  process.env.MAIL_SERVICE_URL ||
+  "https://omris-mail-server.vercel.app/api/mail/send";
 
 interface MailPayload {
   to: string;
   subject: string;
-  text?: string;
-  html: string;
+  text: string;
 }
 
-class MailService {
-  private transporter: Transporter;
-  private number: number = 0;
-
-  constructor() {
-    if (!config.mail.host || !config.mail.hostUser) {
-      console.warn(
-        "[mailService] Mail credentials host or hostUser missing in environment config.",
-      );
-    }
-
-    this.transporter = nodemailer.createTransport({
-      host: config.mail.host,
-      port: Number(config.mail.port),
-      secure: config.mail.secure,
-      auth: {
-        user: config.mail.hostUser,
-        pass: config.mail.hostPass,
+export const sendMail = async (to: string, subject: string, text: string) => {
+  console.log(`[Mail API] Sending email to ${to} via ${MAIL_API_URL}...`);
+  try {
+    const response = await fetch(MAIL_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      tls: {
-        rejectUnauthorized: false,
-      },
+      body: JSON.stringify({ to, subject, text }),
     });
-  }
 
-  private async send({ to, subject, text, html }: MailPayload) {
-    const sender = `"Omri's Home Kitchen" <${config.mail.hostUser || "noreply@omris.com"}>`;
+    const data: any = await response.json();
 
-    try {
-      const info = await this.transporter.sendMail({
-        from: sender,
-        to,
-        subject,
-        text,
-        html,
-      });
-      this.number++;
-      console.log(
-        `[Email service -- Nodemailer]:[${new Date().toISOString()}] Email sent via Nodemailer (${this.number})`,
+    if (!response.ok || (data && data.success === false)) {
+      console.error("[Mail API] Failure response from mail service:", data);
+      throw new Error(
+        data?.error || data?.message || `Mail service error (${response.status})`,
       );
-      return info;
-    } catch (error) {
-      console.error("Error sending email via Nodemailer:", error);
-      throw error;
     }
+
+    console.log("[Mail API] Email sent successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("[Mail API] Error calling mail server API:", error);
+    throw error;
+  }
+};
+
+class MailService {
+  async send(payload: MailPayload) {
+    return sendMail(payload.to, payload.subject, payload.text);
   }
 
   async sendOTPEmail(
@@ -83,39 +50,35 @@ class MailService {
     otp: string,
     subject: string = "Your verification code",
   ) {
-    return this.send({
-      to: email,
-      subject: subject,
-      text: `Your OTP is ${otp}`,
-      html: otpTemplate(otp),
-    });
+    return sendMail(
+      email,
+      subject,
+      `Your OTP is ${otp}. It expires in 15 minutes.`,
+    );
   }
 
   async sendWelcomeEmail(email: string, name: string) {
-    return this.send({
-      to: email,
-      subject: "Welcome to Omri's Home Kitchen",
-      text: `Welcome to Omri's Home Kitchen ${name}`,
-      html: welcomeTemplate(name),
-    });
+    return sendMail(
+      email,
+      "Welcome to Omri's Home Kitchen",
+      `Welcome to Omri's Home Kitchen, ${name}!`,
+    );
   }
 
   async sendForgotPasswordEmail(email: string, resetLink: string) {
-    return this.send({
-      to: email,
-      subject: "Reset your password",
-      text: `Reset your password using this link: ${resetLink}`,
-      html: forgotPasswordTemplate(resetLink),
-    });
+    return sendMail(
+      email,
+      "Reset your password",
+      `Reset your password using this link: ${resetLink}`,
+    );
   }
 
   async sendPasswordResetSuccessEmail(email: string) {
-    return this.send({
-      to: email,
-      subject: "Password updated",
-      text: "Your password has been updated successfully",
-      html: passwordResetSuccessTemplate(),
-    });
+    return sendMail(
+      email,
+      "Password updated",
+      "Your password has been updated successfully.",
+    );
   }
 
   async sendLoginAlertEmail(
@@ -124,32 +87,21 @@ class MailService {
     location: string,
     time: string,
   ) {
-    return this.send({
-      to: email,
-      subject: "New login detected",
-      text: `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
-      html: loginAlertTemplate(device, location, time),
-    });
+    return sendMail(
+      email,
+      "New login detected",
+      `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
+    );
   }
 
   async sendPasswordChangeAlertEmail(email: string, time: string) {
-    return this.send({
-      to: email,
-      subject: "Password Change Alert",
-      text: `Your password was changed at ${time}.`,
-      html: passwordChangeAlertTemplate(time),
-    });
+    return sendMail(
+      email,
+      "Password Change Alert",
+      `Your password was changed at ${time}.`,
+    );
   }
 }
 
 export { MailService, MailService as MailSender };
-
-const mailServiceInstance = new MailService();
-
-export const sendMail = async (to: string, subject: string, text: string) => {
-  const otpMatch = text.match(/\b\d{6}\b/);
-  const otp = otpMatch ? otpMatch[0] : text;
-  return mailServiceInstance.sendOTPEmail(to, otp, subject);
-};
-
 export default MailService;
