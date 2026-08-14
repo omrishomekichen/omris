@@ -1,0 +1,37 @@
+{
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend"
+    },
+    "mail-server": {
+      "root": "mail-server"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/mail/(.*)?",
+      "destination": {
+        "type": "service",
+        "service": "mail-server"
+      }
+    },
+    {
+      "source": "/api/(.*)?",
+      "destination": {
+        "type": "service",
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "frontend"
+      }
+    }
+  ]
+}
