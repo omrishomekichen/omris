@@ -1,4 +1,12 @@
 import dotenv from "dotenv";
+import {
+  otpTemplate,
+  welcomeTemplate,
+  forgotPasswordTemplate,
+  passwordResetSuccessTemplate,
+  loginAlertTemplate,
+  passwordChangeAlertTemplate,
+} from "./templates";
 
 dotenv.config();
 
@@ -10,17 +18,28 @@ interface MailPayload {
   to: string;
   subject: string;
   text: string;
+  html?: string;
 }
 
-export const sendMail = async (to: string, subject: string, text: string) => {
+export const sendMail = async (
+  to: string,
+  subject: string,
+  text: string,
+  html?: string,
+) => {
   console.log(`[Mail API] Sending email to ${to} via ${MAIL_API_URL}...`);
   try {
+    const payload: MailPayload = { to, subject, text };
+    if (html) {
+      payload.html = html;
+    }
+
     const response = await fetch(MAIL_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ to, subject, text }),
+      body: JSON.stringify(payload),
     });
 
     const data: any = await response.json();
@@ -42,7 +61,7 @@ export const sendMail = async (to: string, subject: string, text: string) => {
 
 class MailService {
   async send(payload: MailPayload) {
-    return sendMail(payload.to, payload.subject, payload.text);
+    return sendMail(payload.to, payload.subject, payload.text, payload.html);
   }
 
   async sendOTPEmail(
@@ -54,6 +73,7 @@ class MailService {
       email,
       subject,
       `Your OTP is ${otp}. It expires in 15 minutes.`,
+      otpTemplate(otp),
     );
   }
 
@@ -62,6 +82,7 @@ class MailService {
       email,
       "Welcome to Omri's Home Kitchen",
       `Welcome to Omri's Home Kitchen, ${name}!`,
+      welcomeTemplate(name),
     );
   }
 
@@ -70,6 +91,7 @@ class MailService {
       email,
       "Reset your password",
       `Reset your password using this link: ${resetLink}`,
+      forgotPasswordTemplate(resetLink),
     );
   }
 
@@ -78,6 +100,7 @@ class MailService {
       email,
       "Password updated",
       "Your password has been updated successfully.",
+      passwordResetSuccessTemplate(),
     );
   }
 
@@ -91,6 +114,7 @@ class MailService {
       email,
       "New login detected",
       `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
+      loginAlertTemplate(device, location, time),
     );
   }
 
@@ -99,6 +123,7 @@ class MailService {
       email,
       "Password Change Alert",
       `Your password was changed at ${time}.`,
+      passwordChangeAlertTemplate(time),
     );
   }
 }
