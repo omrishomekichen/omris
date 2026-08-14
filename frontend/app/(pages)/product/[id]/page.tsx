@@ -314,13 +314,7 @@ export default function ProductDetailPage() {
             </ul>
           </div>
 
-          <div className="story-image-frame">
-            <img
-              src="/images/kitchen_craft.png"
-              alt="Raw artisanal pickle ingredients preparation"
-              className="story-frame-img"
-            />
-          </div>
+         
         </section>
 
         {/* Related Products Section */}
