@@ -10,6 +10,8 @@ import {
   Flame,
   ArrowUpDown,
   Filter,
+  Search,
+  X,
 } from "lucide-react";
 import Api from "../../__apis/api";
 
@@ -20,6 +22,7 @@ export default function MenuPage() {
   const [favoritesMap, setFavoritesMap] = useState<Record<string, boolean>>({});
   const [selectedTab, setSelectedTab] = useState<string>("all");
   const [sortOption, setSortOption] = useState<string>("popularity");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -110,14 +113,29 @@ export default function MenuPage() {
     return sorted;
   };
 
-  // Filtered list
+  // Filtered & Searched list
   const filteredProducts = products.filter((p) => {
-    if (selectedTab === "all") return true;
-    if (selectedTab === "veg") return p.category === "veg";
-    if (selectedTab === "nonVeg") return p.category === "nonVeg";
-    if (selectedTab === "spicedPowder") return p.category === "spicedPowder";
-    if (selectedTab === "combo") return p.category === "combo" || p.category === "offer";
-    return true;
+    const matchesCategory =
+      selectedTab === "all"
+        ? true
+        : selectedTab === "veg"
+        ? p.category === "veg"
+        : selectedTab === "nonVeg"
+        ? p.category === "nonVeg"
+        : selectedTab === "spicedPowder"
+        ? p.category === "spicedPowder"
+        : selectedTab === "combo"
+        ? p.category === "combo" || p.category === "offer"
+        : true;
+
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      p.name?.toLowerCase().includes(query) ||
+      p.description?.toLowerCase().includes(query) ||
+      p.category?.toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
   });
 
   const sortedProducts = sortProducts(filteredProducts);
@@ -217,7 +235,7 @@ export default function MenuPage() {
           </p>
         </div>
 
-        {/* Sort & Filter Bar */}
+        {/* Sort, Filter & Search Bar */}
         <div className="menu-controls-bar">
           <div className="menu-category-tabs">
             {[
@@ -238,6 +256,28 @@ export default function MenuPage() {
                 {tab.label}
               </button>
             ))}
+          </div>
+
+          {/* Search Box */}
+          <div className="menu-search-box">
+            <Search size={18} className="search-icon" />
+            <input
+              type="text"
+              className="menu-search-input"
+              placeholder="Search pickles, powders..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
 
           <div className="menu-sort-box">
