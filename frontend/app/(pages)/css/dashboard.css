@@ -740,6 +740,9 @@
   padding: 0.5rem 0.25rem 1.5rem 0.25rem;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .products-wrapper::-webkit-scrollbar {

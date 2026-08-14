@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 import nodemailer from "nodemailer";
+import { emailLayout, renderTemplate } from "../templates";
 
 dotenv.config();
 
@@ -18,8 +19,6 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
-  // Serverless functions must not wait indefinitely for an SMTP socket that
-  // cannot be reached (for example, because outbound SMTP is blocked).
   connectionTimeout: 10_000,
   greetingTimeout: 10_000,
   socketTimeout: 20_000,
@@ -29,22 +28,29 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendMail = async (to: string, subject: string, text: string) => {
+export const sendMail = async (
+  to: string,
+  subject: string,
+  text: string,
+  html?: string,
+) => {
   try {
+    const finalHtml =
+      html ||
+      emailLayout({
+        title: subject,
+        content: `
+          <h2 style="color: #0f172a; margin-top: 0;">${subject}</h2>
+          <p style="color: #475569; font-size: 15px; line-height: 1.6;">${text}</p>
+        `,
+      });
+
     const info = await transporter.sendMail({
       from: `"Omri's Home Kitchen" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <body>
-            <h2>${subject}</h2>
-            <p>${text}</p>
-          </body>
-        </html>
-      `,
+      html: finalHtml,
     });
 
     console.log("📧 Mail sent:", info.messageId);
@@ -64,12 +70,12 @@ export const app = express();
 app.use(express.json());
 
 const handleSendMail = async (req: Request, res: Response) => {
-  const { to, subject, text } = req.body || {};
+  const { to, subject, text, html, templateName, templateData } = req.body || {};
 
-  if (!to || !subject || !text) {
+  if (!to || !subject) {
     return res
       .status(400)
-      .json({ error: "Missing required fields: to, subject, text" });
+      .json({ error: "Missing required fields: to, subject" });
   }
 
   if (!hasMailCredentials) {
@@ -80,7 +86,16 @@ const handleSendMail = async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await sendMail(to, subject, text);
+    let mailHtml = html;
+    if (templateName) {
+      const rendered = renderTemplate(templateName, templateData || {});
+      if (rendered) {
+        mailHtml = rendered;
+      }
+    }
+
+    const fallbackText = text || subject;
+    const result = await sendMail(to, subject, fallbackText, mailHtml);
     return res.status(200).json(result);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unable to send mail";
@@ -116,6 +131,4 @@ app.use(
   },
 );
 
-// Vercel invokes an Express application directly. Wrapping it with an adapter
-// can cause body-stream handling conflicts with Vercel's native request.
 export default app;

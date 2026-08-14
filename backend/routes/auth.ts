@@ -62,6 +62,9 @@ authRouter.post("/register", async (req: Request, res: Response) => {
         user.email,
         "Your verification code",
         `Your OTP is ${verificationCode}. It expires in 15 minutes.`,
+        undefined,
+        "otp",
+        { otp: verificationCode, name: fullName },
       );
     } catch (mailError) {
       console.error("Verification email error:", mailError);
@@ -131,6 +134,20 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
     user.verified = true;
     await user.save();
     await Otp.deleteMany({ email: user.email });
+
+    // Send Welcome Email
+    try {
+      await sendMail(
+        user.email,
+        "Welcome to Omri's Home Kitchen",
+        `Welcome to Omri's Home Kitchen, ${user.firstName}!`,
+        undefined,
+        "welcome",
+        { name: `${user.firstName} ${user.lastName}`.trim() },
+      );
+    } catch (e) {
+      console.error("Failed to send welcome email:", e);
+    }
 
     return res.status(200).json({
       status: "success",
@@ -233,6 +250,9 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
         user.email,
         "Your password reset code",
         `Your password reset OTP is ${resetCode}. It expires in 15 minutes.`,
+        undefined,
+        "otp",
+        { otp: resetCode, name: `${user.firstName} ${user.lastName}`.trim() },
       );
     } catch (mailError) {
       console.error("Password reset email error:", mailError);
@@ -295,6 +315,20 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
     user.password = hashedPassword;
     await user.save();
     await Otp.deleteMany({ email: user.email });
+
+    // Send Password Reset Success Notification
+    try {
+      await sendMail(
+        user.email,
+        "Password Updated Successfully",
+        "Your password has been changed successfully.",
+        undefined,
+        "password_reset_success",
+        { name: `${user.firstName} ${user.lastName}`.trim() },
+      );
+    } catch (e) {
+      console.error("Failed to send password reset confirmation email:", e);
+    }
 
     return res.status(200).json({
       status: "success",

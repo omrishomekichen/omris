@@ -14,7 +14,7 @@ import {
   Package,
   LogOut,
   Sparkles,
-  LogIn
+  LogIn,
 } from "lucide-react";
 import { useAuth } from "../(auth)/AuthContext";
 import { useCart } from "./CartContext";
@@ -25,7 +25,10 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [localUser, setLocalUser] = useState<{ name?: string; email?: string } | null>(null);
+  const [localUser, setLocalUser] = useState<{
+    name?: string;
+    email?: string;
+  } | null>(null);
 
   const auth = useAuth();
   const user = auth?.user;
@@ -33,12 +36,12 @@ export default function Navbar() {
   const { itemCount } = useCart();
 
   useEffect(() => {
-    const saved = localStorage.getItem('user');
+    const saved = localStorage.getItem("user");
     if (saved) {
       try {
-        if (saved.startsWith('{')) {
+        if (saved.startsWith("{")) {
           setLocalUser(JSON.parse(saved));
-        } else if (saved !== '[object Object]') {
+        } else if (saved !== "[object Object]") {
           setLocalUser({ name: saved, email: saved });
         }
       } catch (e) {
@@ -59,9 +62,9 @@ export default function Navbar() {
     if (logout) {
       await logout();
     } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
     }
   };
 
@@ -97,12 +100,7 @@ export default function Navbar() {
             >
               Menu
             </Link>
-            <Link
-              href="/about"
-              className={`nav-link ${isActive("/about") ? "active" : ""}`}
-            >
-              About Us
-            </Link>
+
             <Link
               href="/orders"
               className={`nav-link ${isActive("/orders") ? "active" : ""}`}
@@ -140,11 +138,21 @@ export default function Navbar() {
                     <>
                       <div className="profile-dropdown-header">
                         <div className="profile-avatar">
-                          {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : <User size={16} />}
+                          {currentUser.name ? (
+                            currentUser.name.charAt(0).toUpperCase()
+                          ) : (
+                            <User size={16} />
+                          )}
                         </div>
                         <div className="profile-info">
-                          <span className="profile-user-name">{currentUser.name || "Customer"}</span>
-                          {currentUser.email && <span className="profile-user-email">{currentUser.email}</span>}
+                          <span className="profile-user-name">
+                            {currentUser.name || "Customer"}
+                          </span>
+                          {currentUser.email && (
+                            <span className="profile-user-email">
+                              {currentUser.email}
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -195,8 +203,12 @@ export default function Navbar() {
                           <User size={16} />
                         </div>
                         <div className="profile-info">
-                          <span className="profile-user-name">Welcome Guest</span>
-                          <span className="profile-user-email">Please sign in to continue</span>
+                          <span className="profile-user-name">
+                            Welcome Guest
+                          </span>
+                          <span className="profile-user-email">
+                            Please sign in to continue
+                          </span>
                         </div>
                       </div>
 

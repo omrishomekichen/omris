@@ -43,7 +43,7 @@ export default function MenuPage() {
     const fetchMenu = async () => {
       try {
         setLoading(true);
-        const response = await Api.menu();
+        const response: any = await Api.menu();
         const list = Array.isArray(response)
           ? response
           : response?.data && Array.isArray(response.data)

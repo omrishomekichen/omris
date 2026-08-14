@@ -1,3 +1,5 @@
+import { DEFAULT_MENU_ITEMS } from "../data/defaultMenu";
+
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
@@ -80,10 +82,14 @@ const Api = {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      return await response.json();
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+      return DEFAULT_MENU_ITEMS;
     } catch (error) {
       console.error("Error fetching menu items:", error);
-      return [];
+      return DEFAULT_MENU_ITEMS;
     }
   },
 };

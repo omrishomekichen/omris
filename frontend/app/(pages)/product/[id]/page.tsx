@@ -38,7 +38,7 @@ export default function ProductDetailPage() {
     const fetchProductData = async () => {
       try {
         setLoading(true);
-        const response = await Api.menu();
+        const response: any = await Api.menu();
         const list = Array.isArray(response)
           ? response
           : response?.data && Array.isArray(response.data)

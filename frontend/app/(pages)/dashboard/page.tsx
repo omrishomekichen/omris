@@ -27,28 +27,36 @@ import { useCart } from "../../components/CartContext";
 export default function DashboardPage() {
   const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>({});
-  const [expandedInfoMap, setExpandedInfoMap] = useState<Record<string, boolean>>({});
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>(
+    {},
+  );
+  const [expandedInfoMap, setExpandedInfoMap] = useState<
+    Record<string, boolean>
+  >({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addItem, getQuantity, updateQuantity } = useCart();
 
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const response = await Api.menu();
+        const response: any = await Api.menu();
         const list = Array.isArray(response)
           ? response
           : response?.data && Array.isArray(response.data)
-          ? response.data
-          : [];
+            ? response.data
+            : [];
 
-        // Filter strictly for items where isFeatured is true
-        const featuredList = list.filter(
+        // Filter for items where isFeatured is true, or fallback to top items
+        let featuredList = list.filter(
           (item: any) =>
             item.isFeatured === true ||
             item.isFeatured === "true" ||
             item.isFeatured === 1,
         );
+
+        if (featuredList.length < 3) {
+          featuredList = list.slice(0, 8);
+        }
 
         const formatted = featuredList.map((item: any) => {
           const cat = item.category || "veg";
@@ -78,12 +86,20 @@ export default function DashboardPage() {
             item.priceOptions && item.priceOptions.length > 0
               ? item.priceOptions
               : cat === "combo" || cat === "offer"
-              ? [{ quantity: 1, unit: "piece", price: rawPrice }]
-              : [
-                  { quantity: 250, unit: "g", price: Math.round(rawPrice * 0.52) },
-                  { quantity: 500, unit: "g", price: rawPrice },
-                  { quantity: 1, unit: "kg", price: Math.round(rawPrice * 1.85) },
-                ];
+                ? [{ quantity: 1, unit: "piece", price: rawPrice }]
+                : [
+                    {
+                      quantity: 250,
+                      unit: "g",
+                      price: Math.round(rawPrice * 0.52),
+                    },
+                    { quantity: 500, unit: "g", price: rawPrice },
+                    {
+                      quantity: 1,
+                      unit: "kg",
+                      price: Math.round(rawPrice * 1.85),
+                    },
+                  ];
 
           const priceOpts = [...rawPriceOpts].sort(
             (a: any, b: any) => Number(a.price) - Number(b.price),
@@ -179,7 +195,7 @@ export default function DashboardPage() {
               <div className="feature-pill">
                 <div className="feature-pill-icon">📞</div>
                 <div className="feature-pill-content">
-                  <span className="feature-pill-title">+91 98765 43210</span>
+                  <span className="feature-pill-title">+91 63014 53780</span>
                   <span className="feature-pill-subtitle">
                     Call us for orders & enquiries
                   </span>
@@ -300,8 +316,8 @@ export default function DashboardPage() {
             <div>
               <h2>Featured Home-Made Delicacies</h2>
               <p>
-                Handpicked customer favorites & special offers — freshly made and
-                delivered with care.
+                Handpicked customer favorites & special offers — freshly made
+                and delivered with care.
               </p>
             </div>
 
@@ -331,8 +347,7 @@ export default function DashboardPage() {
                 products.map((product: any) => {
                   const priceOpts = product.priceOptions || [];
                   const selectedSizeIdx = selectedSizes[product.id] ?? 0;
-                  const currentOpt =
-                    priceOpts[selectedSizeIdx] ||
+                  const currentOpt = priceOpts[selectedSizeIdx] ||
                     priceOpts[0] || {
                       quantity: 250,
                       unit: "g",
@@ -347,7 +362,11 @@ export default function DashboardPage() {
 
                   const handleCardClick = (e: React.MouseEvent) => {
                     const target = e.target as HTMLElement;
-                    if (target.closest("button") || target.closest("input") || target.closest("a")) {
+                    if (
+                      target.closest("button") ||
+                      target.closest("input") ||
+                      target.closest("a")
+                    ) {
                       return;
                     }
                     router.push(`/product/${product.id}`);
@@ -426,54 +445,6 @@ export default function DashboardPage() {
                             <Flame size={12} />
                             <span>Cold-Pressed Oil</span>
                           </span>
-                        </div>
-
-                        {/* Expandable Details Accordion */}
-                        <div className="menu-card-details-expand">
-                          <button
-                            type="button"
-                            className="details-toggle-btn"
-                            onClick={() =>
-                              setExpandedInfoMap((prev) => ({
-                                ...prev,
-                                [product.id]: !prev[product.id],
-                              }))
-                            }
-                          >
-                            <Info size={13} />
-                            <span>
-                              {isInfoOpen
-                                ? "Hide Details"
-                                : "View Ingredients & Storage"}
-                            </span>
-                            <ChevronDown
-                              size={14}
-                              className={`chevron-icon ${
-                                isInfoOpen ? "open" : ""
-                              }`}
-                            />
-                          </button>
-
-                          {isInfoOpen && (
-                            <div className="details-expanded-panel">
-                              <div className="panel-section">
-                                <strong>Ingredients:</strong>
-                                <p>
-                                  {product.ingredients?.length
-                                    ? product.ingredients.join(", ")
-                                    : "Sun-dried fresh pickling spices, cold-pressed sesame oil, sea salt, turmeric & secret masala."}
-                                </p>
-                              </div>
-
-                              <div className="panel-section">
-                                <strong>Storage Instructions:</strong>
-                                <p>
-                                  {product.storage?.instructions ||
-                                    "Store in a clean, dry glass jar. Use a dry spoon."}
-                                </p>
-                              </div>
-                            </div>
-                          )}
                         </div>
 
                         {/* Product Price & Action Row */}
@@ -563,8 +534,8 @@ export default function DashboardPage() {
 
             <p>
               We don't mass-produce in factories. Every single jar is made with
-              hand-ground spices, sun-dried ingredients, and patience—giving
-              you that warm, comforting flavor of home.
+              hand-ground spices, sun-dried ingredients, and patience—giving you
+              that warm, comforting flavor of home.
             </p>
 
             <div className="story-highlights">
@@ -591,14 +562,14 @@ export default function DashboardPage() {
         <div className="section-container banner-box">
           <h2>Have Questions or Special Bulk Orders?</h2>
           <p>
-            We are a growing home kitchen and love connecting with our
-            customers directly!
+            We are a growing home kitchen and love connecting with our customers
+            directly!
           </p>
 
           <div className="banner-actions">
-            <a href="tel:+919876543210" className="phone-btn">
+            <a href="tel:+916301453780" className="phone-btn">
               <PhoneCall size={18} />
-              <span>Call / Inquiry: +91 98765 43210</span>
+              <span>Call / Inquiry: +91 63014 53780</span>
             </a>
           </div>
         </div>

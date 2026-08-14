@@ -200,7 +200,7 @@ export default function CheckoutPage() {
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 63014 53780"
                       value={formData.phone}
                       onChange={handleInputChange}
                       required

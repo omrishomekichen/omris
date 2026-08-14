@@ -1,12 +1,4 @@
 import dotenv from "dotenv";
-import {
-  otpTemplate,
-  welcomeTemplate,
-  forgotPasswordTemplate,
-  passwordResetSuccessTemplate,
-  loginAlertTemplate,
-  passwordChangeAlertTemplate,
-} from "./templates";
 
 dotenv.config();
 
@@ -19,6 +11,8 @@ interface MailPayload {
   subject: string;
   text: string;
   html?: string;
+  templateName?: string;
+  templateData?: any;
 }
 
 export const sendMail = async (
@@ -26,12 +20,18 @@ export const sendMail = async (
   subject: string,
   text: string,
   html?: string,
+  templateName?: string,
+  templateData?: any,
 ) => {
   console.log(`[Mail API] Sending email to ${to} via ${MAIL_API_URL}...`);
   try {
     const payload: MailPayload = { to, subject, text };
     if (html) {
       payload.html = html;
+    }
+    if (templateName) {
+      payload.templateName = templateName;
+      payload.templateData = templateData;
     }
 
     const response = await fetch(MAIL_API_URL, {
@@ -61,7 +61,14 @@ export const sendMail = async (
 
 class MailService {
   async send(payload: MailPayload) {
-    return sendMail(payload.to, payload.subject, payload.text, payload.html);
+    return sendMail(
+      payload.to,
+      payload.subject,
+      payload.text,
+      payload.html,
+      payload.templateName,
+      payload.templateData,
+    );
   }
 
   async sendOTPEmail(
@@ -73,7 +80,9 @@ class MailService {
       email,
       subject,
       `Your OTP is ${otp}. It expires in 15 minutes.`,
-      otpTemplate(otp),
+      undefined,
+      "otp",
+      { otp },
     );
   }
 
@@ -82,7 +91,9 @@ class MailService {
       email,
       "Welcome to Omri's Home Kitchen",
       `Welcome to Omri's Home Kitchen, ${name}!`,
-      welcomeTemplate(name),
+      undefined,
+      "welcome",
+      { name },
     );
   }
 
@@ -91,7 +102,9 @@ class MailService {
       email,
       "Reset your password",
       `Reset your password using this link: ${resetLink}`,
-      forgotPasswordTemplate(resetLink),
+      undefined,
+      "forgot_password",
+      { resetLink },
     );
   }
 
@@ -100,7 +113,25 @@ class MailService {
       email,
       "Password updated",
       "Your password has been updated successfully.",
-      passwordResetSuccessTemplate(),
+      undefined,
+      "password_reset_success",
+      {},
+    );
+  }
+
+  async sendOrderConfirmationEmail(
+    email: string,
+    orderId: string,
+    customerName: string,
+    totalAmount: number,
+  ) {
+    return sendMail(
+      email,
+      `Order Confirmed #${orderId}`,
+      `Thank you for your order #${orderId} of ₹${totalAmount}.`,
+      undefined,
+      "order_confirmation",
+      { orderId, customerName, totalAmount },
     );
   }
 
@@ -114,7 +145,9 @@ class MailService {
       email,
       "New login detected",
       `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
-      loginAlertTemplate(device, location, time),
+      undefined,
+      "login_alert",
+      { device, location, time },
     );
   }
 
@@ -123,7 +156,9 @@ class MailService {
       email,
       "Password Change Alert",
       `Your password was changed at ${time}.`,
-      passwordChangeAlertTemplate(time),
+      undefined,
+      "password_change_alert",
+      { time },
     );
   }
 }
