@@ -21,7 +21,7 @@ const priceOptionSchema = new mongoose.Schema(
       min: 0,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const comboItemSchema = new mongoose.Schema(
@@ -43,7 +43,7 @@ const comboItemSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const menuSchema = new mongoose.Schema(
@@ -67,13 +67,7 @@ const menuSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        "veg",
-        "nonVeg",
-        "spicedPowder",
-        "combo",
-        "offer",
-      ],
+      enum: ["veg", "nonVeg", "spicedPowder", "combo", "offer"],
     },
 
     description: {
@@ -168,13 +162,9 @@ const menuSchema = new mongoose.Schema(
 
   {
     timestamps: true,
-  }
+  },
 );
 
-
-
-
-export const Menu =
-  mongoose.models.Menu || mongoose.model("Menu", menuSchema);
+export const Menu = mongoose.models.Menu || mongoose.model("Menu", menuSchema);
 
 export default Menu;

@@ -1,5 +1,7 @@
 const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
+  typeof window !== "undefined"
+    ? process.env.NEXT_PUBLIC_API_BASE_URL || ""
+    : process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
 const Api = {
@@ -25,6 +27,7 @@ const Api = {
     });
     return response.json();
   },
+
   verifyEmail: async (email: string, verificationCode: string) => {
     const response = await fetch(`${API_BASE_URL}/api/verify`, {
       method: "POST",
@@ -45,6 +48,7 @@ const Api = {
     });
     return response.json();
   },
+
   forgotPassword: async (email: string) => {
     const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
       method: "POST",
@@ -53,6 +57,7 @@ const Api = {
     });
     return response.json();
   },
+
   resetPassword: async (
     email: string,
     verificationCode: string,
@@ -65,6 +70,7 @@ const Api = {
     });
     return response.json();
   },
+
   menu: async () => {
     const response = await fetch(`${API_BASE_URL}/api/menu`);
     return response.json();
