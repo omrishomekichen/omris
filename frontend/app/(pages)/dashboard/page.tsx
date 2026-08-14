@@ -56,7 +56,7 @@ export default function DashboardPage() {
             menuId: item.menuId,
             name: item.name,
             category: cat,
-            isFeatured: true,
+            isFeatured: Boolean(item.isFeatured),
             price: item.priceOptions?.[0]?.price
               ? `₹${item.priceOptions[0].price}`
               : item.price || "₹299",
