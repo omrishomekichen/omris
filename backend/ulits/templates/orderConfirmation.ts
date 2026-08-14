@@ -8,41 +8,49 @@ export interface OrderItem {
 
 export interface OrderConfirmationOptions {
   orderId: string;
-  customerName: string;
-  items: OrderItem[];
-  subtotal: number;
-  shipping: number;
-  discount: number;
-  grandTotal: number;
-  shippingAddress: string;
-  paymentMethod: string;
+  customerName?: string;
+  items?: OrderItem[];
+  subtotal?: number;
+  shipping?: number;
+  discount?: number;
+  grandTotal?: number;
+  totalAmount?: number;
+  shippingAddress?: string;
+  paymentMethod?: string;
 }
 
 export const orderConfirmationTemplate = (data: OrderConfirmationOptions): string => {
-  const itemsHtml = data.items
-    .map(
-      (item) => `
-      <tr>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #334155;">${item.name}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #475569; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #0f172a; text-align: right; font-weight: 600;">₹${item.price * item.quantity}</td>
-      </tr>
-    `,
-    )
-    .join("");
+  const itemsList = data.items || [];
+  const itemsHtml = itemsList.length > 0
+    ? itemsList
+        .map(
+          (item) => `
+          <tr>
+            <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #334155;">${item.name}</td>
+            <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #475569; text-align: center;">${item.quantity}</td>
+            <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #0f172a; text-align: right; font-weight: 600;">₹${item.price * item.quantity}</td>
+          </tr>
+        `,
+        )
+        .join("")
+    : `<tr><td colspan="3" style="padding: 12px 8px; color: #64748b; text-align: center;">Order details recorded.</td></tr>`;
+
+  const total = data.grandTotal || data.totalAmount || 0;
+  const subtotalVal = data.subtotal || total;
+  const shippingVal = data.shipping || 0;
 
   return emailLayout({
     title: `Order Confirmed #${data.orderId} - Omri's Home Kitchen`,
     preheader: `Thank you for your order! Order #${data.orderId} is being prepared with care.`,
     content: `
       <h2 style="color: #0f172a; margin-top: 0; font-size: 22px;">Order Confirmed! 📦</h2>
-      <p style="color: #475569;">Hello ${data.customerName},</p>
+      <p style="color: #475569;">Hello ${data.customerName || "Valued Customer"},</p>
       <p style="color: #475569;">Thank you for ordering with <strong>Omri's Home Kitchen</strong>! We're preparing your artisanal order with fresh ingredients.</p>
 
       <div style="background-color: #fffbeb; border-radius: 12px; padding: 16px; margin: 24px 0; border: 1px solid #fef3c7;">
         <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Order ID:</strong> #${data.orderId}</p>
-        <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Payment Method:</strong> ${data.paymentMethod}</p>
-        <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Shipping Address:</strong> ${data.shippingAddress}</p>
+        <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Payment Method:</strong> ${data.paymentMethod || "COD / UPI"}</p>
+        <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Shipping Address:</strong> ${data.shippingAddress || "Provided on Checkout"}</p>
       </div>
 
       <h3 style="color: #0f172a; font-size: 16px; margin-bottom: 12px;">Order Details</h3>
@@ -62,10 +70,10 @@ export const orderConfirmationTemplate = (data: OrderConfirmationOptions): strin
       <div style="border-top: 2px solid #e2e8f0; padding-top: 12px; font-size: 14px;">
         <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #475569;">
           <span>Subtotal:</span>
-          <span>₹${data.subtotal}</span>
+          <span>₹${subtotalVal}</span>
         </div>
         ${
-          data.discount > 0
+          data.discount && data.discount > 0
             ? `<div style="display: flex; justify-content: space-between; margin: 4px 0; color: #166534;">
                 <span>Discount:</span>
                 <span>-₹${data.discount}</span>
@@ -74,11 +82,11 @@ export const orderConfirmationTemplate = (data: OrderConfirmationOptions): strin
         }
         <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #475569;">
           <span>Shipping Fee:</span>
-          <span>${data.shipping === 0 ? "FREE" : `₹${data.shipping}`}</span>
+          <span>${shippingVal === 0 ? "FREE" : `₹${shippingVal}`}</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin: 12px 0 0 0; color: #0f172a; font-size: 18px; font-weight: 800;">
           <span>Total Paid:</span>
-          <span style="color: #b45309;">₹${data.grandTotal}</span>
+          <span style="color: #b45309;">₹${total}</span>
         </div>
       </div>
 

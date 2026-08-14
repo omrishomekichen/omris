@@ -6,6 +6,7 @@ export { passwordResetSuccessTemplate } from "./passwordResetSuccess";
 export { orderConfirmationTemplate } from "./orderConfirmation";
 export { loginAlertTemplate } from "./loginAlert";
 export { passwordChangeAlertTemplate } from "./passwordChangeAlert";
+export { adminOrderAlertTemplate } from "./adminOrderAlert";
 
 import { otpTemplate } from "./otp";
 import { welcomeTemplate } from "./welcome";
@@ -14,6 +15,7 @@ import { passwordResetSuccessTemplate } from "./passwordResetSuccess";
 import { orderConfirmationTemplate } from "./orderConfirmation";
 import { loginAlertTemplate } from "./loginAlert";
 import { passwordChangeAlertTemplate } from "./passwordChangeAlert";
+import { adminOrderAlertTemplate } from "./adminOrderAlert";
 
 export const renderTemplate = (templateName: string, data: any): string | null => {
   switch (templateName.toLowerCase()) {
@@ -30,6 +32,9 @@ export const renderTemplate = (templateName: string, data: any): string | null =
     case "orderconfirmation":
     case "order_confirmation":
       return orderConfirmationTemplate(data);
+    case "adminorderalert":
+    case "admin_order_alert":
+      return adminOrderAlertTemplate(data);
     case "loginalert":
     case "login_alert":
       return loginAlertTemplate(data.device || "Browser", data.location || "India", data.time || new Date().toLocaleString(), data.name);

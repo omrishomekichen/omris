@@ -16,11 +16,21 @@ import {
   Tag,
   ShoppingBag,
   Sparkles,
+  QrCode,
+  Upload,
+  Copy,
+  Check,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useCart } from "../../components/CartContext";
+import Api from "../../__apis/api";
 
 const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val);
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(val);
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -40,9 +50,16 @@ export default function CheckoutPage() {
     notes: "",
   });
 
-  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "upi" | "card">("upi");
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">(
+    "standard",
+  );
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "upi">("upi");
   const [upiId, setUpiId] = useState("");
+  const [upiScreenshot, setUpiScreenshot] = useState<string | null>(null);
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [upiScreenshotName, setUpiScreenshotName] = useState<string>("");
+  const [utrNumber, setUtrNumber] = useState<string>("");
+  const [copiedUpi, setCopiedUpi] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [couponApplied, setCouponApplied] = useState(false);
@@ -65,7 +82,31 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  const shippingCost = subtotal >= 499 || shippingMethod === "standard" ? (subtotal >= 499 ? 0 : 49) : 99;
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setScreenshotFile(file);
+      setUpiScreenshotName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUpiScreenshot(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCopyUpi = () => {
+    navigator.clipboard.writeText("6301453780@ybl");
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2000);
+  };
+
+  const shippingCost =
+    subtotal >= 499 || shippingMethod === "standard"
+      ? subtotal >= 499
+        ? 0
+        : 49
+      : 99;
   const discountAmount = Math.round((subtotal * discountPercent) / 100);
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingCost);
 
@@ -79,52 +120,105 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone || !formData.address || !formData.pincode) {
+    if (
+      !formData.fullName ||
+      !formData.phone ||
+      !formData.address ||
+      !formData.pincode
+    ) {
       alert("Please fill in all required shipping fields.");
       setStep(1);
       return;
     }
 
+    if (paymentMethod === "upi" && !upiScreenshot && !utrNumber.trim()) {
+      alert(
+        "Please upload your payment screenshot or enter the UTR/Reference number to complete your UPI payment.",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem("token") || "";
+      const formattedShippingAddress = `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
+      const formattedItems = items.map((i) => ({
+        name: i.name,
+        price: i.price,
+        quantity: i.quantity,
+        image: i.image,
+      }));
+
+      const res = await Api.placeOrder(
+        token,
+        formData.email,
+        formattedItems,
+        formattedShippingAddress,
+        paymentMethod === "cod" ? "Cash on Delivery" : "UPI Payment (QR)",
+        utrNumber.trim(),
+        grandTotal,
+        screenshotFile,
+      );
+
       const newOrder = {
-        id: `OHK-${Math.floor(1000 + Math.random() * 9000)}`,
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        id:
+          res?.order?.orderId ||
+          `OHK-${Math.floor(1000 + Math.random() * 9000)}`,
+        date: new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
         estimatedDelivery: "Tomorrow, 5:00 PM",
         status: "IN PROGRESS",
         currentStep: 1,
         total: grandTotal,
         itemsCount: items.reduce((acc, i) => acc + i.quantity, 0),
-        items: items.map((i) => ({
-          name: i.name,
-          price: i.price,
-          quantity: i.quantity,
-          image: i.image,
-        })),
-        shippingAddress: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
-        paymentMethod: paymentMethod === "cod" ? "Cash on Delivery" : paymentMethod === "upi" ? "UPI Payment" : "Card",
+        items: formattedItems,
+        shippingAddress: formattedShippingAddress,
+        paymentMethod:
+          paymentMethod === "cod" ? "Cash on Delivery" : "UPI Payment (QR)",
+        paymentScreenshot: upiScreenshot || undefined,
+        utrNumber: utrNumber.trim() || undefined,
       };
 
       // Save order to localStorage
       try {
-        const existing = JSON.parse(localStorage.getItem("user_orders") || "[]");
-        localStorage.setItem("user_orders", JSON.stringify([newOrder, ...existing]));
+        const res = await Api.placeOrder(
+          token,
+          formData.email,
+          formattedItems,
+          formattedShippingAddress,
+          paymentMethod,
+          utrNumber,
+          grandTotal,
+          screenshotFile,
+        );
+        console.log(res);
       } catch (err) {
-        console.error("Error saving order:", err);
+        console.error("Error saving local order:", err);
       }
 
       // Clear Cart & Redirect to Orders Page
       clearCart();
       setIsSubmitting(false);
       router.push("/orders");
-    }, 1200);
+    } catch (err) {
+      console.error("Error placing order:", err);
+      setIsSubmitting(false);
+      alert("Failed to place order. Please try again.");
+    }
   };
 
   if (!items.length && !isSubmitting) {
@@ -133,7 +227,10 @@ export default function CheckoutPage() {
         <div className="checkout-empty-card">
           <ShoppingBag size={48} className="empty-bag-icon" />
           <h2>Your Basket is Empty</h2>
-          <p>Add some handcrafted home-made pickles to your cart to proceed with checkout.</p>
+          <p>
+            Add some handcrafted home-made pickles to your cart to proceed with
+            checkout.
+          </p>
           <Link href="/menu" className="return-menu-btn">
             <ArrowLeft size={16} />
             <span>Explore Artisanal Menu</span>
@@ -256,7 +353,11 @@ export default function CheckoutPage() {
 
                   <div className="field-group third">
                     <label>State *</label>
-                    <select name="state" value={formData.state} onChange={handleInputChange}>
+                    <select
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                    >
                       <option value="Telangana">Telangana</option>
                       <option value="Andhra Pradesh">Andhra Pradesh</option>
                       <option value="Karnataka">Karnataka</option>
@@ -272,8 +373,15 @@ export default function CheckoutPage() {
                     type="button"
                     className="continue-step-btn"
                     onClick={() => {
-                      if (!formData.fullName || !formData.phone || !formData.address || !formData.pincode) {
-                        alert("Please fill in required fields: Name, Phone, Address, and Pincode.");
+                      if (
+                        !formData.fullName ||
+                        !formData.phone ||
+                        !formData.address ||
+                        !formData.pincode
+                      ) {
+                        alert(
+                          "Please fill in required fields: Name, Phone, Address, and Pincode.",
+                        );
                         return;
                       }
                       setStep(2);
@@ -306,10 +414,16 @@ export default function CheckoutPage() {
                       onChange={() => setShippingMethod("standard")}
                     />
                     <div className="option-details">
-                      <span className="option-title">Standard Fresh Home Delivery</span>
-                      <span className="option-sub">Delivered in 1-2 business days in glass-safe packaging</span>
+                      <span className="option-title">
+                        Standard Fresh Home Delivery
+                      </span>
+                      <span className="option-sub">
+                        Delivered in 1-2 business days in glass-safe packaging
+                      </span>
                     </div>
-                    <span className="option-price">{subtotal >= 499 ? "FREE" : "₹49"}</span>
+                    <span className="option-price">
+                      {subtotal >= 499 ? "FREE" : "₹49"}
+                    </span>
                   </label>
 
                   <label
@@ -324,19 +438,29 @@ export default function CheckoutPage() {
                     />
                     <div className="option-details">
                       <span className="option-title">Express Air Shipping</span>
-                      <span className="option-sub">Guaranteed Next-Day Delivery across India</span>
+                      <span className="option-sub">
+                        Guaranteed Next-Day Delivery across India
+                      </span>
                     </div>
                     <span className="option-price">₹99</span>
                   </label>
                 </div>
 
                 <div className="step-actions-row">
-                  <button type="button" className="prev-step-btn" onClick={() => setStep(1)}>
+                  <button
+                    type="button"
+                    className="prev-step-btn"
+                    onClick={() => setStep(1)}
+                  >
                     <ArrowLeft size={16} />
                     <span>Back</span>
                   </button>
 
-                  <button type="button" className="continue-step-btn" onClick={() => setStep(3)}>
+                  <button
+                    type="button"
+                    className="continue-step-btn"
+                    onClick={() => setStep(3)}
+                  >
                     <span>Continue to Payment</span>
                     <ArrowRight size={18} />
                   </button>
@@ -353,7 +477,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="payment-options-list">
-                  {/* UPI */}
+                  {/* UPI Option */}
                   <label
                     className={`payment-option-card ${paymentMethod === "upi" ? "selected" : ""}`}
                     onClick={() => setPaymentMethod("upi")}
@@ -365,25 +489,138 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod("upi")}
                     />
                     <div className="option-details">
-                      <span className="option-title">Instant UPI (GPay, PhonePe, Paytm)</span>
-                      <span className="option-sub">Fastest & secure instant transfer</span>
+                      <span className="option-title">
+                        UPI Payment (QR Code & Upload Screenshot)
+                      </span>
+                      <span className="option-sub">
+                        Scan QR Code via GPay, PhonePe, Paytm or BHIM & upload
+                        payment screenshot
+                      </span>
                     </div>
-                    <span className="payment-badge">RECOMMENDED</span>
+                    <span className="payment-badge">INSTANT & SECURE</span>
                   </label>
 
+                  {/* UPI QR & Screenshot Upload Section */}
                   {paymentMethod === "upi" && (
-                    <div className="upi-input-box">
-                      <label>Enter UPI ID (optional):</label>
-                      <input
-                        type="text"
-                        placeholder="username@okaxis or username@ybl"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                      />
+                    <div className="upi-qr-panel">
+                      <div className="upi-qr-header">
+                        <QrCode size={20} className="upi-qr-icon" />
+                        <div>
+                          <h4>Scan QR Code to Pay</h4>
+                          <p>
+                            Pay <strong>{formatCurrency(grandTotal)}</strong> to
+                            Omri's Home Kitchen
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="upi-qr-body">
+                        <div className="qr-image-wrapper">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                              `upi://pay?pa=6301453780@ybl&pn=Omris%20Home%20Kitchen&am=${grandTotal}&cu=INR`,
+                            )}`}
+                            alt="UPI Payment QR Code"
+                            className="qr-code-img"
+                          />
+                        </div>
+
+                        <div className="qr-details-side">
+                          <div className="upi-id-pill">
+                            <span className="label">UPI ID:</span>
+                            <span className="value">6301453780@ybl</span>
+                            <button
+                              type="button"
+                              className="copy-upi-btn"
+                              onClick={handleCopyUpi}
+                              title="Copy UPI ID"
+                            >
+                              {copiedUpi ? (
+                                <Check size={14} className="copied" />
+                              ) : (
+                                <Copy size={14} />
+                              )}
+                              <span>{copiedUpi ? "Copied" : "Copy"}</span>
+                            </button>
+                          </div>
+
+                          <div className="upi-apps-row">
+                            <span className="apps-tag">Accepts:</span>
+                            <span className="app-badge">GPay</span>
+                            <span className="app-badge">PhonePe</span>
+                            <span className="app-badge">Paytm</span>
+                            <span className="app-badge">BHIM</span>
+                          </div>
+
+                          {/* Screenshot Upload Box */}
+                          <div className="screenshot-upload-box">
+                            <label className="upload-label">
+                              Upload Payment Screenshot *
+                            </label>
+                            <input
+                              type="file"
+                              id="upi-screenshot-input"
+                              accept="image/*"
+                              onChange={handleScreenshotChange}
+                              style={{ display: "none" }}
+                            />
+
+                            {!upiScreenshot ? (
+                              <label
+                                htmlFor="upi-screenshot-input"
+                                className="file-drop-zone"
+                              >
+                                <Upload size={22} className="upload-icon" />
+                                <span className="drop-title">
+                                  Click to upload payment screenshot
+                                </span>
+                                <span className="drop-sub">
+                                  PNG, JPG, JPEG up to 10MB
+                                </span>
+                              </label>
+                            ) : (
+                              <div className="screenshot-preview-card">
+                                <img
+                                  src={upiScreenshot}
+                                  alt="Payment Screenshot Preview"
+                                  className="preview-thumb"
+                                />
+                                <div className="preview-info">
+                                  <span className="file-name">
+                                    {upiScreenshotName || "screenshot.jpg"}
+                                  </span>
+                                  <span className="upload-status">
+                                    ✓ Screenshot attached
+                                  </span>
+                                </div>
+                                <label
+                                  htmlFor="upi-screenshot-input"
+                                  className="change-file-btn"
+                                >
+                                  Change
+                                </label>
+                              </div>
+                            )}
+
+                            <div className="utr-field-wrapper">
+                              <label htmlFor="utr-input">
+                                12-Digit UTR / Ref Number (Optional):
+                              </label>
+                              <input
+                                id="utr-input"
+                                type="text"
+                                placeholder="e.g. 408512930412"
+                                value={utrNumber}
+                                onChange={(e) => setUtrNumber(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {/* COD */}
+                  {/* COD Option */}
                   <label
                     className={`payment-option-card ${paymentMethod === "cod" ? "selected" : ""}`}
                     onClick={() => setPaymentMethod("cod")}
@@ -395,31 +632,22 @@ export default function CheckoutPage() {
                       onChange={() => setPaymentMethod("cod")}
                     />
                     <div className="option-details">
-                      <span className="option-title">Cash on Delivery (COD)</span>
-                      <span className="option-sub">Pay cash when fresh pickle jar reaches your doorstep</span>
-                    </div>
-                  </label>
-
-                  {/* Card */}
-                  <label
-                    className={`payment-option-card ${paymentMethod === "card" ? "selected" : ""}`}
-                    onClick={() => setPaymentMethod("card")}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === "card"}
-                      onChange={() => setPaymentMethod("card")}
-                    />
-                    <div className="option-details">
-                      <span className="option-title">Credit / Debit Card / Net Banking</span>
-                      <span className="option-sub">All major Visa, Mastercard & RuPay cards supported</span>
+                      <span className="option-title">
+                        Cash on Delivery (COD)
+                      </span>
+                      <span className="option-sub">
+                        Pay cash when fresh pickle jar reaches your doorstep
+                      </span>
                     </div>
                   </label>
                 </div>
 
                 <div className="step-actions-row">
-                  <button type="button" className="prev-step-btn" onClick={() => setStep(2)}>
+                  <button
+                    type="button"
+                    className="prev-step-btn"
+                    onClick={() => setStep(2)}
+                  >
                     <ArrowLeft size={16} />
                     <span>Back</span>
                   </button>
@@ -431,7 +659,11 @@ export default function CheckoutPage() {
                     disabled={isSubmitting}
                   >
                     <Lock size={16} />
-                    <span>{isSubmitting ? "Placing Order..." : `Complete Order • ${formatCurrency(grandTotal)}`}</span>
+                    <span>
+                      {isSubmitting
+                        ? "Placing Order..."
+                        : `Complete Order • ${formatCurrency(grandTotal)}`}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -446,12 +678,18 @@ export default function CheckoutPage() {
               <div className="summary-items-list">
                 {items.map((item) => (
                   <div key={item.id} className="summary-item-row">
-                    <img src={item.image} alt={item.name} className="summary-item-thumb" />
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="summary-item-thumb"
+                    />
                     <div className="summary-item-info">
                       <span className="item-name">{item.name}</span>
                       <span className="item-qty">Qty: {item.quantity}</span>
                     </div>
-                    <span className="item-price">{formatCurrency(item.price * item.quantity)}</span>
+                    <span className="item-price">
+                      {formatCurrency(item.price * item.quantity)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -470,7 +708,11 @@ export default function CheckoutPage() {
                     Apply
                   </button>
                 </div>
-                {couponApplied && <span className="coupon-success">✓ 10% Artisanal discount applied!</span>}
+                {couponApplied && (
+                  <span className="coupon-success">
+                    ✓ 10% Artisanal discount applied!
+                  </span>
+                )}
               </form>
 
               {/* Price Calculation Breakdown */}
@@ -489,7 +731,9 @@ export default function CheckoutPage() {
 
                 <div className="breakdown-row">
                   <span>Shipping</span>
-                  <span>{shippingCost === 0 ? "FREE" : formatCurrency(shippingCost)}</span>
+                  <span>
+                    {shippingCost === 0 ? "FREE" : formatCurrency(shippingCost)}
+                  </span>
                 </div>
 
                 <div className="breakdown-divider" />
@@ -502,7 +746,9 @@ export default function CheckoutPage() {
 
               <div className="trust-foot-note">
                 <ShieldCheck size={18} />
-                <span>100% Secure SSL Checkout • Fresh Small-Batch Guarantee</span>
+                <span>
+                  100% Secure SSL Checkout • Fresh Small-Batch Guarantee
+                </span>
               </div>
             </div>
           </aside>

@@ -92,7 +92,44 @@ const Api = {
       return DEFAULT_MENU_ITEMS;
     }
   },
+  placeOrder: async (
+    token: string,
+    email: string,
+    orderItems: any[],
+    shippingAddress: string,
+    paymentMethod: string,
+    utrNumber: string,
+    totalPrice: number,
+    screenshot: File | null,
+  ) => {
+    const formData = new FormData();
+    if (token) formData.append("token", token);
+    if (email) formData.append("email", email);
+    formData.append("orderItems", JSON.stringify(orderItems));
+    formData.append("shippingAddress", shippingAddress);
+    formData.append("paymentMethod", paymentMethod);
+    formData.append("utrNumber", utrNumber);
+    formData.append("totalPrice", totalPrice.toString());
+    if (screenshot) {
+      formData.append("paymentScreenshot", screenshot);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/place-order`, {
+      method: "POST",
+      body: formData,
+    });
+    return response.json();
+  },
+  orders: async (token: string, email: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/orders`, {
+      method: "POST",
+      body: JSON.stringify({ token, email }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.json();
+  },
 };
 
 export default Api;
-

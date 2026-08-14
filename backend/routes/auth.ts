@@ -1,14 +1,15 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
+import jwt from "jsonwebtoken";
 import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
 
+const JWT_SECRET = process.env.JWT_SECRET as string;
+
 const authRouter: express.Router = express.Router();
 
 const buildUserResponse = (user: any) => ({
-  id: user._id,
   name: `${user.firstName} ${user.lastName}`.trim(),
   email: user.email,
   verified: user.verified,
@@ -36,7 +37,9 @@ authRouter.post("/register", async (req: Request, res: Response) => {
     const [firstName, ...rest] = fullName.trim().split(" ");
     const lastName = rest.join(" ");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
     const verificationExpires = new Date(Date.now() + 15 * 60 * 1000);
 
     const user = new User({
@@ -72,13 +75,15 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       await Otp.deleteMany({ email: user.email });
       return res.status(500).json({
         status: "error",
-        message: "Unable to send verification email. Please check your email address and try again.",
+        message:
+          "Unable to send verification email. Please check your email address and try again.",
       });
     }
 
     return res.status(201).json({
       status: "success",
-      message: "User registered successfully. Check your email for the verification code.",
+      message:
+        "User registered successfully. Check your email for the verification code.",
       email: user.email,
     });
   } catch (error) {
@@ -116,7 +121,10 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
       });
     }
 
-    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
+    const otp = await Otp.findOne({
+      email: user.email,
+      code: verificationCode,
+    });
     if (!otp) {
       return res.status(400).json({
         status: "error",
@@ -197,17 +205,46 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       });
     }
 
-    const token = randomUUID();
-    const updatedUser = await User.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      { $set: { token } },
-      { returnDocument: 'after' },
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+      },
+      JWT_SECRET,
+      { expiresIn: "15m" },
     );
+    await User.updateOne({ email: email.toLowerCase() }, { $set: { token } });
+
+    // Send Security Login Alert Email
+    try {
+      const userAgent = req.headers["user-agent"] || "Web Browser";
+      const deviceType = userAgent.includes("Mobile")
+        ? "Mobile Device"
+        : "Desktop Browser";
+      const loginTime = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      });
+      await sendMail(
+        user.email,
+        "Security Alert: New Sign-In",
+        `We noticed a new login to your Omri's Home Kitchen account at ${loginTime}.`,
+        undefined,
+        "login_alert",
+        {
+          device: deviceType,
+          location: "India",
+          time: loginTime,
+          name: `${user.firstName} ${user.lastName}`.trim(),
+        },
+      );
+    } catch (e) {
+      console.error("Failed to send login alert email:", e);
+    }
 
     return res.status(200).json({
       status: "success",
       token,
-      updatedUser,
       user: buildUserResponse(user),
     });
   } catch (error) {
@@ -218,7 +255,6 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     });
   }
 });
-
 
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body || {};
@@ -296,7 +332,10 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
       });
     }
 
-    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
+    const otp = await Otp.findOne({
+      email: user.email,
+      code: verificationCode,
+    });
     if (!otp) {
       return res.status(400).json({
         status: "error",
@@ -344,5 +383,3 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
 });
 
 export default authRouter;
-
-

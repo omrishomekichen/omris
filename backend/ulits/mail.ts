@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { renderTemplate } from "./templates";
 
 dotenv.config();
 
@@ -24,14 +25,40 @@ export const sendMail = async (
   templateData?: any,
 ) => {
   console.log(`[Mail API] Sending email to ${to} via ${MAIL_API_URL}...`);
+
   try {
-    const payload: MailPayload = { to, subject, text };
+    const payload: MailPayload = {
+      to,
+      subject,
+      text,
+    };
+
+    /*
+     * If HTML is directly provided, use it.
+     */
     if (html) {
       payload.html = html;
     }
+
+    /*
+     * If a template is provided, render it here.
+     * The rendered HTML is then sent to the mail server.
+     */
     if (templateName) {
       payload.templateName = templateName;
       payload.templateData = templateData;
+
+      try {
+        const renderedHtml = renderTemplate(templateName, templateData || {});
+
+        if (renderedHtml) {
+          payload.html = renderedHtml;
+        }
+      } catch (renderError) {
+        console.error("[Mail API] Template rendering failed:", renderError);
+
+        throw new Error(`Failed to render email template: ${templateName}`);
+      }
     }
 
     const response = await fetch(MAIL_API_URL, {
@@ -42,24 +69,53 @@ export const sendMail = async (
       body: JSON.stringify(payload),
     });
 
-    const data: any = await response.json();
+    /*
+     * Safely read the response.
+     */
+    const responseText = await response.text();
 
-    if (!response.ok || (data && data.success === false)) {
-      console.error("[Mail API] Failure response from mail service:", data);
+    let data: any;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      console.error(
+        "[Mail API] Invalid response from mail server:",
+        responseText,
+      );
+
       throw new Error(
-        data?.error || data?.message || `Mail service error (${response.status})`,
+        `Mail service returned an invalid response (${response.status})`,
+      );
+    }
+
+    /*
+     * Handle API errors.
+     */
+    if (!response.ok || data?.success === false) {
+      console.error("[Mail API] Failure response from mail service:", data);
+
+      throw new Error(
+        data?.error ||
+          data?.message ||
+          `Mail service error (${response.status})`,
       );
     }
 
     console.log("[Mail API] Email sent successfully:", data);
+
     return data;
   } catch (error) {
     console.error("[Mail API] Error calling mail server API:", error);
+
     throw error;
   }
 };
 
 class MailService {
+  /*
+   * Generic mail sender
+   */
   async send(payload: MailPayload) {
     return sendMail(
       payload.to,
@@ -71,6 +127,9 @@ class MailService {
     );
   }
 
+  /*
+   * OTP email
+   */
   async sendOTPEmail(
     email: string,
     otp: string,
@@ -82,10 +141,15 @@ class MailService {
       `Your OTP is ${otp}. It expires in 15 minutes.`,
       undefined,
       "otp",
-      { otp },
+      {
+        otp,
+      },
     );
   }
 
+  /*
+   * Welcome email
+   */
   async sendWelcomeEmail(email: string, name: string) {
     return sendMail(
       email,
@@ -93,10 +157,15 @@ class MailService {
       `Welcome to Omri's Home Kitchen, ${name}!`,
       undefined,
       "welcome",
-      { name },
+      {
+        name,
+      },
     );
   }
 
+  /*
+   * Forgot password email
+   */
   async sendForgotPasswordEmail(email: string, resetLink: string) {
     return sendMail(
       email,
@@ -104,10 +173,15 @@ class MailService {
       `Reset your password using this link: ${resetLink}`,
       undefined,
       "forgot_password",
-      { resetLink },
+      {
+        resetLink,
+      },
     );
   }
 
+  /*
+   * Password reset success email
+   */
   async sendPasswordResetSuccessEmail(email: string) {
     return sendMail(
       email,
@@ -119,11 +193,17 @@ class MailService {
     );
   }
 
+  /*
+   * Customer order confirmation
+   */
   async sendOrderConfirmationEmail(
     email: string,
     orderId: string,
     customerName: string,
     totalAmount: number,
+    items?: any[],
+    shippingAddress?: string,
+    paymentMethod?: string,
   ) {
     return sendMail(
       email,
@@ -131,10 +211,66 @@ class MailService {
       `Thank you for your order #${orderId} of ₹${totalAmount}.`,
       undefined,
       "order_confirmation",
-      { orderId, customerName, totalAmount },
+      {
+        orderId,
+        customerName,
+        totalAmount,
+        grandTotal: totalAmount,
+        items,
+        shippingAddress,
+        paymentMethod,
+      },
     );
   }
 
+  /*
+   * Admin order notification
+   */
+  async sendAdminOrderNotificationEmail(
+    adminEmail: string,
+    orderId: string,
+    customerName: string,
+    customerEmail: string,
+    totalPrice: number,
+    paymentMethod: string,
+    utrNumber: string,
+    shippingAddress: string,
+    orderItems: any[],
+    status?: string,
+    createdAt?: string,
+    hasScreenshot?: boolean,
+    customerPhone?: string,
+    screenshotBase64?: string,
+  ) {
+    return sendMail(
+      adminEmail,
+      `🚨 New Order Placed #${orderId}`,
+      `New order #${orderId} of ₹${totalPrice} received from ${
+        customerName || customerEmail
+      }.`,
+      undefined,
+      "admin_order_alert",
+      {
+        orderId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        totalPrice,
+        paymentMethod,
+        utrNumber,
+        shippingAddress,
+        orderItems,
+        status,
+        createdAt,
+        hasScreenshot,
+        screenshotBase64,
+      },
+    );
+  }
+
+  /*
+   * Login alert
+   */
   async sendLoginAlertEmail(
     email: string,
     device: string,
@@ -147,10 +283,17 @@ class MailService {
       `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
       undefined,
       "login_alert",
-      { device, location, time },
+      {
+        device,
+        location,
+        time,
+      },
     );
   }
 
+  /*
+   * Password change alert
+   */
   async sendPasswordChangeAlertEmail(email: string, time: string) {
     return sendMail(
       email,
@@ -158,10 +301,13 @@ class MailService {
       `Your password was changed at ${time}.`,
       undefined,
       "password_change_alert",
-      { time },
+      {
+        time,
+      },
     );
   }
 }
 
 export { MailService, MailService as MailSender };
+
 export default MailService;

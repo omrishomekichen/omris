@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import authRouter from "./routes/auth";
 import { MailSender } from "./ulits/mail";
 import menuRouter from "./routes/menu";
+import orderRouter from "./routes/order";
 dotenv.config();
 
 const app: express.Express = express();
@@ -54,6 +55,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api", authRouter);
 app.use("/api", menuRouter);
+app.use("/api", orderRouter);
 
 async function connectDatabase(): Promise<void> {
   let uri: string | undefined = process.env.MONGODB_URI;
