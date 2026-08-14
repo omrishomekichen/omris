@@ -746,6 +746,8 @@
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
 }
 
 .products-wrapper::-webkit-scrollbar {
@@ -768,13 +770,16 @@
   flex-wrap: nowrap;
   gap: 1.5rem;
   width: max-content;
+  margin: 0 auto;
+  justify-content: center;
 }
 
 .products-grid .simple-product-card {
-  width: 340px;
-  flex: 0 0 340px;
+  width: 400px;
+  flex: 0 0 400px;
   flex-shrink: 0;
   scroll-snap-align: start;
+  height: 400px;
 }
 
 /* Popular Picks section styles */
