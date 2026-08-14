@@ -79,7 +79,16 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
           <footer className="cart-drawer-footer">
             <div className="cart-subtotal"><span>Subtotal</span><strong>{formatCurrency(subtotal)}</strong></div>
             <p className="cart-shipping-note"><Truck size={16} /> Shipping and taxes calculated at checkout.</p>
-            <button type="button" className="cart-checkout-button">PROCEED TO CHECKOUT <ArrowRight size={19} /></button>
+            <button
+              type="button"
+              className="cart-checkout-button"
+              onClick={() => {
+                onClose();
+                window.location.href = "/checkout";
+              }}
+            >
+              PROCEED TO CHECKOUT <ArrowRight size={19} />
+            </button>
             <button type="button" className="cart-continue-button" onClick={onClose}>Continue Shopping</button>
           </footer>
         )}
