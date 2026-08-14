@@ -1,74 +1,242 @@
+import nodemailer, { Transporter } from "nodemailer";
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
-import nodemailer from "nodemailer";
 
 dotenv.config();
 
-const mailrouter: express.Router = express.Router();
+const config = {
+  env: process.env.NODE_ENV || "development",
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  mail: {
+    host: process.env.MAIL_HOST || process.env.GMAIL_HOST || "smtp.gmail.com",
+    port: Number(process.env.MAIL_PORT || process.env.GMAIL_PORT || 465),
+    secure: process.env.MAIL_SECURE === "false" ? false : true,
+    hostUser: process.env.MAIL_HOST_USER || process.env.GMAIL_USER || "",
+    hostPass:
+      process.env.MAIL_HOST_PASS || process.env.GMAIL_APP_PASSWORD || "",
+  },
+};
 
-mailrouter.use(express.json());
+import {
+  otpTemplate,
+  welcomeTemplate,
+  formCreation,
+  forgotPasswordTemplate,
+  passwordResetSuccessTemplate,
+  loginAlertTemplate,
+  passwordChangeAlertTemplate,
+  formSubmissionConfirmed,
+} from "./templates";
+import { Resend } from "resend";
 
-
-
-
-
-if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-  console.warn(
-    "GMAIL_USER and GMAIL_APP_PASSWORD are not set. Mail sending will fail until they are provided in backend/.env.",
-  );
+interface MailPayload {
+  to: string;
+  subject: string;
+  text?: string;
+  html: string;
 }
 
+type Mode = "resend" | "nodemailer";
 
+class MailService {
+  private transporter: Transporter | Resend;
+  private mode: Mode = config.env === "production" ? "resend" : "nodemailer";
+  private number: number = 0;
 
+  constructor() {
+    if (config.env === "production") {
+      if (!config.RESEND_API_KEY) {
+        throw new Error(
+          "[mailService] Resend API key is missing! Check your Render environment configurations.",
+        );
+      }
+      this.transporter = new Resend(config.RESEND_API_KEY);
+    } else {
+      if (!config.mail.host || !config.mail.hostUser) {
+        throw new Error(
+          "[mailService] Mail config is missing! Check your local .env file loading.",
+        );
+      }
+      this.transporter = nodemailer.createTransport({
+        host: config.mail.host,
+        port: Number(config.mail.port),
+        secure: config.mail.secure,
+        auth: {
+          user: config.mail.hostUser,
+          pass: config.mail.hostPass,
+        },
+      });
+    }
+  }
 
+  private async mailMode(
+    mode: Mode,
+    props: {
+      to: string;
+      from: string;
+      subject: string;
+      text?: string;
+      html: string;
+    },
+  ) {
+    if (mode === "resend") {
+      try {
+        const response = await (this.transporter as Resend).emails.send({
+          from: "Paperwork <onboarding@resend.dev>",
+          to: props.to,
+          subject: props.subject,
+          text: props.text,
+          html: props.html,
+        });
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: false,
+        if (response.error) {
+          console.error(
+            "[Email service -- Resend Error]:",
+            JSON.stringify(response.error, null, 2),
+          );
+          throw new Error(`Resend payload rejected: ${response.error.message}`);
+        }
 
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+        this.number++;
+        console.log(
+          `[Email service -- Resend]:[${new Date().toISOString()}] Email sent count (${this.number}) | Message ID: ${response.data?.id}`,
+        );
+        return response.data;
+      } catch (error) {
+        console.error("Error sending email via Resend:", error);
+        throw error;
+      }
+    }
 
+    if (mode === "nodemailer") {
+      try {
+        const info = await (this.transporter as Transporter).sendMail({
+          from: props.from,
+          to: props.to,
+          subject: props.subject,
+          text: props.text,
+          html: props.html,
+        });
+        this.number++;
+        console.log(
+          `[Email service -- Nodemailer]:[${new Date().toISOString()}] Email sent via Nodemailer (${this.number})`,
+        );
+        return info;
+      } catch (error) {
+        console.error("Error sending email via Nodemailer:", error);
+        throw error;
+      }
+    }
+  }
 
+  private async send({ to, subject, text, html }: MailPayload) {
+    const sender =
+      config.env === "production"
+        ? "Paperwork <onboarding@resend.dev>"
+        : `"Paperwork" <${config.mail.hostUser}>`;
 
-
-
-export const sendMail = async (to: string, subject: string, text: string) => {
-  try {
-    const info = await transporter.sendMail({
-      from: `"Omri's Home Kitchen" <${process.env.GMAIL_USER}>`,
+    return this.mailMode(this.mode, {
+      from: sender,
       to,
       subject,
       text,
-
-      html: `
-        <!DOCTYPE html>
-
-        <html>
-          <body>
-            <h2>${subject}</h2>
-
-            <p>${text}</p>
-          </body>
-        </html>
-      `,
+      html,
     });
-
-    console.log("📧 Mail sent:", info.messageId);
-
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error("❌ Mail error:", error);
-
-    throw error;
   }
+
+  async sendOTPEmail(
+    email: string,
+    otp: string,
+    subject: string = "Your verification code",
+  ) {
+    return this.send({
+      to: email,
+      subject: subject,
+      text: `Your OTP is ${otp}`,
+      html: otpTemplate(otp),
+    });
+  }
+
+  async sendWelcomeEmail(email: string, name: string) {
+    return this.send({
+      to: email,
+      subject: "Welcome to Paperwork",
+      text: `Welcome to Paperwork ${name}`,
+      html: welcomeTemplate(name),
+    });
+  }
+
+  async sendFormCreatedEmail(email: string, formName: string, formId: string) {
+    return this.send({
+      to: email,
+      subject: "Your form is live",
+      text: `${formName} has been created`,
+      html: formCreation(formName, formId),
+    });
+  }
+
+  async sendForgotPasswordEmail(email: string, resetLink: string) {
+    return this.send({
+      to: email,
+      subject: "Reset your password",
+      text: `Reset your password using this link: ${resetLink}`,
+      html: forgotPasswordTemplate(resetLink),
+    });
+  }
+
+  async sendPasswordResetSuccessEmail(email: string) {
+    return this.send({
+      to: email,
+      subject: "Password updated",
+      text: "Your password has been updated successfully",
+      html: passwordResetSuccessTemplate(),
+    });
+  }
+
+  async sendLoginAlertEmail(
+    email: string,
+    device: string,
+    location: string,
+    time: string,
+  ) {
+    return this.send({
+      to: email,
+      subject: "New login detected",
+      text: `We noticed a new login to your account from ${device} in ${location} at ${time}.`,
+      html: loginAlertTemplate(device, location, time),
+    });
+  }
+
+  async sendPasswordChangeAlertEmail(email: string, time: string) {
+    return this.send({
+      to: email,
+      subject: "Password Change Alert",
+      text: `Your password was changed at ${time}.`,
+      html: passwordChangeAlertTemplate(time),
+    });
+  }
+
+  async sendFormSubmissionConfirmedEmail(
+    email: string,
+    formName: string,
+    submissionId: string,
+  ) {
+    return this.send({
+      to: email,
+      subject: "Form Submission Confirmed",
+      text: `Your submission for ${formName} has been received. Submission ID: ${submissionId}`,
+      html: formSubmissionConfirmed(formName, submissionId),
+    });
+  }
+}
+
+export { MailService, MailService as MailSender };
+
+const mailServiceInstance = new MailService();
+
+export const sendMail = async (to: string, subject: string, text: string) => {
+  const otpMatch = text.match(/\b\d{6}\b/);
+  const otp = otpMatch ? otpMatch[0] : text;
+  return mailServiceInstance.sendOTPEmail(to, otp, subject);
 };
 
-export default mailrouter;
+export default MailService;

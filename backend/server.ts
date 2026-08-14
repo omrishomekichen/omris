@@ -3,7 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import authRouter from "./routes/auth";
-
+import {MailSender} from "./ulits/mail"
 dotenv.config();
 
 const app: express.Express = express();
@@ -93,6 +93,7 @@ app.get("/api/health", (req: Request, res: Response) => {
   });
 });
 
+export const mailService = new MailSender()
 
 // Render supplies the port through PORT. Keep 3000 solely for local runs.
 const PORT = Number(process.env.PORT ?? 5000);
