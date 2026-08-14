@@ -148,7 +148,6 @@
   padding-bottom: 0.75rem;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
 }
 
 .menu-products-row-wrapper::-webkit-scrollbar {
@@ -310,6 +309,7 @@
   padding: 0.25rem 0.55rem;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   color: #775800;
   font-size: 0.75rem;

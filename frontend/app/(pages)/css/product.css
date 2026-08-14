@@ -1,0 +1,512 @@
+/* Product Detail Page Styling - Omri's Home Kitchen */
+
+.product-detail-root {
+  background-color: #fff8f3;
+  color: #1e1b17;
+  min-height: 100vh;
+  font-family: var(--font-sans, "Work Sans", system-ui, sans-serif);
+  padding-bottom: 5rem;
+}
+
+.product-detail-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.product-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: #59413c;
+  font-size: 1.1rem;
+}
+
+.return-link {
+  margin-top: 1rem;
+  color: #650700;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Breadcrumb */
+.product-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #8d706b;
+  margin-bottom: 2rem;
+}
+
+.breadcrumb-link {
+  color: #59413c;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #650700;
+}
+
+.breadcrumb-icon {
+  color: #e1bfb8;
+}
+
+.breadcrumb-category {
+  color: #59413c;
+}
+
+.breadcrumb-current {
+  color: #1e1b17;
+  font-weight: 700;
+}
+
+/* Hero Grid */
+.product-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+  align-items: start;
+  margin-bottom: 4rem;
+}
+
+.product-gallery-box {
+  position: relative;
+  width: 100%;
+}
+
+.gallery-main-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3.5;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(225, 191, 184, 0.6);
+  box-shadow: 0 12px 32px rgba(45, 42, 38, 0.08);
+}
+
+.gallery-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.gallery-main-frame:hover .gallery-main-img {
+  transform: scale(1.04);
+}
+
+.gallery-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(30, 27, 23, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Product Info Column */
+.product-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-pill-tag {
+  display: inline-block;
+  background: #fed16e;
+  color: #775800;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+}
+
+.product-main-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+
+.product-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.star-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.review-count {
+  font-size: 0.85rem;
+  color: #59413c;
+}
+
+.product-hero-desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #59413c;
+  margin: 0;
+}
+
+/* Size Selector Card */
+.product-size-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(45, 42, 38, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.size-selector-heading {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #8d706b;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.size-options-grid {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.product-size-radio {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1.5px solid #e1bfb8;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.product-size-radio:hover {
+  border-color: #650700;
+  background: #fff8f3;
+}
+
+.product-size-radio.selected {
+  border-color: #650700;
+  background: #650700;
+  color: #ffffff;
+}
+
+.radio-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.product-size-radio.selected .radio-label,
+.product-size-radio.selected .radio-price {
+  color: #ffffff;
+}
+
+.radio-price {
+  font-size: 0.82rem;
+  color: #8d706b;
+  font-weight: 600;
+}
+
+/* Quantity & Add to Cart */
+.quantity-add-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quantity-counter {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e1bfb8;
+  border-radius: 10px;
+  background: #fff8f3;
+  padding: 0.25rem;
+}
+
+.quantity-counter button {
+  background: none;
+  border: none;
+  color: #650700;
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counter-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0 0.6rem;
+  color: #1e1b17;
+}
+
+.add-to-cart-primary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #650700;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(101, 7, 0, 0.2);
+}
+
+.add-to-cart-primary:hover {
+  background: #8c1404;
+  transform: translateY(-1px);
+}
+
+/* Key Badges Grid */
+.key-badges-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.badge-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(225, 191, 184, 0.5);
+}
+
+.badge-icon {
+  color: #785a00;
+}
+
+.badge-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e1b17;
+}
+
+.badge-sub {
+  font-size: 0.78rem;
+  color: #59413c;
+}
+
+/* Artisanal Process Story Section */
+.artisanal-story-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 3rem;
+  margin-bottom: 4rem;
+  box-shadow: 0 8px 28px rgba(45, 42, 38, 0.04);
+}
+
+.story-section-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin-bottom: 1rem;
+}
+
+.story-paragraph {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #59413c;
+  margin-bottom: 1.25rem;
+}
+
+.ingredients-heading {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 1.75rem 0 1rem;
+}
+
+.ingredients-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #59413c;
+}
+
+.leaf-icon {
+  color: #785a00;
+}
+
+.story-image-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.story-frame-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Related Products */
+.related-products-section {
+  margin-top: 2rem;
+}
+
+.related-section-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e1b17;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.related-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.related-product-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(225, 191, 184, 0.6);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(45, 42, 38, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.related-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(101, 7, 0, 0.1);
+}
+
+.related-img-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.related-img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.related-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.related-name {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.related-desc {
+  font-size: 0.85rem;
+  color: #59413c;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.related-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.related-price {
+  font-weight: 700;
+  color: #650700;
+  font-size: 0.95rem;
+}
+
+.related-add-btn {
+  background: #fff8f3;
+  color: #650700;
+  border: 1px solid #e1bfb8;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.related-add-btn:hover {
+  background: #650700;
+  color: #ffffff;
+  border-color: #650700;
+}
+
+@media (max-width: 900px) {
+  .product-hero-grid,
+  .artisanal-story-section {
+    grid-template-columns: 1fr;
+  }
+  .related-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

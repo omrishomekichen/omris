@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import "../css/dashboard.css";
 import {
   Sparkles,
@@ -23,6 +25,7 @@ import Api from "../../__apis/api";
 import { useCart } from "../../components/CartContext";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>({});
   const [expandedInfoMap, setExpandedInfoMap] = useState<Record<string, boolean>>({});
@@ -342,10 +345,20 @@ export default function DashboardPage() {
                   const qty = getQuantity(cartItemId);
                   const isInfoOpen = expandedInfoMap[product.id] || false;
 
+                  const handleCardClick = (e: React.MouseEvent) => {
+                    const target = e.target as HTMLElement;
+                    if (target.closest("button") || target.closest("input") || target.closest("a")) {
+                      return;
+                    }
+                    router.push(`/product/${product.id}`);
+                  };
+
                   return (
                     <div
                       key={product.id}
                       className="simple-product-card is-visible"
+                      onClick={handleCardClick}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="product-img-frame">
                         <img src={product.image} alt={product.name} />

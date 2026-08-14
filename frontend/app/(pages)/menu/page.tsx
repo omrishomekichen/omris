@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import "../css/menu.css";
 import {
   Heart,
@@ -22,6 +24,7 @@ import Api from "../../__apis/api";
 import { useCart } from "../../components/CartContext";
 
 export default function MenuPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [favoritesMap, setFavoritesMap] = useState<Record<string, boolean>>({});
@@ -201,8 +204,21 @@ export default function MenuPage() {
     )
       badgeClass = "badge-featured";
 
+    const handleCardClick = (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("button") || target.closest("input") || target.closest("a")) {
+        return;
+      }
+      router.push(`/product/${product.id}`);
+    };
+
     return (
-      <div key={product.id} className="menu-product-card is-visible">
+      <div
+        key={product.id}
+        className="menu-product-card is-visible"
+        onClick={handleCardClick}
+        style={{ cursor: "pointer" }}
+      >
         <div className="menu-card-img-wrapper">
           <img src={product.image} alt={product.name} />
           <div className="menu-card-badges-row">
@@ -222,7 +238,11 @@ export default function MenuPage() {
           <div className="menu-card-header">
             <div>
               <span className="menu-card-spice-tag">{product.spiceLevel}</span>
-              <h3 className="menu-card-title">{product.name}</h3>
+              <h3 className="menu-card-title">
+                <Link href={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {product.name}
+                </Link>
+              </h3>
             </div>
             <button
               type="button"
