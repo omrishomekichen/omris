@@ -385,61 +385,30 @@
   }
 }
 
-/* Entry Animations for Menu Page */
-@keyframes menuFadeDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes menuFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(28px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes menuFadeScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.menu-header-block {
-  animation: menuFadeDown 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.menu-controls-bar {
-  animation: menuFadeScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
-}
-
-.category-title-row {
-  animation: menuFadeDown 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
+/* Scroll Reveal Entrance Styles for Menu Page */
+.menu-header-block,
+.menu-controls-bar,
+.category-title-row,
 .menu-product-card {
-  animation: menuFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 0;
+  transform: translateY(28px);
+  will-change: opacity, transform;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-header-block.is-visible,
+.menu-controls-bar.is-visible,
+.category-title-row.is-visible,
+.menu-product-card.is-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 /* Staggered card entrance delays */
-.menu-products-grid .menu-product-card:nth-child(1) { animation-delay: 0.1s; }
-.menu-products-grid .menu-product-card:nth-child(2) { animation-delay: 0.2s; }
-.menu-products-grid .menu-product-card:nth-child(3) { animation-delay: 0.3s; }
-.menu-products-grid .menu-product-card:nth-child(4) { animation-delay: 0.4s; }
-.menu-products-grid .menu-product-card:nth-child(5) { animation-delay: 0.5s; }
-.menu-products-grid .menu-product-card:nth-child(6) { animation-delay: 0.6s; }
+.menu-products-grid .menu-product-card:nth-child(1) { transition-delay: 60ms; }
+.menu-products-grid .menu-product-card:nth-child(2) { transition-delay: 140ms; }
+.menu-products-grid .menu-product-card:nth-child(3) { transition-delay: 220ms; }
+.menu-products-grid .menu-product-card:nth-child(4) { transition-delay: 300ms; }
+.menu-products-grid .menu-product-card:nth-child(5) { transition-delay: 380ms; }
+.menu-products-grid .menu-product-card:nth-child(6) { transition-delay: 460ms; }
 
