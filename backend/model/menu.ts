@@ -174,5 +174,7 @@ const menuSchema = new mongoose.Schema(
 
 
 
-export default mongoose.models.Menu ||
-  mongoose.model("Menu", menuSchema);
+export const Menu =
+  mongoose.models.Menu || mongoose.model("Menu", menuSchema);
+
+export default Menu;

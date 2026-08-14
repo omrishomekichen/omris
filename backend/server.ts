@@ -3,7 +3,8 @@ import express, { NextFunction, Request, Response } from "express";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import authRouter from "./routes/auth";
-import {MailSender} from "./ulits/mail"
+import { MailSender } from "./ulits/mail";
+import menuRouter from "./routes/menu";
 dotenv.config();
 
 const app: express.Express = express();
@@ -52,6 +53,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", authRouter);
+app.use("/api", menuRouter);
 
 async function connectDatabase(): Promise<void> {
   let uri: string | undefined = process.env.MONGODB_URI;
@@ -86,19 +88,15 @@ connectDatabase().catch((err: unknown) => {
   process.exit(1);
 });
 
-
-
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "ok",
   });
 });
 
-export const mailService = new MailSender()
+export const mailService = new MailSender();
 
-// Render supplies the port through PORT. Keep 3000 solely for local runs.
 const PORT = Number(process.env.PORT ?? 5000);
-
 
 const HOST = "0.0.0.0";
 

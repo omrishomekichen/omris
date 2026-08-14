@@ -38,11 +38,14 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/verify-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), verificationCode: verificationCode.trim() }),
+      body: JSON.stringify({
+        email: email.trim(),
+        verificationCode: verificationCode.trim(),
+      }),
     });
     return response.json();
   },
-    forgotPassword: async (email: string) => {
+  forgotPassword: async (email: string) => {
     const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -50,15 +53,22 @@ const Api = {
     });
     return response.json();
   },
-  resetPassword: async (email: string, verificationCode: string, newPassword: string) => {
+  resetPassword: async (
+    email: string,
+    verificationCode: string,
+    newPassword: string,
+  ) => {
     const response = await fetch(`${API_BASE_URL}/api/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, verificationCode, newPassword }),
     });
     return response.json();
-  }
-
+  },
+  menu: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/menu`);
+    return response.json();
+  },
 };
 
 export default Api;
