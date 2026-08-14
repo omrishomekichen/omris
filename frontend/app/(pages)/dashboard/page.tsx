@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/dashboard.css";
 import {
   Sparkles,
@@ -11,39 +11,16 @@ import {
   Minus,
   ArrowRight,
   PhoneCall,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Api from "../../__apis/api";
 
-const DEFAULT_PRODUCTS = [
-  {
-    id: "mango-avakaya",
-    name: "Classic Avakaya Mango Pickle",
-    category: "veg",
-    price: "₹350",
-    description:
-      "Crisp green raw mangoes prepared with hand-ground spices and traditional sesame oil.",
-    image: "/images/mango_pickle.png",
-    tag: "⭐ Featured Veg",
-    spiceLevel: "🌶️🌶️ Medium-Spicy",
-    isFeatured: true,
-  },
-  {
-    id: "chicken-pickle",
-    name: "Spicy Country Chicken Pickle",
-    category: "nonVeg",
-    price: "₹499",
-    description:
-      "Tender boneless chicken slow-cooked with curry leaves and authentic roasted spices.",
-    image: "/images/chicken_pickle.png",
-    tag: "⭐ Featured Non-Veg",
-    spiceLevel: "🌶️🌶️🌶️ Spicy",
-    isFeatured: true,
-  },
-];
-
 export default function DashboardPage() {
   const [cartCountMap, setCartCountMap] = useState<Record<string, number>>({});
-  const [products, setProducts] = useState<any[]>(DEFAULT_PRODUCTS);
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -55,49 +32,44 @@ export default function DashboardPage() {
           ? response.data
           : [];
 
-        // Strictly show ONLY menu items where isFeatured is true
-        const featuredList = list.filter(
-          (item: any) => item.isFeatured === true,
-        );
+        // Format ALL menu items from database into single scrolling row
+        const formatted = list.map((item: any) => {
+          const cat = item.category || "veg";
+          let defaultImg = "/images/mango_pickle.png";
+          let tagLabel = item.isFeatured ? "★ FEATURED" : "HOMEMADE";
 
-        if (featuredList.length > 0) {
-          const formatted = featuredList.map((item: any) => {
-            const cat = item.category || "veg";
-            let defaultImg = "/images/mango_pickle.png";
-            let tagLabel = "⭐ Featured";
+          if (cat === "nonVeg") {
+            defaultImg = "/images/chicken_pickle.png";
+            tagLabel = item.isFeatured ? "★ FEATURED NON-VEG" : "NON-VEG";
+          } else if (cat === "veg") {
+            defaultImg = "/images/mango_pickle.png";
+            tagLabel = item.isFeatured ? "★ FEATURED VEG" : "VEG";
+          } else if (cat === "spicedPowder") {
+            defaultImg = "/images/garlic_pickle.png";
+            tagLabel = item.isFeatured ? "★ FEATURED POWDER" : "SPICED POWDER";
+          } else if (cat === "combo" || cat === "offer") {
+            defaultImg = "/images/kitchen_craft.png";
+            tagLabel = item.isFeatured ? "★ SPECIAL OFFER" : "SPECIAL COMBO";
+          }
 
-            if (cat === "nonVeg") {
-              defaultImg = "/images/chicken_pickle.png";
-              tagLabel = "⭐ Featured Non-Veg";
-            } else if (cat === "veg") {
-              defaultImg = "/images/mango_pickle.png";
-              tagLabel = "⭐ Featured Veg";
-            } else if (cat === "spicedPowder") {
-              defaultImg = "/images/garlic_pickle.png";
-              tagLabel = "⭐ Featured Powder";
-            } else if (cat === "combo" || cat === "offer") {
-              defaultImg = "/images/kitchen_craft.png";
-              tagLabel = "⭐ Special Offer";
-            }
+          return {
+            id: item._id || item.menuId || item.id,
+            menuId: item.menuId,
+            name: item.name,
+            category: cat,
+            isFeatured: Boolean(item.isFeatured),
+            price: item.priceOptions?.[0]?.price
+              ? `₹${item.priceOptions[0].price}`
+              : item.price || "₹299",
+            description: item.description,
+            image: item.image || defaultImg,
+            tag: tagLabel,
+            spiceLevel:
+              cat === "nonVeg" ? "🌶️🌶️ Spicy" : "🌶️🌶️ Medium-Spicy",
+          };
+        });
 
-            return {
-              id: item._id || item.menuId || item.id,
-              menuId: item.menuId,
-              name: item.name,
-              category: cat,
-              isFeatured: true,
-              price: item.priceOptions?.[0]?.price
-                ? `₹${item.priceOptions[0].price}`
-                : item.price || "₹299",
-              description: item.description,
-              image: item.image || defaultImg,
-              tag: tagLabel,
-              spiceLevel:
-                cat === "nonVeg" ? "🌶️🌶️🌶️ Spicy" : "🌶️🌶️ Medium-Spicy",
-            };
-          });
-          setProducts(formatted);
-        }
+        setProducts(formatted);
       } catch (error) {
         console.error("Error fetching menu items:", error);
       }
@@ -105,6 +77,13 @@ export default function DashboardPage() {
 
     fetchMenu();
   }, []);
+
+  const handleScroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === "left" ? -340 : 340;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
   const handleUpdateQuantity = (productId: string, delta: number) => {
     setCartCountMap((prev) => {
@@ -117,10 +96,19 @@ export default function DashboardPage() {
     });
   };
 
-  const productList =
-    Array.isArray(products) && products.length > 0
-      ? products
-      : DEFAULT_PRODUCTS;
+  const productList = Array.isArray(products) ? products : [];
+
+  const filteredProducts = productList.filter((product: any) => {
+    if (selectedCategory === "all") return true;
+    if (selectedCategory === "featured") return product.isFeatured === true;
+    if (selectedCategory === "nonVeg") return product.category === "nonVeg";
+    if (selectedCategory === "veg") return product.category === "veg";
+    if (selectedCategory === "spicedPowder")
+      return product.category === "spicedPowder";
+    if (selectedCategory === "combo")
+      return product.category === "combo" || product.category === "offer";
+    return true;
+  });
 
   return (
     <div className="dashboard-root">
@@ -284,69 +272,117 @@ export default function DashboardPage() {
 
       <section id="pickles" className="pickles-section">
         <div className="section-container">
-          <div className="simple-heading">
-            <h2>Featured Home-Made Delicacies</h2>
-            <p>
-              Handpicked customer favorites & special offers — freshly made and
-              delivered with care.
-            </p>
+          <div className="pickles-header-row">
+            <div>
+              <h2>Our Home-Made Pickles & Delicacies</h2>
+              <p>
+                Explore our full selection below — freshly crafted and
+                delivered directly to your doorstep.
+              </p>
+            </div>
+
+            <div className="slider-nav-btns">
+              <button
+                type="button"
+                className="scroll-btn"
+                onClick={() => handleScroll("left")}
+                aria-label="Scroll Left"
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <button
+                type="button"
+                className="scroll-btn"
+                onClick={() => handleScroll("right")}
+                aria-label="Scroll Right"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </div>
           </div>
 
-          <div className="products-grid">
-            {Array.isArray(productList) &&
-              productList.map((product: any) => {
-                const qty = cartCountMap[product.id] || 0;
-                return (
-                  <div key={product.id} className="simple-product-card">
-                    <div className="product-img-frame">
-                      <img src={product.image} alt={product.name} />
-                      <span className="product-tag">{product.tag}</span>
-                    </div>
+          <div className="category-tabs-bar">
+            {[
+              { key: "all", label: `All Items (${productList.length})` },
+              { key: "featured", label: "⭐ Featured" },
+              { key: "nonVeg", label: "🍗 Non-Veg" },
+              { key: "veg", label: "🥭 Veg Pickles" },
+              { key: "spicedPowder", label: "🧄 Spiced Powders" },
+              { key: "combo", label: "🎁 Combos & Offers" },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`tab-pill ${
+                  selectedCategory === tab.key ? "active" : ""
+                }`}
+                onClick={() => setSelectedCategory(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-                    <div className="product-details">
-                      <span className="product-spice">{product.spiceLevel}</span>
-                      <h3 className="product-title">{product.name}</h3>
-                      <p className="product-desc">{product.description}</p>
+          <div className="products-wrapper" ref={scrollRef}>
+            <div className="products-grid">
+              {Array.isArray(filteredProducts) &&
+                filteredProducts.map((product: any) => {
+                  const qty = cartCountMap[product.id] || 0;
+                  return (
+                    <div
+                      key={product.id}
+                      className="simple-product-card is-visible"
+                    >
+                      <div className="product-img-frame">
+                        <img src={product.image} alt={product.name} />
+                        <span className="product-tag">{product.tag}</span>
+                      </div>
 
-                      <div className="product-action-row">
-                        <span className="product-price">{product.price}</span>
-                        {qty === 0 ? (
-                          <button
-                            type="button"
-                            className="add-btn"
-                            onClick={() => handleUpdateQuantity(product.id, 1)}
-                          >
-                            <Plus size={16} />
-                            <span>Add to Order</span>
-                          </button>
-                        ) : (
-                          <div className="qty-control">
+                      <div className="product-details">
+                        <span className="product-spice">{product.spiceLevel}</span>
+                        <h3 className="product-title">{product.name}</h3>
+                        <p className="product-desc">{product.description}</p>
+
+                        <div className="product-action-row">
+                          <span className="product-price">{product.price}</span>
+                          {qty === 0 ? (
                             <button
                               type="button"
-                              aria-label={`Decrease ${product.name} quantity`}
-                              onClick={() =>
-                                handleUpdateQuantity(product.id, -1)
-                              }
+                              className="add-btn"
+                              onClick={() => handleUpdateQuantity(product.id, 1)}
                             >
-                              <Minus size={14} />
+                              <Plus size={16} />
+                              <span>Add to Order</span>
                             </button>
-                            <span>{qty}</span>
-                            <button
-                              type="button"
-                              aria-label={`Increase ${product.name} quantity`}
-                              onClick={() =>
-                                handleUpdateQuantity(product.id, 1)
-                              }
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="qty-control">
+                              <button
+                                type="button"
+                                aria-label={`Decrease ${product.name} quantity`}
+                                onClick={() =>
+                                  handleUpdateQuantity(product.id, -1)
+                                }
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span>{qty}</span>
+                              <button
+                                type="button"
+                                aria-label={`Increase ${product.name} quantity`}
+                                onClick={() =>
+                                  handleUpdateQuantity(product.id, 1)
+                                }
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
         </div>
       </section>
