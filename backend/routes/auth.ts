@@ -15,7 +15,7 @@ const buildUserResponse = (user: any) => ({
 });
 
 authRouter.post("/register", async (req: Request, res: Response) => {
-  const { fullName, email, password, agreeToTerms } = req.body;
+  const { fullName, email, password, agreeToTerms } = req.body || {};
 
   if (!fullName || !email || !password) {
     return res.status(400).json({
@@ -65,6 +65,12 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       );
     } catch (mailError) {
       console.error("Verification email error:", mailError);
+      await User.deleteOne({ _id: user._id });
+      await Otp.deleteMany({ email: user.email });
+      return res.status(500).json({
+        status: "error",
+        message: "Unable to send verification email. Please check your email address and try again.",
+      });
     }
 
     return res.status(201).json({
@@ -82,7 +88,7 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 });
 
 authRouter.post("/verify", async (req: Request, res: Response) => {
-  const { email, verificationCode } = req.body;
+  const { email, verificationCode } = req.body || {};
 
   if (!email || !verificationCode) {
     return res.status(400).json({
@@ -141,7 +147,7 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
 });
 
 authRouter.post("/login", async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
     return res.status(400).json({
@@ -167,78 +173,13 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       });
     }
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-    await Otp.deleteMany({ email: user.email });
-    await Otp.create({ email: user.email, code: verificationCode, expiresAt });
-
-    try {
-      await sendMail(
-        user.email,
-        "Your login verification code",
-        `Your login OTP is ${verificationCode}. It expires in 15 minutes.`,
-      );
-    } catch (mailError) {
-      console.error("Login OTP email error:", mailError);
-    }
-
-    return res.status(200).json({
-      status: "pending",
-      message: "Login verification code sent to your email.",
-      email: user.email,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
-  }
-});
-
-authRouter.post("/verify-login", async (req: Request, res: Response) => {
-  const { email, verificationCode } = req.body;
-
-  if (!email || !verificationCode) {
-    return res.status(400).json({
-      status: "error",
-      message: "Email and verification code are required",
-    });
-  }
-
-  try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "User not found",
-      });
-    }
-
     if (!user.verified) {
       return res.status(403).json({
         status: "error",
-        message: "Email not verified yet",
+        message: "Please verify your email address before logging in.",
       });
     }
 
-    const otp = await Otp.findOne({ email: user.email, code: verificationCode });
-    if (!otp) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid verification code",
-      });
-    }
-
-    if (new Date() > otp.expiresAt) {
-      return res.status(400).json({
-        status: "error",
-        message: "Verification code expired",
-      });
-    }
-
-    await Otp.deleteMany({ email: user.email });
     const token = randomUUID();
     const updatedUser = await User.findOneAndUpdate(
       { email: email.toLowerCase() },
@@ -253,7 +194,7 @@ authRouter.post("/verify-login", async (req: Request, res: Response) => {
       user: buildUserResponse(user),
     });
   } catch (error) {
-    console.error("Login verification error:", error);
+    console.error("Login error:", error);
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
@@ -261,8 +202,9 @@ authRouter.post("/verify-login", async (req: Request, res: Response) => {
   }
 });
 
+
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { email } = req.body || {};
 
   if (!email) {
     return res.status(400).json({
@@ -294,6 +236,11 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
       );
     } catch (mailError) {
       console.error("Password reset email error:", mailError);
+      await Otp.deleteMany({ email: user.email });
+      return res.status(500).json({
+        status: "error",
+        message: "Unable to send password reset email. Please try again later.",
+      });
     }
 
     return res.status(200).json({
@@ -311,7 +258,7 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
 });
 
 authRouter.post("/reset-password", async (req: Request, res: Response) => {
-  const { email, verificationCode, newPassword } = req.body;
+  const { email, verificationCode, newPassword } = req.body || {};
 
   if (!email || !verificationCode || !newPassword) {
     return res.status(400).json({

@@ -87,11 +87,12 @@ export default function RegisterPage() {
       if (res.status === 'success') {
         setsentotp(true);
       } else {
-        setError(res.message || 'Unable to create your account. Please try again.');
+        setsentotp(false);
+        setError(res.message || 'Unable to send verification email. Please try again.');
       }
     } catch (error) {
-      setError('Error during registration.');
-      setError('Unable to create your account. Please try again.');
+      setsentotp(false);
+      setError('Unable to send verification email. Please try again.');
     } finally {
       setLoading(false);
     }

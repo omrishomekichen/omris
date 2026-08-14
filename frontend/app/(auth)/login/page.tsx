@@ -44,13 +44,17 @@ export default function Login() {
     event.preventDefault();
     setError("");
     setLoading(true);
-    try{
-       const res = await Api.login(
+    try {
+      const res = await Api.login(
         FormData.email,
         FormData.password,
       );
-     if (res.status === 'pending') {
-        setsentotp(true);
+      if (res.status === 'success') {
+        localStorage.setItem('token', res.token);
+        if (res.user) {
+          localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
+        }
+        router.push('/dashboard');
       } else {
         setError(res.message || 'Unable to login to your account. Please try again.');
       }
@@ -59,8 +63,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-   
-
   };
   const handleverifySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

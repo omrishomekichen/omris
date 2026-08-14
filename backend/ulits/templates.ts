@@ -22,7 +22,7 @@ const emailLayout = (title: string, content: string): string => `
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
     .email-header {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
       padding: 30px 20px;
       text-align: center;
     }
@@ -38,8 +38,8 @@ const emailLayout = (title: string, content: string): string => `
       line-height: 1.6;
     }
     .otp-box {
-      background-color: #f0fdf4;
-      border: 2px dashed #22c55e;
+      background-color: #fffbeb;
+      border: 2px dashed #f59e0b;
       border-radius: 8px;
       padding: 15px;
       text-align: center;
@@ -49,12 +49,12 @@ const emailLayout = (title: string, content: string): string => `
       font-size: 32px;
       font-weight: 800;
       letter-spacing: 6px;
-      color: #15803d;
+      color: #b45309;
       margin: 0;
     }
     .btn {
       display: inline-block;
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
       color: #ffffff !important;
       text-decoration: none;
       padding: 12px 28px;
@@ -64,7 +64,7 @@ const emailLayout = (title: string, content: string): string => `
     }
     .info-card {
       background-color: #f8fafc;
-      border-left: 4px solid #4f46e5;
+      border-left: 4px solid #d97706;
       padding: 15px;
       border-radius: 0 8px 8px 0;
       margin: 20px 0;
@@ -85,13 +85,13 @@ const emailLayout = (title: string, content: string): string => `
 <body>
   <div class="email-container">
     <div class="email-header">
-      <h1>Paperwork</h1>
+      <h1>Omri's Home Kitchen</h1>
     </div>
     <div class="email-body">
       ${content}
     </div>
     <div class="email-footer">
-      <p>&copy; ${new Date().getFullYear()} Paperwork. All rights reserved.</p>
+      <p>&copy; ${new Date().getFullYear()} Omri's Home Kitchen. All rights reserved.</p>
       <p>If you did not initiate this request, please ignore this email or contact support.</p>
     </div>
   </div>
@@ -115,33 +115,15 @@ export const otpTemplate = (otp: string): string => {
 
 export const welcomeTemplate = (name: string): string => {
     return emailLayout(
-        'Welcome to Paperwork',
+        "Welcome to Omri's Home Kitchen",
         `
         <h2 style="color: #111827; margin-top: 0;">Welcome, ${name}! 🎉</h2>
-        <p style="color: #4b5563;">We are thrilled to have you join Paperwork. Our platform helps you create, manage, and track all your forms and documents seamlessly.</p>
-        <p style="color: #4b5563;">Get started by creating your very first form or exploring your dashboard.</p>
+        <p style="color: #4b5563;">We are thrilled to have you join Omri's Home Kitchen. Enjoy authentic handcrafted pickles, sun-cured spices, and traditional recipes delivered straight to your doorstep.</p>
+        <p style="color: #4b5563;">Get started by exploring our store or checking out your personal dashboard.</p>
         <div style="text-align: center;">
             <a href="#" class="btn">Go to Dashboard</a>
         </div>
         <p style="color: #6b7280; font-size: 14px;">If you have any questions, feel free to reply to this email.</p>
-        `
-    );
-};
-
-export const formCreation = (formName: string, formId: string): string => {
-    return emailLayout(
-        'Your Form is Live',
-        `
-        <h2 style="color: #111827; margin-top: 0;">Your Form is Live! 🚀</h2>
-        <p style="color: #4b5563;">Your new form <strong>${formName}</strong> has been successfully created and published.</p>
-        <div class="info-card">
-            <p><strong>Form Name:</strong> ${formName}</p>
-            <p><strong>Form ID:</strong> <code>${formId}</code></p>
-        </div>
-        <p style="color: #4b5563;">You can now share this form with users and monitor responses in real-time.</p>
-        <div style="text-align: center;">
-            <a href="#" class="btn">View Form</a>
-        </div>
         `
     );
 };
@@ -155,7 +137,7 @@ export const forgotPasswordTemplate = (resetLink: string): string => {
         <div style="text-align: center;">
             <a href="${resetLink}" class="btn">Reset Password</a>
         </div>
-        <p style="color: #6b7280; font-size: 14px; word-break: break-all;">Or copy and paste this link into your browser:<br><a href="${resetLink}" style="color: #4f46e5;">${resetLink}</a></p>
+        <p style="color: #6b7280; font-size: 14px; word-break: break-all;">Or copy and paste this link into your browser:<br><a href="${resetLink}" style="color: #d97706;">${resetLink}</a></p>
         <p style="color: #9ca3af; font-size: 13px;">If you did not request a password reset, no further action is required.</p>
         `
     );
@@ -180,7 +162,7 @@ export const loginAlertTemplate = (device: string, location: string, time: strin
         'New Login Detected',
         `
         <h2 style="color: #111827; margin-top: 0;">Security Alert: New Login 🔒</h2>
-        <p style="color: #4b5563;">We detected a new sign-in to your Paperwork account.</p>
+        <p style="color: #4b5563;">We detected a new sign-in to your Omri's Home Kitchen account.</p>
         <div class="info-card" style="border-left-color: #eab308;">
             <p><strong>Device:</strong> ${device}</p>
             <p><strong>Location:</strong> ${location}</p>
@@ -201,21 +183,6 @@ export const passwordChangeAlertTemplate = (time: string): string => {
             <p style="color: #991b1b;"><strong>Time of Change:</strong> ${time}</p>
         </div>
         <p style="color: #6b7280; font-size: 14px;">If you did not make this change, your account may be compromised. Please reset your password immediately or contact support.</p>
-        `
-    );
-};
-
-export const formSubmissionConfirmed = (formName: string, submissionId: string): string => {
-    return emailLayout(
-        'Form Submission Confirmed',
-        `
-        <h2 style="color: #111827; margin-top: 0;">Submission Confirmed 📋</h2>
-        <p style="color: #4b5563;">Thank you! Your submission for <strong>${formName}</strong> has been received successfully.</p>
-        <div class="info-card">
-            <p><strong>Form Name:</strong> ${formName}</p>
-            <p><strong>Submission ID:</strong> <code>${submissionId}</code></p>
-        </div>
-        <p style="color: #6b7280; font-size: 14px;">Keep this email for your records.</p>
         `
     );
 };
