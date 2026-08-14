@@ -20,10 +20,18 @@ export default function ScrollReveal() {
       ".story-content",
       ".banner-box",
       ".footer-grid > div",
+      ".footer-column",
       ".scroll-reveal",
+      ".reveal",
+      ".reveal-scale",
+      ".reveal-left",
+      ".reveal-right",
       ".feature-pill",
       ".hero-text",
       ".hero-card",
+      ".auth-card",
+      ".booking-card",
+      ".orders-card",
     ];
 
     const observer = new IntersectionObserver(
@@ -35,7 +43,7 @@ export default function ScrollReveal() {
           }
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
+      { threshold: 0.05, rootMargin: "0px 0px -30px 0px" },
     );
 
     const observeElements = () => {
@@ -51,10 +59,8 @@ export default function ScrollReveal() {
       });
     };
 
-    // Initial check after mount
     const timer = setTimeout(observeElements, 100);
 
-    // Watch for dynamic DOM changes (e.g. API fetches on menu & dashboard)
     const mutationObserver = new MutationObserver(() => {
       observeElements();
     });
