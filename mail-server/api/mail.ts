@@ -5,7 +5,11 @@ import serverless from "serverless-http";
 
 dotenv.config();
 
-if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+const hasMailCredentials = Boolean(
+  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD,
+);
+
+if (!hasMailCredentials) {
   console.warn(
     "GMAIL_USER and GMAIL_APP_PASSWORD are not set. Mail sending will fail until they are provided in .env.",
   );
@@ -15,6 +19,11 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
+  // Serverless functions must not wait indefinitely for an SMTP socket that
+  // cannot be reached (for example, because outbound SMTP is blocked).
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 20_000,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
@@ -64,11 +73,20 @@ const handleSendMail = async (req: Request, res: Response) => {
       .json({ error: "Missing required fields: to, subject, text" });
   }
 
+  if (!hasMailCredentials) {
+    return res.status(503).json({
+      success: false,
+      error: "Mail service is not configured",
+    });
+  }
+
   try {
     const result = await sendMail(to, subject, text);
     return res.status(200).json(result);
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: String(error) });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unable to send mail";
+    console.error("Mail delivery failed:", error);
+    return res.status(502).json({ success: false, error: message });
   }
 };
 
