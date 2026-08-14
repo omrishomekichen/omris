@@ -228,31 +228,31 @@
   background: #f4ede6;
 }
 
-/* Menu Product Card */
+/* Menu Product Card - Match Dashboard Card Size & Styling */
 .menu-product-card {
-  width: 320px;
-  flex: 0 0 320px;
+  width: 340px;
+  flex: 0 0 340px;
   flex-shrink: 0;
   scroll-snap-align: start;
   background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e1bfb8;
-  box-shadow: 0 4px 12px rgba(45, 42, 38, 0.04);
+  border-radius: 22px;
+  border: 1px solid rgba(225, 191, 184, 0.6);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .menu-product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(45, 42, 38, 0.1);
-  border-color: #650700;
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(101, 7, 0, 0.16);
+  border-color: rgba(101, 7, 0, 0.35);
 }
 
 .menu-card-img-wrapper {
   position: relative;
-  height: 220px;
+  height: 230px;
   overflow: hidden;
 }
 
