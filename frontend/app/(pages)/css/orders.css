@@ -79,7 +79,11 @@
   color: #1e1b17;
   margin-bottom: 1.25rem;
 }
-
+.orderdiv {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
 /* Active Order Card */
 .active-order-card {
   position: relative;

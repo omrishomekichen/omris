@@ -1,48 +1,153 @@
-import express, { Request, Response, Router } from "express";
-import multer, { FileFilterCallback } from "multer";
+import express, {
+  Request,
+  Response,
+  Router,
+} from "express";
+import multer, {
+  FileFilterCallback,
+} from "multer";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+
 import Order from "../model/order";
 import { User } from "../model/user";
 import MailService from "../ulits/mail";
 
-const JWT_SECRET = process.env.JWT_SECRET || "omris_secret_jwt_key_2026";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "omrishomekichen@gmail.com";
-const mailService = new MailService();
-const orderRouter: Router = express.Router();
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  "omris_secret_jwt_key_2026";
 
-// Store uploaded image temporarily in memory
+const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL ||
+  "omrishomekichen@gmail.com";
+
+const mailService = new MailService();
+
+const orderRouter: Router =
+  express.Router();
+
+
+
+interface JwtPayload {
+  userId?: string;
+  id?: string;
+}
+
+interface PlaceOrderRequest
+  extends Request {
+  file?: Express.Multer.File;
+}
+
+
+
 const upload = multer({
   storage: multer.memoryStorage(),
+
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB
+    fileSize: 10 * 1024 * 1024,
   },
+
   fileFilter: (
     _req: Request,
     file: Express.Multer.File,
     cb: FileFilterCallback,
   ) => {
-    if (file.mimetype.startsWith("image/")) {
+    if (
+      file.mimetype.startsWith("image/")
+    ) {
       cb(null, true);
     } else {
-      cb(new Error("Only image files are allowed"));
+      cb(
+        new Error(
+          "Only image files are allowed",
+        ),
+      );
     }
   },
 });
 
-interface PlaceOrderRequest extends Request {
-  file?: Express.Multer.File;
-}
 
-// POST /place-order
+
+const getUserIdFromToken = (
+  req: Request,
+): string | null => {
+  try {
+    const authHeader =
+      req.headers.authorization;
+
+    if (
+      !authHeader ||
+      !authHeader.startsWith(
+        "Bearer ",
+      )
+    ) {
+      return null;
+    }
+
+    const token =
+      authHeader.substring(7).trim();
+
+    if (!token) {
+      return null;
+    }
+
+    const decoded =
+      jwt.verify(
+        token,
+        JWT_SECRET,
+      ) as JwtPayload;
+
+    const userId =
+      decoded.userId ||
+      decoded.id;
+
+    if (!userId) {
+      return null;
+    }
+
+    return userId;
+  } catch (error) {
+    return null;
+  }
+};
+
+
+
 orderRouter.post(
   "/place-order",
   upload.single("paymentScreenshot"),
-  async (req: PlaceOrderRequest, res: Response) => {
+
+  async (
+    req: PlaceOrderRequest,
+    res: Response,
+  ) => {
     try {
+     
+
+      const userId = getUserIdFromToken(req);
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message:
+            "Invalid or missing authentication token",
+        });
+      }
+
+     
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+     
+
       const {
-        token,
-        email,
         orderItems,
         shippingAddress,
         paymentMethod,
@@ -50,42 +155,65 @@ orderRouter.post(
         totalPrice,
       } = req.body || {};
 
-      // Extract raw token from request body or Authorization header
-      const rawToken =
-        token || req.headers.authorization?.replace(/^Bearer\s+/i, "");
+     
 
-      let userId: string | undefined;
-      let userObj: any = null;
-
-      if (rawToken && rawToken !== "null" && rawToken !== "undefined") {
-        try {
-          const decoded = jwt.verify(rawToken, JWT_SECRET) as {
-            userId?: string;
-            id?: string;
-          };
-          userId = decoded.userId || decoded.id;
-        } catch (e) {
-          // Check if token is stored on User document
-          userObj = await User.findOne({ token: rawToken });
-          if (userObj) {
-            userId = userObj._id.toString();
-          }
-        }
+      if (
+        !orderItems ||
+        !shippingAddress ||
+        !paymentMethod ||
+        totalPrice === undefined ||
+        totalPrice === null
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "All required order details must be provided",
+        });
       }
 
-      // If token did not resolve userId, attempt to find user by email
-      if (!userId && email) {
-        userObj = await User.findOne({ email: email.toLowerCase() });
-        if (userObj) {
-          userId = userObj._id.toString();
-        }
+     
+
+      let parsedOrderItems: unknown;
+
+      try {
+        parsedOrderItems =
+          typeof orderItems === "string"
+            ? JSON.parse(orderItems)
+            : orderItems;
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid orderItems format",
+        });
       }
 
-      const isUpi =
-        paymentMethod && paymentMethod.toLowerCase().includes("upi");
+      if (
+        !Array.isArray(parsedOrderItems) ||
+        parsedOrderItems.length === 0
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "At least one order item is required",
+        });
+      }
 
-      // Check payment screenshot requirement for UPI
-      if (isUpi && !req.file && !utrNumber) {
+     
+
+      const isUpi = String(
+        paymentMethod,
+      )
+        .toLowerCase()
+        .includes("upi");
+
+     
+
+      if (
+        isUpi &&
+        !req.file &&
+        !utrNumber
+      ) {
         return res.status(400).json({
           success: false,
           message:
@@ -93,200 +221,300 @@ orderRouter.post(
         });
       }
 
-      // Validate required fields
-      if (!orderItems || !shippingAddress || !paymentMethod || !totalPrice) {
-        return res.status(400).json({
-          success: false,
-          message: "All required order details must be provided",
-        });
-      }
+     
 
-      // Parse orderItems if sent as JSON string
-      let parsedOrderItems;
-      try {
-        parsedOrderItems =
-          typeof orderItems === "string" ? JSON.parse(orderItems) : orderItems;
-      } catch (error) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid orderItems format",
-        });
-      }
+      const orderId =
+        `ORD-${Date.now()}-${crypto
+          .randomBytes(3)
+          .toString("hex")
+          .toUpperCase()}`;
 
-      // Generate unique order ID
-      const orderId = `ORD-${Date.now()}-${crypto
-        .randomBytes(3)
-        .toString("hex")
-        .toUpperCase()}`;
+     
 
-      // Build Order payload
-      const orderData: any = {
-        orderId,
-        orderItems: parsedOrderItems,
-        shippingAddress,
-        paymentMethod,
-        totalPrice: Number(totalPrice),
-        status: "pending",
-      };
-
-      if (userId) {
-        orderData.userId = userId;
-      }
-
-      if (utrNumber) {
-        orderData.utrNumber = utrNumber;
-      } else {
-        orderData.utrNumber = "N/A";
-      }
-
-      if (req.file) {
-        orderData.paymentScreenshot = {
+      const paymentScreenshot = req.file
+        ? {
           data: req.file.buffer,
-          contentType: req.file.mimetype,
-        };
-      } else {
-        orderData.paymentScreenshot = {
+          contentType:
+            req.file.mimetype,
+        }
+        : {
           data: Buffer.from(""),
           contentType: "image/none",
         };
-      }
 
-      const order = new Order(orderData);
+     
+
+      const order = new Order({
+        userId: user._id,
+
+        orderId,
+
+        orderItems:
+          parsedOrderItems,
+
+        shippingAddress,
+
+        paymentMethod,
+
+        paymentScreenshot,
+
+        utrNumber:
+          utrNumber || "N/A",
+
+        totalPrice:
+          Number(totalPrice),
+
+        status: "pending",
+      });
+
       await order.save();
 
-      // Send admin and customer notification emails asynchronously
-      const customerEmail = email || userObj?.email;
-      const customerName = userObj
-        ? `${userObj.firstName || ""} ${userObj.lastName || ""}`.trim()
-        : "Customer";
+     
 
-      const screenshotBase64 = req.file
-        ? `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
-        : undefined;
+      const customerEmail =
+        user.email;
 
-      (async () => {
+      const customerName =
+        `${user.firstName || ""} ${user.lastName || ""
+          }`.trim() || "Customer";
+
+     
+      const customerPhone =
+        (user as any).phone ||
+        undefined;
+
+     
+
+     
+
+      const createdAt =
+        order.createdAt
+          ? order.createdAt.toISOString()
+          : new Date().toISOString();
+
+     
+
+      const screenshotBase64 =
+        req.file
+          ? `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+            "base64",
+          )}`
+          : undefined;
+
+     
+
+      void (async () => {
+       
+
         try {
-          console.log(
-            `[Order Mail] Dispatching admin order notification to ${ADMIN_EMAIL}...`,
-          );
+         
+
           await mailService.sendAdminOrderNotificationEmail(
             ADMIN_EMAIL,
+
             order.orderId,
+
             customerName,
+
             customerEmail || "N/A",
+
             order.totalPrice,
+
             order.paymentMethod,
+
             order.utrNumber || "N/A",
+
             order.shippingAddress,
+
             order.orderItems,
+
             order.status,
-            (order as any).createdAt,
+
+            createdAt,
+
             Boolean(req.file),
-            req.body?.phone || userObj?.phone || undefined,
+
+            customerPhone,
+
             screenshotBase64,
           );
-        } catch (mailErr) {
+
+        
+        } catch (mailError) {
           console.error(
-            "[Order Mail] Error sending admin order email:",
-            mailErr,
+            "[Order Mail] Admin email error:",
+            mailError,
           );
         }
 
+       
+
         if (customerEmail) {
           try {
-            console.log(
-              `[Order Mail] Dispatching customer confirmation email to ${customerEmail}...`,
-            );
+           
+
             await mailService.sendOrderConfirmationEmail(
               customerEmail,
+
               order.orderId,
+
               customerName,
+
               order.totalPrice,
+
               order.orderItems,
+
               order.shippingAddress,
+
               order.paymentMethod,
             );
-          } catch (mailErr) {
+
+           
+          } catch (mailError) {
             console.error(
-              "[Order Mail] Error sending customer confirmation email:",
-              mailErr,
+              "[Order Mail] Customer email error:",
+              mailError,
             );
           }
         }
       })();
 
+     
+
       return res.status(201).json({
         success: true,
-        message: "Order placed successfully",
+
+        message:
+          "Order placed successfully",
+
         order: {
-          orderId: order.orderId,
-          userId: order.userId,
-          orderItems: order.orderItems,
-          shippingAddress: order.shippingAddress,
-          paymentMethod: order.paymentMethod,
-          utrNumber: order.utrNumber,
-          totalPrice: order.totalPrice,
-          status: order.status,
-          createdAt: (order as any).createdAt,
+          orderId:
+            order.orderId,
+
+          userId:
+            order.userId,
+
+          orderItems:
+            order.orderItems,
+
+          shippingAddress:
+            order.shippingAddress,
+
+          paymentMethod:
+            order.paymentMethod,
+
+          utrNumber:
+            order.utrNumber,
+
+          totalPrice:
+            order.totalPrice,
+
+          status:
+            order.status,
+
+          createdAt:
+            order.createdAt,
         },
       });
     } catch (error) {
-      console.error("Place order error:", error);
+      console.error(
+        "Place order error:",
+        error,
+      );
 
       return res.status(500).json({
         success: false,
-        message: "Failed to place order",
-        error: error instanceof Error ? error.message : "Unknown error",
+
+        message:
+          "Failed to place order",
+
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
       });
     }
   },
-  orderRouter.get("/orders", async (req, res) => {
-    try {
-      const orders = await Order.find();
-      res.status(200).json({
-        success: true,
-        orders,
-      });
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch orders",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }),
 );
+
+
+
+
 
 orderRouter.post("/user/orders", async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
+    const authHeader = req.headers.authorization;
+
+    if (
+      !authHeader ||
+      !authHeader.startsWith("Bearer ")
+    ) {
+      return res.status(401).json({
         success: false,
-        message: "User not found",
+        message: "Authorization token is required",
       });
     }
-    const orders = await Order.find({ userId: user._id });
-    if (!orders) {
-      return res.status(404).json({
+
+    const token = authHeader.substring(7).trim();
+
+    if (!token) {
+      return res.status(401).json({
         success: false,
-        message: "Orders not found",
+        message: "Authentication token is missing",
       });
     }
-    res.status(200).json({
+
+    const decoded = jwt.verify(
+      token,
+      JWT_SECRET
+    ) as {
+      userId?: string;
+      id?: string;
+    };
+
+    const userId =
+      decoded.userId || decoded.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token",
+      });
+    }
+
+    const orders = await Order.find({
+      userId,
+    }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
       success: true,
       orders,
     });
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({
+    console.error(
+      "Error fetching user orders:",
+      error
+    );
+
+    if (
+      error instanceof jwt.JsonWebTokenError
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch orders",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unknown error",
     });
   }
 });
-
 export default orderRouter;

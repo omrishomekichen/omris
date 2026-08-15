@@ -120,15 +120,31 @@ const Api = {
     });
     return response.json();
   },
-  orders: async (token: string, email: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/user/orders`, {
-      method: "POST",
-      body: JSON.stringify({ token, email }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return response.json();
+  orders: async (token: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/user/orders`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    let data: any = {};
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      console.error("Orders API error:", data);
+    }
+
+    return data;
   },
 };
 
