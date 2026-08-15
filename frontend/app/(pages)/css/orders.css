@@ -1,4 +1,4 @@
-/* Orders Page Styling - Omri's Home Kitchen */
+
 
 .orders-page-root {
   background-color: #fff8f3;
@@ -34,7 +34,7 @@
   line-height: 1.5;
 }
 
-/* Tabs Bar */
+
 .orders-tabs-bar {
   display: flex;
   gap: 0.6rem;
@@ -67,7 +67,7 @@
   box-shadow: 0 4px 12px rgba(101, 7, 0, 0.18);
 }
 
-/* Section Headings */
+
 .orders-section {
   margin-bottom: 3.5rem;
 }
@@ -84,7 +84,7 @@
     flex-direction: column;
     gap: 40px;
 }
-/* Active Order Card */
+
 .active-order-card {
   position: relative;
   background: #ffffff;
@@ -185,7 +185,7 @@
   opacity: 0.85;
 }
 
-/* Stepper Progress Tracker */
+
 .progress-tracker-wrapper {
   position: relative;
   margin: 2.5rem 0 2rem;
@@ -261,7 +261,7 @@
   font-weight: 700;
 }
 
-/* Card Footer */
+
 .active-card-footer {
   display: flex;
   justify-content: space-between;
@@ -308,7 +308,7 @@
   margin-left: 0;
 }
 
-/* Past Orders List */
+
 .past-orders-list {
   display: flex;
   flex-direction: column;
@@ -440,7 +440,7 @@
   transform: translateY(-1px);
 }
 
-/* Empty State */
+
 .orders-empty-state {
   display: flex;
   flex-direction: column;

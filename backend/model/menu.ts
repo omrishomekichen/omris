@@ -48,7 +48,7 @@ const comboItemSchema = new mongoose.Schema(
 
 const menuSchema = new mongoose.Schema(
   {
-    // Unique application-level ID
+
     menuId: {
       type: String,
       unique: true,
@@ -57,7 +57,7 @@ const menuSchema = new mongoose.Schema(
       index: true,
     },
 
-    // Basic Information
+
     name: {
       type: String,
       required: true,
@@ -76,13 +76,13 @@ const menuSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Ingredients
+
     ingredients: {
       type: [String],
       default: [],
     },
 
-    // Storage & Shelf Life
+
     storage: {
       instructions: {
         type: String,
@@ -102,25 +102,25 @@ const menuSchema = new mongoose.Schema(
       },
     },
 
-    // Product image
+
     image: {
       type: String,
       default: null,
     },
 
-    // Quantity & prices
+
     priceOptions: {
       type: [priceOptionSchema],
       default: [],
     },
 
-    // Combo products
+
     comboItems: {
       type: [comboItemSchema],
       default: [],
     },
 
-    // Offers
+
     offer: {
       enabled: {
         type: Boolean,
@@ -143,7 +143,7 @@ const menuSchema = new mongoose.Schema(
       },
     },
 
-    // Status
+
     isAvailable: {
       type: Boolean,
       default: true,

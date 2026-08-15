@@ -47,7 +47,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Actual payment screenshot stored in MongoDB
+
     paymentScreenshot: {
       data: {
         type: Buffer,

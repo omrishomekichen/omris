@@ -62,17 +62,17 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  
-  
-  
+
+
+
 
   const handleContinue = () => {
     setPassOpen(true);
   };
 
-  
-  
-  
+
+
+
 
   const handlePasswordSubmit = async (
     e: React.FormEvent<HTMLFormElement>
@@ -132,15 +132,15 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  
-  
-  
+
+
+
 
   return (
     <main className={styles.page}>
       <section className={styles.card}>
 
-        {/* LEFT SIDE */}
+
         <aside className={styles.story}>
           <Link href="/" className={styles.brand}>
             <img
@@ -190,9 +190,9 @@ export default function ForgotPasswordPage() {
           </div>
         </aside>
 
-        {/* RIGHT SIDE */}
 
-        {/* STEP 1 — EMAIL */}
+
+
         {!sentotp && !passopen && (
           <div className={styles.formPanel}>
 
@@ -278,7 +278,7 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* STEP 2 — EMAIL SENT */}
+
         {sentotp && !passopen && (
           <div className={styles.formPanel}>
 
@@ -332,7 +332,7 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* STEP 3 — PASSWORD */}
+
         {passopen && (
           <div className={styles.formPanel}>
 
@@ -379,7 +379,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </label>
 
-              {/* NEW PASSWORD */}
+
               <label className={styles.field}>
                 New password
 
@@ -404,7 +404,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </label>
 
-              {/* CONFIRM PASSWORD */}
+
               <label className={styles.field}>
                 Confirm password
 

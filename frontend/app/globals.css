@@ -10,7 +10,7 @@
   background: #f9f4ed;
   color: #1f1a16;
 
-  /* Design tokens */
+
   --surface: #fff8f3;
   --surface-dim: #e0d9d3;
   --surface-bright: #fff8f3;
@@ -91,7 +91,7 @@ main.app-main {
   margin-top: 72px;
 }
 
-/* Full-Screen Splash Screen Overlay */
+
 .splash-overlay {
   position: fixed;
   top: 0;
@@ -117,7 +117,7 @@ main.app-main {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(225, 191, 184, 0.6);
   border-radius: 28px;
-  box-shadow: 
+  box-shadow:
     0 24px 64px -12px rgba(101, 7, 0, 0.15),
     0 8px 24px -8px rgba(45, 42, 38, 0.06);
   display: flex;
@@ -243,7 +243,7 @@ main.app-main {
   to { opacity: 1; }
 }
 
-/* Global Entry Animations */
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -319,7 +319,7 @@ main.app-main {
   animation: fadeInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Scroll-triggered reveal utilities */
+
 .reveal,
 .reveal-scale,
 .reveal-left,
@@ -360,4 +360,3 @@ main.app-main {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
-

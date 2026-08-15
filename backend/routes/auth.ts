@@ -143,7 +143,7 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
     await user.save();
     await Otp.deleteMany({ email: user.email });
 
-    // Send Welcome Email
+
     try {
       await sendMail(
         user.email,
@@ -216,7 +216,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     );
     await User.updateOne({ email: email.toLowerCase() }, { $set: { token } });
 
-    // Send Security Login Alert Email
+
     try {
       const userAgent = req.headers["user-agent"] || "Web Browser";
       const deviceType = userAgent.includes("Mobile")
@@ -355,7 +355,7 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
     await user.save();
     await Otp.deleteMany({ email: user.email });
 
-    // Send Password Reset Success Notification
+
     try {
       await sendMail(
         user.email,

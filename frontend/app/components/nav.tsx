@@ -69,7 +69,7 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-container">
-        {/* Brand Logo & Name */}
+
         <Link href="/" className="navbar-brand">
           <div className="navbar-logo-frame">
             <img
@@ -84,7 +84,7 @@ export default function Navbar() {
           </div>
         </Link>
         <div className="navbar-spacer">
-          {/* Desktop Navigation Links */}
+
           <nav className="navbar-links">
             <Link
               href="/"
@@ -107,7 +107,7 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          {/* Action Buttons */}
+
           <div className="navbar-actions">
             <button
               type="button"
@@ -235,7 +235,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Toggle Button */}
+
             <button
               type="button"
               className="mobile-menu-btn"
@@ -248,7 +248,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer Dropdown */}
+
       {mobileMenuOpen && (
         <div className="mobile-drawer">
           <nav className="mobile-nav-links">

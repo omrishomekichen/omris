@@ -74,7 +74,7 @@ export default function MenuPage() {
             ? Number(item.priceOptions[0].price)
             : Number(item.price) || 299;
 
-          // Default price options if missing in DB, sorted low-to-high so basic price is FIRST
+
           const rawPriceOpts =
             item.priceOptions && item.priceOptions.length > 0
               ? item.priceOptions
@@ -134,7 +134,7 @@ export default function MenuPage() {
     }));
   };
 
-  // Sort logic
+
   const sortProducts = (items: any[]) => {
     const sorted = [...items];
     if (sortOption === "priceLow") {
@@ -147,7 +147,7 @@ export default function MenuPage() {
     return sorted;
   };
 
-  // Filtered & Searched list
+
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
       selectedTab === "all"
@@ -174,7 +174,7 @@ export default function MenuPage() {
 
   const sortedProducts = sortProducts(filteredProducts);
 
-  // Group by category for section layout
+
   const vegPickles = sortedProducts.filter((p) => p.category === "veg");
   const nonVegPickles = sortedProducts.filter((p) => p.category === "nonVeg");
   const spicedPowders = sortedProducts.filter(
@@ -313,7 +313,7 @@ export default function MenuPage() {
   return (
     <div className="menu-page-root">
       <main className="menu-container">
-        {/* Page Header */}
+
         <div className="menu-header-block">
           <h1 className="menu-header-title">Artisanal Pickles Menu</h1>
           <p className="menu-header-sub">
@@ -322,7 +322,7 @@ export default function MenuPage() {
           </p>
         </div>
 
-        {/* Sort, Filter & Search Bar */}
+
         <div className="menu-controls-bar">
           <div className="menu-category-tabs">
             {[
@@ -345,7 +345,7 @@ export default function MenuPage() {
             ))}
           </div>
 
-          {/* Search Box */}
+
           <div className="menu-search-box">
             <Search size={18} className="search-icon" />
             <input
@@ -402,7 +402,7 @@ export default function MenuPage() {
           </div>
         ) : (
           <>
-            {/* Category: Vegetable Pickles */}
+
             {vegPickles.length > 0 && (
               <section className="menu-section">
                 <div className="category-title-row">
@@ -419,7 +419,7 @@ export default function MenuPage() {
               </section>
             )}
 
-            {/* Category: Non-Veg Specialties */}
+
             {nonVegPickles.length > 0 && (
               <section className="menu-section">
                 <div className="category-title-row">
@@ -436,7 +436,7 @@ export default function MenuPage() {
               </section>
             )}
 
-            {/* Category: Spiced Powders */}
+
             {spicedPowders.length > 0 && (
               <section className="menu-section">
                 <div className="category-title-row">
@@ -453,7 +453,7 @@ export default function MenuPage() {
               </section>
             )}
 
-            {/* Category: Combos & Offers */}
+
             {comboPickles.length > 0 && (
               <section className="menu-section">
                 <div className="category-title-row">

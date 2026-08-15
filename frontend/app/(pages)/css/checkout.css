@@ -1,4 +1,4 @@
-/* Checkout Page CSS - Omri's Home Kitchen */
+
 
 .checkout-page-root {
   background-color: #fff8f3;
@@ -15,7 +15,7 @@
   padding: 2.5rem 1.5rem;
 }
 
-/* Stepper Header */
+
 .checkout-stepper-header {
   display: flex;
   justify-content: space-between;
@@ -85,7 +85,7 @@
   background: #e8e1db;
 }
 
-/* Main Grid Layout */
+
 .checkout-main-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -93,7 +93,7 @@
   align-items: start;
 }
 
-/* Form Panel */
+
 .checkout-step-panel {
   background: #ffffff;
   border-radius: 20px;
@@ -124,7 +124,7 @@
   margin: 0;
 }
 
-/* Form Inputs Grid */
+
 .form-fields-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -178,7 +178,7 @@
   background: #ffffff;
 }
 
-/* Shipping Option Cards */
+
 .shipping-options-list,
 .payment-options-list {
   display: flex;
@@ -277,7 +277,7 @@
   font-size: 0.85rem;
 }
 
-/* Step Action Buttons */
+
 .step-actions-row {
   display: flex;
   justify-content: space-between;
@@ -331,7 +331,7 @@
   color: #650700;
 }
 
-/* Summary Right Column */
+
 .summary-card {
   background: #ffffff;
   border-radius: 20px;
@@ -398,7 +398,7 @@
   color: #650700;
 }
 
-/* Coupon Box */
+
 .coupon-box {
   display: flex;
   flex-direction: column;
@@ -445,7 +445,7 @@
   font-weight: 600;
 }
 
-/* Price Breakdown */
+
 .price-breakdown {
   display: flex;
   flex-direction: column;
@@ -495,7 +495,7 @@
   color: #650700;
 }
 
-/* Empty Checkout */
+
 .checkout-empty-container {
   display: flex;
   justify-content: center;
@@ -544,7 +544,7 @@
   text-decoration: none;
 }
 
-/* UPI QR & Screenshot Section */
+
 .upi-qr-panel {
   background: #ffffff;
   border: 1.5px solid #e1bfb8;
@@ -674,7 +674,7 @@
   font-weight: 700;
 }
 
-/* Screenshot Upload Box */
+
 .screenshot-upload-box {
   display: flex;
   flex-direction: column;

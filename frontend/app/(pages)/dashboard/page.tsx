@@ -47,7 +47,7 @@ export default function DashboardPage() {
             ? response.data
             : [];
 
-        // Filter for items where isFeatured is true, or fallback to top items
+
         let featuredList = list.filter(
           (item: any) =>
             item.isFeatured === true ||
@@ -82,7 +82,7 @@ export default function DashboardPage() {
             ? Number(item.priceOptions[0].price)
             : Number(item.price) || 299;
 
-          // Default price options if missing in DB, sorted low-to-high (basic price first)
+
           const rawPriceOpts =
             item.priceOptions && item.priceOptions.length > 0
               ? item.priceOptions
@@ -396,7 +396,7 @@ export default function DashboardPage() {
                         <h3 className="product-title">{product.name}</h3>
                         <p className="product-desc">{product.description}</p>
 
-                        {/* Interactive Pack Size Selector */}
+
                         {priceOpts.length > 1 && (
                           <div className="dash-size-selector-box">
                             <div className="size-selector-header">
@@ -436,7 +436,7 @@ export default function DashboardPage() {
                           </div>
                         )}
 
-                        {/* Key Feature Chips */}
+
                         <div className="menu-highlights-chips">
                           <span className="chip-tag">
                             <ShieldCheck size={12} />
@@ -448,7 +448,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
 
-                        {/* Product Price & Action Row */}
+
                         <div className="product-action-row">
                           <div className="price-display-box">
                             <div className="price-values-row">

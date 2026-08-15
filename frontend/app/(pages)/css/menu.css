@@ -1,4 +1,4 @@
-/* Menu Page Styling - Omri's Home Kitchen */
+
 
 .menu-page-root {
   background-color: #fff8f3;
@@ -37,7 +37,7 @@
   line-height: 1.6;
 }
 
-/* Sort & Filter Bar */
+
 .menu-controls-bar {
   display: flex;
   justify-content: space-between;
@@ -112,7 +112,7 @@
   border-color: #650700;
 }
 
-/* Category Sections */
+
 .menu-section {
   margin-bottom: 4rem;
 }
@@ -140,7 +140,7 @@
   color: #8d706b;
 }
 
-/* Horizontal Single Row Scroll Container */
+
 .menu-products-row-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -173,7 +173,7 @@
   padding: 0.25rem 0.25rem 0.75rem 0.25rem;
 }
 
-/* Menu Search Box */
+
 .menu-search-box {
   position: relative;
   display: flex;
@@ -227,7 +227,7 @@
   background: #f4ede6;
 }
 
-/* Menu Product Card */
+
 .menu-product-card {
   width: 360px;
   flex: 0 0 360px;
@@ -374,7 +374,7 @@
   margin: 0;
 }
 
-/* Pack Size Selector */
+
 .menu-size-selector-box {
   display: flex;
   flex-direction: column;
@@ -454,7 +454,7 @@
   color: #8d706b;
 }
 
-/* Highlight Chips */
+
 .menu-highlights-chips {
   display: flex;
   gap: 0.45rem;
@@ -478,7 +478,7 @@
   color: #650700;
 }
 
-/* Expandable Details Panel */
+
 .menu-card-details-expand {
   display: flex;
   flex-direction: column;
@@ -549,7 +549,7 @@
   color: #59413c;
 }
 
-/* Card Footer */
+
 .menu-card-footer {
   display: flex;
   justify-content: space-between;
@@ -649,7 +649,7 @@
   text-align: center;
 }
 
-/* Empty State */
+
 .menu-empty-state {
   text-align: center;
   padding: 4rem 1rem;
@@ -673,7 +673,7 @@
   }
 }
 
-/* Scroll Reveal Entrance Styles */
+
 .menu-header-block,
 .menu-controls-bar,
 .category-title-row,

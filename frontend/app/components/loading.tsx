@@ -17,14 +17,14 @@ export default function Loading({
   return (
     <div className="splash-overlay" role="dialog" aria-modal="true" aria-label="Loading Omri's Home Kitchen">
       <div className="splash-card">
-        
-        {/* Top Badge */}
+
+
         <div className="splash-badge">
           <Sparkles size={14} className="sparkle-icon" />
           <span>Omri's Home Kitchen</span>
         </div>
 
-        {/* Logo Container with Animated Glow */}
+
         <div className="splash-logo-wrapper">
           <div className="splash-logo-glow" />
           <img
@@ -34,18 +34,18 @@ export default function Loading({
           />
         </div>
 
-        {/* Title & Subtitle */}
+
         <h1 className="splash-title">
           Omri’s <span className="splash-title-sub">Home Kitchen</span>
         </h1>
         <p className="splash-subtitle">Artisanal Handcrafted Heritage Pickles</p>
 
-        {/* Spinner Indicator */}
+
         <div className="splash-spinner-box">
           <div className="splash-dual-ring" />
         </div>
 
-        {/* Status Message */}
+
         <p className="splash-status">
           {showSlowNote && seconds > 0
             ? `Waking up kitchen server… (${seconds}s)`
@@ -58,7 +58,7 @@ export default function Loading({
           </p>
         )}
 
-        {/* Trust Footer Note */}
+
         <div className="splash-trust">
           <Heart size={14} className="heart-icon" />
           <span>100% Natural • Zero Chemical Preservatives</span>

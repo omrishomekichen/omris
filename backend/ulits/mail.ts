@@ -33,17 +33,17 @@ export const sendMail = async (
       text,
     };
 
-    /*
-     * If HTML is directly provided, use it.
-     */
+
+
+
     if (html) {
       payload.html = html;
     }
 
-    /*
-     * If a template is provided, render it here.
-     * The rendered HTML is then sent to the mail server.
-     */
+
+
+
+
     if (templateName) {
       payload.templateName = templateName;
       payload.templateData = templateData;
@@ -69,9 +69,9 @@ export const sendMail = async (
       body: JSON.stringify(payload),
     });
 
-    /*
-     * Safely read the response.
-     */
+
+
+
     const responseText = await response.text();
 
     let data: any;
@@ -89,9 +89,9 @@ export const sendMail = async (
       );
     }
 
-    /*
-     * Handle API errors.
-     */
+
+
+
     if (!response.ok || data?.success === false) {
       console.error("[Mail API] Failure response from mail service:", data);
 
@@ -113,9 +113,9 @@ export const sendMail = async (
 };
 
 class MailService {
-  /*
-   * Generic mail sender
-   */
+
+
+
   async send(payload: MailPayload) {
     return sendMail(
       payload.to,
@@ -127,9 +127,9 @@ class MailService {
     );
   }
 
-  /*
-   * OTP email
-   */
+
+
+
   async sendOTPEmail(
     email: string,
     otp: string,
@@ -147,9 +147,9 @@ class MailService {
     );
   }
 
-  /*
-   * Welcome email
-   */
+
+
+
   async sendWelcomeEmail(email: string, name: string) {
     return sendMail(
       email,
@@ -163,9 +163,9 @@ class MailService {
     );
   }
 
-  /*
-   * Forgot password email
-   */
+
+
+
   async sendForgotPasswordEmail(email: string, resetLink: string) {
     return sendMail(
       email,
@@ -179,9 +179,9 @@ class MailService {
     );
   }
 
-  /*
-   * Password reset success email
-   */
+
+
+
   async sendPasswordResetSuccessEmail(email: string) {
     return sendMail(
       email,
@@ -193,9 +193,9 @@ class MailService {
     );
   }
 
-  /*
-   * Customer order confirmation
-   */
+
+
+
   async sendOrderConfirmationEmail(
     email: string,
     orderId: string,
@@ -223,9 +223,9 @@ class MailService {
     );
   }
 
-  /*
-   * Admin order notification
-   */
+
+
+
   async sendAdminOrderNotificationEmail(
     adminEmail: string,
     orderId: string,
@@ -268,9 +268,9 @@ class MailService {
     );
   }
 
-  /*
-   * Login alert
-   */
+
+
+
   async sendLoginAlertEmail(
     email: string,
     device: string,
@@ -291,9 +291,9 @@ class MailService {
     );
   }
 
-  /*
-   * Password change alert
-   */
+
+
+
   async sendPasswordChangeAlertEmail(email: string, time: string) {
     return sendMail(
       email,

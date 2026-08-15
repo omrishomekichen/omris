@@ -774,7 +774,7 @@
   scroll-snap-align: start;
 }
 
-/* Popular Picks section styles */
+
 .popular-section {
   padding: 3rem 0;
   background: transparent;
@@ -1342,7 +1342,7 @@
   }
 
 
- 
+
 
   .simple-hero {
     padding: 1.75rem 0 2.5rem;
@@ -2283,7 +2283,7 @@
     font-size: 1.6rem;
   }
 
-  /* Make products list horizontally scrollable on small screens */
+
   .products-grid {
     display: flex;
     gap: 1rem;
@@ -2311,7 +2311,7 @@
     font-size: 0.88rem;
   }
 
-  
+
 
   .product-img-frame {
     height: 200px;
@@ -2495,7 +2495,7 @@
   }
 }
 
-/* Dashboard Product Card Extra Details */
+
 .product-details {
   display: flex;
   flex-direction: column;
@@ -2709,4 +2709,3 @@
   color: #8d706b;
   font-weight: 500;
 }
-

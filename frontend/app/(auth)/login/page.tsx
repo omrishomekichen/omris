@@ -73,7 +73,7 @@ export default function Login() {
     try{
        const res = await Api.verifyLogin(
         FormData.email,
-        verificationCode,   
+        verificationCode,
       );
       if (res.status === 'success') {
         localStorage.setItem('token', res.token);
@@ -91,16 +91,16 @@ export default function Login() {
     }
   }
 
- 
+
 
   return (
     <div className="auth-page">
-      {/* Background ambient lighting effects */}
+
       <div className="auth-bg-glow glow-top-left" />
       <div className="auth-bg-glow glow-bottom-right" />
 
       <div className="auth-card">
-        {/* Left Editorial Panel */}
+
         <aside className="auth-panel">
           <div className="auth-panel-header">
             <Link href="/" className="auth-brand-link">
@@ -246,7 +246,7 @@ export default function Login() {
                 <span className="checkbox-label">Keep me signed in</span>
               </label>
 
-            
+
             </div>
 
             <button className="auth-btn" type="submit" disabled={loading}>

@@ -38,7 +38,7 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   const [step, setStep] = useState<number>(1);
 
-  // Form State
+
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -66,7 +66,7 @@ export default function CheckoutPage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-fill user details if saved in auth/localStorage
+
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -79,7 +79,7 @@ export default function CheckoutPage() {
         }));
       }
     } catch (e) {
-      // ignore
+
     }
   }, []);
 
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
         utrNumber: utrNumber.trim() || undefined,
       };
 
-      // Save order to localStorage
+
       try {
         await Api.placeOrder(
           token,
@@ -209,7 +209,7 @@ export default function CheckoutPage() {
         );
       } catch {}
 
-      // Clear Cart & Redirect to Orders Page
+
       clearCart();
       setIsSubmitting(false);
       router.push("/orders");
@@ -241,7 +241,7 @@ export default function CheckoutPage() {
   return (
     <div className="checkout-page-root">
       <div className="checkout-container">
-        {/* Stepper Header Bar */}
+
         <div className="checkout-stepper-header">
           <Link href="/" className="back-home-link">
             <ArrowLeft size={16} />
@@ -267,9 +267,9 @@ export default function CheckoutPage() {
         </div>
 
         <div className="checkout-main-grid">
-          {/* Form Left Column */}
+
           <div className="checkout-form-column">
-            {/* Step 1: Address */}
+
             {step === 1 && (
               <div className="checkout-step-panel">
                 <div className="panel-title-row">
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Step 2: Shipping Option */}
+
             {step === 2 && (
               <div className="checkout-step-panel">
                 <div className="panel-title-row">
@@ -466,7 +466,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Step 3: Payment */}
+
             {step === 3 && (
               <div className="checkout-step-panel">
                 <div className="panel-title-row">
@@ -475,7 +475,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="payment-options-list">
-                  {/* UPI Option */}
+
                   <label
                     className={`payment-option-card ${paymentMethod === "upi" ? "selected" : ""}`}
                     onClick={() => setPaymentMethod("upi")}
@@ -498,7 +498,7 @@ export default function CheckoutPage() {
                     <span className="payment-badge">INSTANT & SECURE</span>
                   </label>
 
-                  {/* UPI QR & Screenshot Upload Section */}
+
                   {paymentMethod === "upi" && (
                     <div className="upi-qr-panel">
                       <div className="upi-qr-header">
@@ -550,7 +550,7 @@ export default function CheckoutPage() {
                             <span className="app-badge">BHIM</span>
                           </div>
 
-                          {/* Screenshot Upload Box */}
+
                           <div className="screenshot-upload-box">
                             <label className="upload-label">
                               Upload Payment Screenshot *
@@ -618,7 +618,7 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* COD Option */}
+
                   <label
                     className={`payment-option-card ${paymentMethod === "cod" ? "selected" : ""}`}
                     onClick={() => setPaymentMethod("cod")}
@@ -668,7 +668,7 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Right Column: Order Summary */}
+
           <aside className="checkout-summary-column">
             <div className="summary-card">
               <h3 className="summary-title">Order Summary</h3>
@@ -692,7 +692,7 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              {/* Coupon Form */}
+
               <form onSubmit={handleApplyCoupon} className="coupon-box">
                 <div className="coupon-input-row">
                   <Tag size={16} className="tag-icon" />
@@ -713,7 +713,7 @@ export default function CheckoutPage() {
                 )}
               </form>
 
-              {/* Price Calculation Breakdown */}
+
               <div className="price-breakdown">
                 <div className="breakdown-row">
                   <span>Subtotal</span>

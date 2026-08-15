@@ -54,7 +54,7 @@ export default function RootLayout({
 
             <Footer />
 
-            {/* Global Toast */}
+
             <Toaster
               position="top-right"
               reverseOrder={false}

@@ -1,4 +1,4 @@
-/* Base reset & typography defaults for login page */
+
 .auth-page button,
 .auth-page input,
 .auth-page select {
@@ -10,7 +10,7 @@
   text-decoration: none;
 }
 
-/* Page Layout */
+
 .auth-page {
   position: relative;
   display: flex;
@@ -21,7 +21,7 @@
   min-height: calc(100vh - 120px);
 }
 
-/* Ambient glow spheres */
+
 .auth-bg-glow {
   position: absolute;
   border-radius: 50%;
@@ -47,7 +47,7 @@
   background: radial-gradient(circle, rgba(140, 20, 4, 0.2) 0%, rgba(255, 248, 243, 0) 70%);
 }
 
-/* Card Container */
+
 .auth-card {
   position: relative;
   z-index: 1;
@@ -57,7 +57,7 @@
   background: var(--surface-container-lowest);
   border-radius: 22px;
   border: 1px solid rgba(225, 191, 184, 0.45);
-  box-shadow: 
+  box-shadow:
     0 24px 64px -16px rgba(101, 7, 0, 0.12),
     0 8px 24px -8px rgba(45, 42, 38, 0.05);
   overflow: hidden;
@@ -68,12 +68,12 @@
 
 .auth-card:hover {
   transform: translateY(-4px) scale(1.002);
-  box-shadow: 
+  box-shadow:
     0 32px 80px -16px rgba(101, 7, 0, 0.18),
     0 12px 32px -8px rgba(45, 42, 38, 0.08);
 }
 
-/* Left Hero Panel (Editorial & Artisanal) */
+
 .auth-panel {
   display: flex;
   flex-direction: column;
@@ -86,7 +86,7 @@
   overflow: hidden;
 }
 
-/* Subtle spice/organic texture overlay on hero panel */
+
 .auth-panel::before {
   content: '';
   position: absolute;
@@ -190,7 +190,7 @@
   animation: pulseBadgeIcon 2.5s ease-in-out infinite;
 }
 
-/* Editorial Copy */
+
 .auth-panel-copy {
   position: relative;
   z-index: 2;
@@ -226,7 +226,7 @@
   max-width: 440px;
 }
 
-/* Feature Bullet Items */
+
 .auth-panel-features {
   position: relative;
   z-index: 2;
@@ -292,7 +292,7 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
-/* Hero Image Showcase Frame */
+
 .auth-hero-showcase {
   position: relative;
   z-index: 2;
@@ -364,7 +364,7 @@
   font-weight: 500;
 }
 
-/* Right Form Panel */
+
 .auth-form-panel {
   display: flex;
   flex-direction: column;
@@ -404,7 +404,7 @@
   color: var(--on-surface-variant);
 }
 
-/* Form Controls */
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -503,7 +503,7 @@
   background: var(--surface-container);
 }
 
-/* Checkbox & Options */
+
 .auth-options-row {
   display: flex;
   align-items: center;
@@ -569,7 +569,7 @@
   color: var(--on-secondary-fixed);
 }
 
-/* Submit Button */
+
 .auth-btn {
   position: relative;
   width: 100%;
@@ -656,7 +656,7 @@
   }
 }
 
-/* Divider */
+
 .auth-divider {
   position: relative;
   text-align: center;
@@ -687,7 +687,7 @@
   letter-spacing: 0.05em;
 }
 
-/* Google Sign-in Button */
+
 .auth-google-btn {
   display: flex;
   align-items: center;
@@ -726,7 +726,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Register link footer */
+
 .auth-register {
   margin: 0.5rem 0 0;
   text-align: center;
@@ -748,7 +748,7 @@
   transform: translateY(-1px);
 }
 
-/* Keyframes */
+
 @keyframes slideInDown {
   from {
     opacity: 0;
@@ -760,7 +760,7 @@
   }
 }
 
-/* Responsive Breakdown */
+
 @media (max-width: 960px) {
   .auth-card {
     grid-template-columns: 1fr;

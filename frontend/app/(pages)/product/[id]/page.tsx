@@ -46,7 +46,7 @@ export default function ProductDetailPage() {
           ? response.data
           : [];
 
-        // Find current product or fallback
+
         let found = list.find(
           (p: any) =>
             p._id === productId ||
@@ -109,7 +109,7 @@ export default function ProductDetailPage() {
             reviewCount: 128,
           });
 
-          // Related products
+
           const related = list
             .filter((p: any) => (p._id || p.id) !== found._id)
             .slice(0, 3)
@@ -173,7 +173,7 @@ export default function ProductDetailPage() {
   return (
     <div className="product-detail-root">
       <main className="product-detail-container">
-        {/* Breadcrumb Navigation */}
+
         <nav aria-label="Breadcrumb" className="product-breadcrumb">
           <Link href="/menu" className="breadcrumb-link">
             Menu
@@ -190,9 +190,9 @@ export default function ProductDetailPage() {
           <span className="breadcrumb-current">{product.name}</span>
         </nav>
 
-        {/* Product Hero Section */}
+
         <div className="product-hero-grid">
-          {/* Left: Bento Image Gallery */}
+
           <div className="product-gallery-box">
             <div className="gallery-main-frame">
               <img src={product.image} alt={product.name} className="gallery-main-img" />
@@ -200,7 +200,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Right: Product Details & Controls */}
+
           <div className="product-info-column">
             <div className="product-header-block">
               <span className="category-pill-tag">
@@ -223,7 +223,7 @@ export default function ProductDetailPage() {
               <p className="product-hero-desc">{product.description}</p>
             </div>
 
-            {/* Size Selector Box */}
+
             <div className="product-size-card">
               <h3 className="size-selector-heading">SELECT PACK SIZE</h3>
 
@@ -245,7 +245,7 @@ export default function ProductDetailPage() {
                 })}
               </div>
 
-              {/* Quantity Counter & Add to Order */}
+
               <div className="quantity-add-row">
                 <div className="quantity-counter">
                   <button
@@ -272,7 +272,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Key Info Badges */}
+
             <div className="key-badges-grid">
               <div className="badge-card">
                 <PackageCheck size={20} className="badge-icon" />
@@ -293,7 +293,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Artisanal Process Story Section */}
+
         <section className="artisanal-story-section">
           <div className="story-card-left">
             <h2 className="story-section-title">The Artisanal Process</h2>
@@ -315,10 +315,10 @@ export default function ProductDetailPage() {
             </ul>
           </div>
 
-         
+
         </section>
 
-        {/* Related Products Section */}
+
         {relatedProducts.length > 0 && (
           <section className="related-products-section">
             <h2 className="related-section-title">You May Also Like</h2>

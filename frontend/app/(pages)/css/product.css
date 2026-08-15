@@ -1,4 +1,4 @@
-/* Product Detail Page Styling - Omri's Home Kitchen */
+
 
 .product-detail-root {
   background-color: #fff8f3;
@@ -32,7 +32,7 @@
   text-decoration: none;
 }
 
-/* Breadcrumb */
+
 .product-breadcrumb {
   display: flex;
   align-items: center;
@@ -65,7 +65,7 @@
   font-weight: 700;
 }
 
-/* Hero Grid */
+
 .product-hero-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -115,7 +115,7 @@
   letter-spacing: 0.05em;
 }
 
-/* Product Info Column */
+
 .product-info-column {
   display: flex;
   flex-direction: column;
@@ -168,7 +168,7 @@
   margin: 0;
 }
 
-/* Size Selector Card */
+
 .product-size-card {
   background: #ffffff;
   border-radius: 18px;
@@ -234,7 +234,7 @@
   font-weight: 600;
 }
 
-/* Quantity & Add to Cart */
+
 .quantity-add-row {
   display: flex;
   align-items: center;
@@ -291,7 +291,7 @@
   transform: translateY(-1px);
 }
 
-/* Key Badges Grid */
+
 .key-badges-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -323,7 +323,7 @@
   color: #59413c;
 }
 
-/* Artisanal Process Story Section */
+
 .artisanal-story-section {
   background: #ffffff;
   border-radius: 24px;
@@ -391,7 +391,7 @@
   object-fit: cover;
 }
 
-/* Related Products */
+
 .related-products-section {
   margin-top: 2rem;
 }

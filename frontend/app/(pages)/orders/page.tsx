@@ -65,7 +65,7 @@ export default function OrdersPage() {
 
   const [loading, setLoading] = useState<boolean>(true);
 
- 
+
   const [userlogin, setUserLogin] = useState<boolean>(false);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function OrdersPage() {
 
         const token = localStorage.getItem("token");
 
-        // No token = user is not logged in
+
         if (!token) {
           toast.error("Please log in to view your orders.");
 
@@ -86,12 +86,12 @@ export default function OrdersPage() {
           return;
         }
 
-        // Token exists
+
         setUserLogin(true);
 
         const response: OrdersResponse = await Api.orders(token);
 
-       
+
 
         if (!response?.success) {
           toast.error(response?.message || "Unable to load your orders. Please try again.");
@@ -232,9 +232,9 @@ export default function OrdersPage() {
     <div className="orders-page-root">
       <main className="orders-container">
 
-        {/* ============================================
-            HEADER
-        ============================================ */}
+
+
+
 
         <div className="orders-header-block">
           <h1 className="orders-header-title">
@@ -248,9 +248,9 @@ export default function OrdersPage() {
           </p>
         </div>
 
-        {/* ============================================
-            NOT LOGGED IN
-        ============================================ */}
+
+
+
 
         {!userlogin && !loading && (
           <div className="orders-empty-state">
@@ -283,15 +283,15 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {/* ============================================
-            LOGGED-IN USER
-        ============================================ */}
+
+
+
 
         {userlogin && (
           <>
-            {/* ========================================
-                ORDER TABS
-            ======================================== */}
+
+
+
 
             {totalOrdersCount > 0 && (
               <div className="orders-tabs-bar">
@@ -347,9 +347,9 @@ export default function OrdersPage() {
               </div>
             )}
 
-            {/* ========================================
-                LOADING
-            ======================================== */}
+
+
+
 
             {loading ? (
               <div className="orders-empty-state">
@@ -360,9 +360,9 @@ export default function OrdersPage() {
 
             ) : totalOrdersCount === 0 ? (
 
-              /* ======================================
-                  NO ORDERS
-              ====================================== */
+
+
+
 
               <div className="orders-empty-state">
 
@@ -399,14 +399,14 @@ export default function OrdersPage() {
 
             ) : (
 
-              /* ======================================
-                  ORDERS
-              ====================================== */
+
+
+
 
               <>
-                {/* ====================================
-                    ACTIVE ORDERS
-                ==================================== */}
+
+
+
 
                 {(activeTab === "all" ||
                   activeTab === "active") &&
@@ -462,7 +462,7 @@ export default function OrdersPage() {
 
                                 <div className="active-card-glow" />
 
-                                {/* HEADER */}
+
 
                                 <div className="active-card-header">
 
@@ -523,7 +523,7 @@ export default function OrdersPage() {
 
                                 </div>
 
-                                {/* PROGRESS */}
+
 
                                 <div className="progress-tracker-wrapper">
 
@@ -540,7 +540,7 @@ export default function OrdersPage() {
 
                                   <div className="tracker-steps">
 
-                                    {/* STEP 1 */}
+
 
                                     <div
                                       className={`step-item ${
@@ -560,7 +560,7 @@ export default function OrdersPage() {
 
                                     </div>
 
-                                    {/* STEP 2 */}
+
 
                                     <div
                                       className={`step-item ${
@@ -580,7 +580,7 @@ export default function OrdersPage() {
 
                                     </div>
 
-                                    {/* STEP 3 */}
+
 
                                     <div
                                       className={`step-item ${
@@ -600,7 +600,7 @@ export default function OrdersPage() {
 
                                     </div>
 
-                                    {/* STEP 4 */}
+
 
                                     <div
                                       className={`step-item ${
@@ -626,7 +626,7 @@ export default function OrdersPage() {
 
                                 </div>
 
-                                {/* FOOTER */}
+
 
                                 <div className="active-card-footer">
 
@@ -651,7 +651,7 @@ export default function OrdersPage() {
 
                                   </div>
 
-                                  {/* ITEM IMAGES */}
+
 
                                   {order.orderItems &&
                                     order.orderItems.length >
@@ -706,9 +706,9 @@ export default function OrdersPage() {
                     </section>
                   )}
 
-                {/* ====================================
-                    PAST ORDERS
-                ==================================== */}
+
+
+
 
                 {(activeTab === "all" ||
                   activeTab === "completed") &&
@@ -749,7 +749,7 @@ export default function OrdersPage() {
                                 className="past-order-card"
                               >
 
-                                {/* LEFT */}
+
 
                                 <div className="past-card-left">
 
@@ -767,7 +767,7 @@ export default function OrdersPage() {
 
                                   <div className="past-order-info">
 
-                                    {/* META */}
+
 
                                     <div className="past-order-meta">
 
@@ -788,7 +788,7 @@ export default function OrdersPage() {
 
                                     </div>
 
-                                    {/* TITLE */}
+
 
                                     <h4 className="past-order-title">
 
@@ -797,7 +797,7 @@ export default function OrdersPage() {
 
                                     </h4>
 
-                                    {/* ITEMS */}
+
 
                                     <p className="past-order-items-sub">
 
@@ -810,7 +810,7 @@ export default function OrdersPage() {
 
                                     </p>
 
-                                    {/* PRICE */}
+
 
                                     <div className="past-order-price-row">
 
@@ -841,7 +841,7 @@ export default function OrdersPage() {
 
                                 </div>
 
-                                {/* REORDER */}
+
 
                                 <div className="past-card-actions">
 
