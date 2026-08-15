@@ -171,41 +171,6 @@ export default function CheckoutPage() {
         screenshotFile,
       );
 
-      const newOrder = {
-        id:
-          res?.order?.orderId ||
-          `OHK-${Math.floor(1000 + Math.random() * 9000)}`,
-        date: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        estimatedDelivery: "Tomorrow, 5:00 PM",
-        status: "IN PROGRESS",
-        currentStep: 1,
-        total: grandTotal,
-        itemsCount: items.reduce((acc, i) => acc + i.quantity, 0),
-        items: formattedItems,
-        shippingAddress: formattedShippingAddress,
-        paymentMethod:
-          paymentMethod === "cod" ? "Cash on Delivery" : "UPI Payment (QR)",
-        paymentScreenshot: upiScreenshot || undefined,
-        utrNumber: utrNumber.trim() || undefined,
-      };
-
-
-      try {
-        await Api.placeOrder(
-          formData.email,
-          formattedItems,
-          formattedShippingAddress,
-          paymentMethod,
-          utrNumber,
-          grandTotal,
-          screenshotFile,
-        );
-      } catch {}
-
 
       clearCart();
       setIsSubmitting(false);
