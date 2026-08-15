@@ -19,6 +19,7 @@ import {
 import { useAuth } from "../(auth)/AuthContext";
 import { useCart } from "./CartContext";
 import CartDrawer from "./CartDrawer";
+import Api from "../__apis/api";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -60,7 +61,7 @@ export default function Navbar() {
     if (logout) {
       await logout();
     } else {
-      localStorage.removeItem("token");
+      await Api.logout();
       localStorage.removeItem("user");
       window.location.href = "/login";
     }

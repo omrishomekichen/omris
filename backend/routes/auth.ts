@@ -4,8 +4,11 @@ import jwt from "jsonwebtoken";
 import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
-
-const JWT_SECRET = process.env.JWT_SECRET as string;
+import {
+  AUTH_COOKIE_NAME,
+  authCookieOptions,
+  JWT_SECRET,
+} from "../config/security";
 
 const authRouter: express.Router = express.Router();
 
@@ -214,7 +217,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       JWT_SECRET,
       { expiresIn: "15m" },
     );
-    await User.updateOne({ email: email.toLowerCase() }, { $set: { token } });
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
 
 
     try {
@@ -244,7 +247,6 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 
     return res.status(200).json({
       status: "success",
-      token,
       user: buildUserResponse(user),
     });
   } catch (error) {
@@ -254,6 +256,12 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       message: "Internal server error",
     });
   }
+});
+
+authRouter.post("/logout", (_req: Request, res: Response) => {
+  const { maxAge, ...clearCookieOptions } = authCookieOptions;
+  res.clearCookie(AUTH_COOKIE_NAME, clearCookieOptions);
+  return res.status(204).send();
 });
 
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {

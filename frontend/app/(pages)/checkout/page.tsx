@@ -153,7 +153,6 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token") || "";
       const formattedShippingAddress = `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
       const formattedItems = items.map((i) => ({
         name: i.name,
@@ -163,7 +162,6 @@ export default function CheckoutPage() {
       }));
 
       const res = await Api.placeOrder(
-        token,
         formData.email,
         formattedItems,
         formattedShippingAddress,
@@ -198,7 +196,6 @@ export default function CheckoutPage() {
 
       try {
         await Api.placeOrder(
-          token,
           formData.email,
           formattedItems,
           formattedShippingAddress,

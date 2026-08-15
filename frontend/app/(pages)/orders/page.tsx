@@ -73,29 +73,14 @@ export default function OrdersPage() {
       try {
         setLoading(true);
 
-        const token = localStorage.getItem("token");
-
-
-        if (!token) {
-          toast.error("Please log in to view your orders.");
-
-          setUserLogin(false);
-          setActiveOrders([]);
-          setPastOrders([]);
-
-          return;
-        }
-
-
-        setUserLogin(true);
-
-        const response: OrdersResponse = await Api.orders(token);
+        const response: OrdersResponse = await Api.orders();
 
 
 
         if (!response?.success) {
-          toast.error(response?.message || "Unable to load your orders. Please try again.");
+          toast.error(response?.message || "Please log in to view your orders.");
 
+          setUserLogin(false);
           setActiveOrders([]);
           setPastOrders([]);
 
@@ -134,9 +119,11 @@ export default function OrdersPage() {
 
         setActiveOrders(active);
         setPastOrders(past);
+        setUserLogin(true);
       } catch {
         toast.error("Unable to load your orders. Please try again.");
 
+        setUserLogin(false);
         setActiveOrders([]);
         setPastOrders([]);
       } finally {

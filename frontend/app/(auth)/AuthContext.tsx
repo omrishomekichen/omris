@@ -33,9 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
-    if (token && savedUser) {
+    if (savedUser) {
       try {
         if (savedUser.startsWith("{")) {
           setUser(JSON.parse(savedUser));
@@ -51,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await Api.login(email, password);
       if (response.status === "success") {
-        localStorage.setItem("token", response.token);
         if (response.user) {
           localStorage.setItem("user", JSON.stringify(response.user));
           setUser(response.user);
@@ -71,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await Api.register(name, email, password);
       if (response.status === "success") {
-        localStorage.setItem("token", response.token);
         if (response.user) {
           localStorage.setItem("user", JSON.stringify(response.user));
           setUser(response.user);
@@ -88,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    localStorage.removeItem("token");
+    await Api.logout();
     localStorage.removeItem("user");
     setUser(null);
     router.push("/login");

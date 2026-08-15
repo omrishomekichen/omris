@@ -47,7 +47,6 @@ export default function Login() {
         FormData.password,
       );
       if (res.status === 'success') {
-        localStorage.setItem('token', res.token);
         if (res.user) {
           localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
         }
@@ -76,7 +75,6 @@ export default function Login() {
         verificationCode,
       );
       if (res.status === 'success') {
-        localStorage.setItem('token', res.token);
         if (res.user) {
           localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
         }

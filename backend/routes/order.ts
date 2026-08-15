@@ -12,10 +12,7 @@ import jwt from "jsonwebtoken";
 import Order from "../model/order";
 import { User } from "../model/user";
 import MailService from "../ulits/mail";
-
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  "omris_secret_jwt_key_2026";
+import { getAuthToken, JWT_SECRET } from "../config/security";
 
 const ADMIN_EMAIL =
   process.env.ADMIN_EMAIL ||
@@ -72,20 +69,7 @@ const getUserIdFromToken = (
   req: Request,
 ): string | null => {
   try {
-    const authHeader =
-      req.headers.authorization;
-
-    if (
-      !authHeader ||
-      !authHeader.startsWith(
-        "Bearer ",
-      )
-    ) {
-      return null;
-    }
-
-    const token =
-      authHeader.substring(7).trim();
+    const token = getAuthToken(req.headers.cookie);
 
     if (!token) {
       return null;
@@ -443,24 +427,12 @@ orderRouter.post(
 
 orderRouter.post("/user/orders", async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (
-      !authHeader ||
-      !authHeader.startsWith("Bearer ")
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Authorization token is required",
-      });
-    }
-
-    const token = authHeader.substring(7).trim();
+    const token = getAuthToken(req.headers.cookie);
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication token is missing",
+        message: "Authentication is required",
       });
     }
 

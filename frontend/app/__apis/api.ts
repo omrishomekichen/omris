@@ -18,6 +18,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
     return response.json();
@@ -27,6 +28,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ fullName, email, password }),
     });
     return response.json();
@@ -36,6 +38,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, verificationCode }),
     });
     return response.json();
@@ -45,6 +48,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/verify-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({
         email: email.trim(),
         verificationCode: verificationCode.trim(),
@@ -57,6 +61,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email }),
     });
     return response.json();
@@ -70,6 +75,7 @@ const Api = {
     const response = await fetch(`${API_BASE_URL}/api/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, verificationCode, newPassword }),
     });
     return response.json();
@@ -91,7 +97,6 @@ const Api = {
     }
   },
   placeOrder: async (
-    token: string,
     email: string,
     orderItems: any[],
     shippingAddress: string,
@@ -101,7 +106,6 @@ const Api = {
     screenshot: File | null,
   ) => {
     const formData = new FormData();
-    if (token) formData.append("token", token);
     if (email) formData.append("email", email);
     formData.append("orderItems", JSON.stringify(orderItems));
     formData.append("shippingAddress", shippingAddress);
@@ -114,19 +118,17 @@ const Api = {
 
     const response = await fetch(`${API_BASE_URL}/api/place-order`, {
       method: "POST",
+      credentials: "include",
       body: formData,
     });
     return response.json();
   },
-  orders: async (token: string) => {
+  orders: async () => {
     const response = await fetch(
       `${API_BASE_URL}/api/user/orders`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        credentials: "include",
       }
     );
 
@@ -142,6 +144,12 @@ const Api = {
     }
 
     return data;
+  },
+  logout: async () => {
+    await fetch(`${API_BASE_URL}/api/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
   },
 };
 
