@@ -40,11 +40,14 @@ export const sendMail = async (
       html,
     });
 
+    console.log("📧 Mail sent:", info.messageId);
+
     return {
       success: true,
       messageId: info.messageId,
     };
   } catch (error) {
+    console.error("❌ Mail error:", error);
     throw error;
   }
 };
@@ -78,6 +81,8 @@ const handleSendMail = async (req: Request, res: Response) => {
     const message =
       error instanceof Error ? error.message : "Unable to send mail";
 
+    console.error("Mail delivery failed:", error);
+
     return res.status(502).json({
       success: false,
       error: message,
@@ -100,6 +105,8 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
       error: "Request body is invalid or incomplete",
     });
   }
+
+  console.error("Unhandled mail API error:", error);
 
   return res.status(500).json({
     success: false,

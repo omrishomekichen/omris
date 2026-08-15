@@ -24,6 +24,8 @@ export const sendMail = async (
   templateName?: string,
   templateData?: any,
 ) => {
+  console.log(`[Mail API] Sending email to ${to} via ${MAIL_API_URL}...`);
+
   try {
     const payload: MailPayload = {
       to,
@@ -52,7 +54,9 @@ export const sendMail = async (
         if (renderedHtml) {
           payload.html = renderedHtml;
         }
-      } catch {
+      } catch (renderError) {
+        console.error("[Mail API] Template rendering failed:", renderError);
+
         throw new Error(`Failed to render email template: ${templateName}`);
       }
     }
@@ -75,6 +79,11 @@ export const sendMail = async (
     try {
       data = JSON.parse(responseText);
     } catch {
+      console.error(
+        "[Mail API] Invalid response from mail server:",
+        responseText,
+      );
+
       throw new Error(
         `Mail service returned an invalid response (${response.status})`,
       );
@@ -84,6 +93,8 @@ export const sendMail = async (
      * Handle API errors.
      */
     if (!response.ok || data?.success === false) {
+      console.error("[Mail API] Failure response from mail service:", data);
+
       throw new Error(
         data?.error ||
           data?.message ||
@@ -91,8 +102,12 @@ export const sendMail = async (
       );
     }
 
+    console.log("[Mail API] Email sent successfully:", data);
+
     return data;
   } catch (error) {
+    console.error("[Mail API] Error calling mail server API:", error);
+
     throw error;
   }
 };
