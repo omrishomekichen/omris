@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Api from "../../../__apis/api";
 import { useCart } from "../../../components/CartContext";
+import toast from "react-hot-toast";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -122,8 +123,8 @@ export default function ProductDetailPage() {
 
           setRelatedProducts(related);
         }
-      } catch (err) {
-        console.error("Error loading product detail:", err);
+      } catch {
+        toast.error("Unable to load this product. Please try again.");
       } finally {
         setLoading(false);
       }

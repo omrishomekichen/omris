@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Api from "../../__apis/api";
 import { useCart } from "../../components/CartContext";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -124,8 +125,8 @@ export default function DashboardPage() {
         });
 
         setProducts(formatted);
-      } catch (error) {
-        console.error("Error fetching menu items:", error);
+      } catch {
+        toast.error("Unable to load featured items. Please try again.");
       }
     };
 

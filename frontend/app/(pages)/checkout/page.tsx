@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../../components/CartContext";
 import Api from "../../__apis/api";
+import toast from "react-hot-toast";
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -115,8 +116,9 @@ export default function CheckoutPage() {
     if (couponCode.trim().toUpperCase() === "OMRI10") {
       setDiscountPercent(10);
       setCouponApplied(true);
+      toast.success("Coupon applied: 10% off!");
     } else {
-      alert("Invalid coupon code. Try 'OMRI10' for 10% off!");
+      toast.error("Invalid coupon code. Try 'OMRI10' for 10% off!");
     }
   };
 
@@ -136,13 +138,13 @@ export default function CheckoutPage() {
       !formData.address ||
       !formData.pincode
     ) {
-      alert("Please fill in all required shipping fields.");
+      toast.error("Please fill in all required shipping fields.");
       setStep(1);
       return;
     }
 
     if (paymentMethod === "upi" && !upiScreenshot && !utrNumber.trim()) {
-      alert(
+      toast.error(
         "Please upload your payment screenshot or enter the UTR/Reference number to complete your UPI payment.",
       );
       return;
@@ -195,7 +197,7 @@ export default function CheckoutPage() {
 
       // Save order to localStorage
       try {
-        const res = await Api.placeOrder(
+        await Api.placeOrder(
           token,
           formData.email,
           formattedItems,
@@ -205,19 +207,15 @@ export default function CheckoutPage() {
           grandTotal,
           screenshotFile,
         );
-        console.log(res);
-      } catch (err) {
-        console.error("Error saving local order:", err);
-      }
+      } catch {}
 
       // Clear Cart & Redirect to Orders Page
       clearCart();
       setIsSubmitting(false);
       router.push("/orders");
-    } catch (err) {
-      console.error("Error placing order:", err);
+    } catch {
       setIsSubmitting(false);
-      alert("Failed to place order. Please try again.");
+      toast.error("Failed to place order. Please try again.");
     }
   };
 
@@ -379,7 +377,7 @@ export default function CheckoutPage() {
                         !formData.address ||
                         !formData.pincode
                       ) {
-                        alert(
+                        toast.error(
                           "Please fill in required fields: Name, Phone, Address, and Pincode.",
                         );
                         return;

@@ -15,11 +15,10 @@ import {
   Star,
   ArrowRight,
   ChefHat,
-  AlertCircle,
-  X,
   Truck,
   Leaf
 } from "lucide-react";
+import toast from "react-hot-toast";
 import "./login.css";
 import styles from "../auth-pages.module.css";
 
@@ -29,7 +28,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [sentotp,setsentotp] = useState(false);
 
 
@@ -42,7 +40,6 @@ export default function Login() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
     setLoading(true);
     try {
       const res = await Api.login(
@@ -56,21 +53,19 @@ export default function Login() {
         }
         router.push('/dashboard');
       } else {
-        setError(res.message || 'Unable to login to your account. Please try again.');
+        toast.error(res.message || 'Unable to login to your account. Please try again.');
       }
     } catch (error) {
-      setError('Unable to login to your account. Please try again.');
+      toast.error('Unable to login to your account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
   const handleverifySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-
     const verificationCode = FormData.verificationCode.trim();
     if (!/^\d{6}$/.test(verificationCode)) {
-      setError("Enter the six-digit verification code sent to your email.");
+      toast.error("Enter the six-digit verification code sent to your email.");
       return;
     }
 
@@ -87,10 +82,10 @@ export default function Login() {
         }
         router.push('/dashboard');
       } else {
-        setError(res.message || 'Unable to verify your login. Please try again.');
+        toast.error(res.message || 'Unable to verify your login. Please try again.');
       }
     } catch (error) {
-      setError('Unable to verify your login. Please try again.');
+      toast.error('Unable to verify your login. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -191,21 +186,6 @@ export default function Login() {
             <h2>Sign In to your Account</h2>
             <p>Enter your email and password to access your Omri’s account.</p>
           </div>
-
-          {error && (
-            <div className="auth-error" role="alert">
-              <AlertCircle size={18} className="error-icon" />
-              <div className="error-text">{error}</div>
-              <button
-                type="button"
-                className="error-close"
-                onClick={() => setError("")}
-                aria-label="Dismiss error"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="off">
             <label className="auth-field">

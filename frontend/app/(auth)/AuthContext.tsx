@@ -42,9 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setUser({ id: "1", email: savedUser, name: savedUser });
         }
-      } catch (e) {
-        console.error("Error parsing user from localStorage:", e);
-      }
+      } catch {}
     }
     setLoading(false);
   }, []);
@@ -61,8 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push("/dashboard");
       }
       return response;
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
       return {
         status: "error",
         message: "An error occurred while logging in.",
@@ -82,8 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push("/dashboard");
       }
       return response;
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch {
       return {
         status: "error",
         message: "An error occurred while registering.",

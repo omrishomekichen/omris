@@ -44,9 +44,7 @@ export default function Navbar() {
         } else if (saved !== "[object Object]") {
           setLocalUser({ name: saved, email: saved });
         }
-      } catch (e) {
-        console.error("Error reading user from localStorage:", e);
-      }
+      } catch {}
     } else {
       setLocalUser(null);
     }

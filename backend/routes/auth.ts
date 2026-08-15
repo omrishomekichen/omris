@@ -69,8 +69,7 @@ authRouter.post("/register", async (req: Request, res: Response) => {
         "otp",
         { otp: verificationCode, name: fullName },
       );
-    } catch (mailError) {
-      console.error("Verification email error:", mailError);
+    } catch {
       await User.deleteOne({ _id: user._id });
       await Otp.deleteMany({ email: user.email });
       return res.status(500).json({
@@ -86,8 +85,7 @@ authRouter.post("/register", async (req: Request, res: Response) => {
         "User registered successfully. Check your email for the verification code.",
       email: user.email,
     });
-  } catch (error) {
-    console.error("Registration error:", error);
+  } catch {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
@@ -153,17 +151,14 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
         "welcome",
         { name: `${user.firstName} ${user.lastName}`.trim() },
       );
-    } catch (e) {
-      console.error("Failed to send welcome email:", e);
-    }
+    } catch {}
 
     return res.status(200).json({
       status: "success",
       message: "Email verified successfully",
       user: buildUserResponse(user),
     });
-  } catch (error) {
-    console.error("Verification error:", error);
+  } catch {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
@@ -238,17 +233,14 @@ authRouter.post("/login", async (req: Request, res: Response) => {
           name: `${user.firstName} ${user.lastName}`.trim(),
         },
       );
-    } catch (e) {
-      console.error("Failed to send login alert email:", e);
-    }
+    } catch {}
 
     return res.status(200).json({
       status: "success",
       token,
       user: buildUserResponse(user),
     });
-  } catch (error) {
-    console.error("Login error:", error);
+  } catch {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
@@ -290,8 +282,7 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
         "otp",
         { otp: resetCode, name: `${user.firstName} ${user.lastName}`.trim() },
       );
-    } catch (mailError) {
-      console.error("Password reset email error:", mailError);
+    } catch {
       await Otp.deleteMany({ email: user.email });
       return res.status(500).json({
         status: "error",
@@ -304,8 +295,7 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
       message: "Password reset code sent to your email.",
       email: user.email,
     });
-  } catch (error) {
-    console.error("Forgot password error:", error);
+  } catch {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
@@ -365,16 +355,13 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
         "password_reset_success",
         { name: `${user.firstName} ${user.lastName}`.trim() },
       );
-    } catch (e) {
-      console.error("Failed to send password reset confirmation email:", e);
-    }
+    } catch {}
 
     return res.status(200).json({
       status: "success",
       message: "Password reset successfully",
     });
-  } catch (error) {
-    console.error("Reset password error:", error);
+  } catch {
     return res.status(500).json({
       status: "error",
       message: "Internal server error",

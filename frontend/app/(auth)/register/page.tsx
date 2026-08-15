@@ -1,12 +1,12 @@
 'use client';
 import Link from "next/link";
-import { ArrowRight, ChefHat, LockKeyhole, Mail, ShieldCheck, UserRound,AlertCircle ,X} from "lucide-react";
+import { ArrowRight, ChefHat, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
 import styles from "../auth-pages.module.css";
 import { useState } from "react";
 import Api from "../../__apis/api";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
-  const [Error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
 
@@ -33,33 +33,33 @@ export default function RegisterPage() {
 
   const validateRegistration = () => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      setError('Please enter both first and last name.');
+      toast.error('Please enter both first and last name.');
       return false;
     }
 
     if (!formData.email.trim()) {
-      setError('Please enter your email address.');
+      toast.error('Please enter your email address.');
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address.');
+      toast.error('Please enter a valid email address.');
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      toast.error('Password must be at least 6 characters.');
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
+      toast.error('Passwords do not match.');
       return false;
     }
 
     if (!formData.agreeToTerms) {
-      setError('You must agree to the terms.');
+      toast.error('You must agree to the terms.');
       return false;
     }
 
@@ -68,7 +68,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     if (!validateRegistration()) {
@@ -88,11 +87,11 @@ export default function RegisterPage() {
         setsentotp(true);
       } else {
         setsentotp(false);
-        setError(res.message || 'Unable to send verification email. Please try again.');
+        toast.error(res.message || 'Unable to send verification email. Please try again.');
       }
     } catch (error) {
       setsentotp(false);
-      setError('Unable to send verification email. Please try again.');
+      toast.error('Unable to send verification email. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -100,13 +99,13 @@ export default function RegisterPage() {
 
   const validateVerification = () => {
     if (!formData.email.trim()) {
-      setError('Please enter the email address used to register.');
+      toast.error('Please enter the email address used to register.');
       return false;
     }
 
     const otpRegex = /^\d{6}$/;
     if (!otpRegex.test(formData.verificationCode.trim())) {
-      setError('Please enter the 6-digit verification code.');
+      toast.error('Please enter the 6-digit verification code.');
       return false;
     }
 
@@ -115,8 +114,6 @@ export default function RegisterPage() {
 
   const verifyemail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-
     if (!validateVerification()) {
       return;
     }
@@ -132,11 +129,11 @@ export default function RegisterPage() {
       if (res.status === 'success') {
         window.location.href = '/login';
       } else {
-        setError(res.message || 'Unable to verify your email. Please try again.');
+        toast.error(res.message || 'Unable to verify your email. Please try again.');
       }
     }
     catch (error) {
-      setError('Unable to verify your email. Please try again.');
+      toast.error('Unable to verify your email. Please try again.');
     } finally {
       setVerifyLoading(false);
     }
@@ -201,21 +198,6 @@ export default function RegisterPage() {
           <p className={styles.intro}>
             A few details and you’ll be ready for your next home-style order.
           </p>
-            {Error && (
-            <div className={styles.errorBanner} role="alert">
-              <AlertCircle size={18} className={styles.errorIcon} />
-              <div className={styles.errorText}>{Error}</div>
-              <button
-                type="button"
-                className={styles.errorClose}
-                onClick={() => setError("")}
-                aria-label="Dismiss error"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.fieldsRow}>
               <label className={styles.field}>

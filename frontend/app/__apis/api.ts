@@ -9,8 +9,7 @@ const Api = {
     try {
       const response = await fetch(`${API_BASE_URL}/api/health`);
       return await response.json();
-    } catch (error) {
-      console.error("Health check failed:", error);
+    } catch {
       return { status: "error" };
     }
   },
@@ -87,8 +86,7 @@ const Api = {
         return data;
       }
       return DEFAULT_MENU_ITEMS;
-    } catch (error) {
-      console.error("Error fetching menu items:", error);
+    } catch {
       return DEFAULT_MENU_ITEMS;
     }
   },
@@ -141,7 +139,6 @@ const Api = {
     }
 
     if (!response.ok) {
-      console.error("Orders API error:", data);
     }
 
     return data;

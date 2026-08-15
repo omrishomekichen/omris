@@ -77,7 +77,7 @@ export default function OrdersPage() {
 
         // No token = user is not logged in
         if (!token) {
-         toast.error("Please login first")
+          toast.error("Please log in to view your orders.");
 
           setUserLogin(false);
           setActiveOrders([]);
@@ -89,17 +89,12 @@ export default function OrdersPage() {
         // Token exists
         setUserLogin(true);
 
-        toast.error("Fetching orders using authentication token");
-
         const response: OrdersResponse = await Api.orders(token);
 
        
 
         if (!response?.success) {
-        toast.error(
-            "Orders API returned an error:",
-            response?.message
-          );
+          toast.error(response?.message || "Unable to load your orders. Please try again.");
 
           setActiveOrders([]);
           setPastOrders([]);
@@ -110,8 +105,6 @@ export default function OrdersPage() {
         const orders = Array.isArray(response.orders)
           ? response.orders
           : [];
-
-        console.log("Received orders:", orders);
 
         const completedStatuses: OrderStatus[] = [
           "delivered",
@@ -141,11 +134,8 @@ export default function OrdersPage() {
 
         setActiveOrders(active);
         setPastOrders(past);
-      } catch (error) {
-        console.error(
-          "Error fetching orders:",
-          error
-        );
+      } catch {
+        toast.error("Unable to load your orders. Please try again.");
 
         setActiveOrders([]);
         setPastOrders([]);

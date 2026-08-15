@@ -8,19 +8,16 @@ import {
   KeyRound,
   Mail,
   ShieldCheck,
-  AlertCircle,
-  X,
 } from "lucide-react";
 import styles from "../auth-pages.module.css";
 import { useState } from "react";
 import Api from "../../__apis/api";
+import toast from "react-hot-toast";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
 
   const [verificationCode, setVerificationCode] = useState("");
-
-  const [error, setError] = useState("");
 
   const [sentotp, setSentOtp] = useState(false);
 
@@ -38,10 +35,8 @@ export default function ForgotPasswordPage() {
   ) => {
     e.preventDefault();
 
-    setError("");
-
     if (!email) {
-      setError("Please enter your email address.");
+      toast.error("Please enter your email address.");
       return;
     }
 
@@ -53,15 +48,13 @@ export default function ForgotPasswordPage() {
       if (req.status === "success") {
         setSentOtp(true);
       } else {
-        setError(
+        toast.error(
           req.message ||
             "Unable to send OTP. Please try again."
         );
       }
-    } catch (err) {
-      console.error(err);
-
-      setError(
+    } catch {
+      toast.error(
         "An error occurred while sending the OTP."
       );
     } finally {
@@ -74,7 +67,6 @@ export default function ForgotPasswordPage() {
   
 
   const handleContinue = () => {
-    setError("");
     setPassOpen(true);
   };
 
@@ -87,32 +79,30 @@ export default function ForgotPasswordPage() {
   ) => {
     e.preventDefault();
 
-    setError("");
-
     if (!verificationCode || !/^[0-9]{6}$/.test(verificationCode.trim())) {
-      setError("Please enter the six-digit reset code sent to your email.");
+      toast.error("Please enter the six-digit reset code sent to your email.");
       return;
     }
 
     if (!newPassword) {
-      setError("Please enter a new password.");
+      toast.error("Please enter a new password.");
       return;
     }
 
     if (newPassword.length < 8) {
-      setError(
+      toast.error(
         "Password must be at least 8 characters long."
       );
       return;
     }
 
     if (!confirmPassword) {
-      setError("Please confirm your password.");
+      toast.error("Please confirm your password.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -128,15 +118,13 @@ export default function ForgotPasswordPage() {
       if (req.status === "success") {
         window.location.href = "/login";
       } else {
-        setError(
+        toast.error(
           req.message ||
             "Unable to reset password. Please try again."
         );
       }
-    } catch (err) {
-      console.error(err);
-
-      setError(
+    } catch {
+      toast.error(
         "An error occurred while resetting your password."
       );
     } finally {
@@ -221,32 +209,6 @@ export default function ForgotPasswordPage() {
               No worries. We’ll email you a 6-digit code to
               choose a new one.
             </p>
-
-            {/* ERROR */}
-            {error && (
-              <div
-                className={styles.errorBanner}
-                role="alert"
-              >
-                <AlertCircle
-                  size={18}
-                  className={styles.errorIcon}
-                />
-
-                <div className={styles.errorText}>
-                  {error}
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.errorClose}
-                  onClick={() => setError("")}
-                  aria-label="Dismiss error"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
 
             <form
               className={styles.form}
@@ -388,32 +350,6 @@ export default function ForgotPasswordPage() {
               Make sure both passwords match.
             </p>
 
-            {/* ERROR */}
-            {error && (
-              <div
-                className={styles.errorBanner}
-                role="alert"
-              >
-                <AlertCircle
-                  size={18}
-                  className={styles.errorIcon}
-                />
-
-                <div className={styles.errorText}>
-                  {error}
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.errorClose}
-                  onClick={() => setError("")}
-                  aria-label="Dismiss error"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
             <form
               className={styles.form}
               onSubmit={handlePasswordSubmit}
@@ -530,7 +466,6 @@ export default function ForgotPasswordPage() {
               className={styles.backLink}
               onClick={() => {
                 setPassOpen(false);
-                setError("");
               }}
             >
               <ArrowLeft size={16} />

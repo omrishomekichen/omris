@@ -340,12 +340,7 @@ orderRouter.post(
           );
 
         
-        } catch (mailError) {
-          console.error(
-            "[Order Mail] Admin email error:",
-            mailError,
-          );
-        }
+        } catch {}
 
        
 
@@ -370,12 +365,7 @@ orderRouter.post(
             );
 
            
-          } catch (mailError) {
-            console.error(
-              "[Order Mail] Customer email error:",
-              mailError,
-            );
-          }
+          } catch {}
         }
       })();
 
@@ -417,11 +407,6 @@ orderRouter.post(
         },
       });
     } catch (error) {
-      console.error(
-        "Place order error:",
-        error,
-      );
-
       return res.status(500).json({
         success: false,
 
@@ -493,11 +478,6 @@ orderRouter.post("/user/orders", async (req, res) => {
       orders,
     });
   } catch (error) {
-    console.error(
-      "Error fetching user orders:",
-      error
-    );
-
     if (
       error instanceof jwt.JsonWebTokenError
     ) {
