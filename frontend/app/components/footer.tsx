@@ -79,9 +79,25 @@ export default function Footer() {
                 <span>+91 63014 53780</span>
               </a>
 
-              <a href="mailto:orders@omrishomekichen.com" className="contact-item">
+              <a href="tel:+917670851967" className="contact-item">
+                <Phone size={16} className="contact-icon" />
+                <span>+91 76708 51967</span>
+              </a>
+
+              <a
+                href="https://wa.me/916301453780"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Chat with Omri's Home Kichen on WhatsApp"
+                className="contact-item"
+              >
+                <MessageCircle size={16} className="contact-icon" />
+                <span>WhatsApp: +91 63014 53780</span>
+              </a>
+
+              <a href="mailto:omrishomekichen@gmail.com" className="contact-item">
                 <Mail size={16} className="contact-icon" />
-                <span>orders@omrishomekichen.com</span>
+                <span>omrishomekichen@gmail.com</span>
               </a>
 
               <div className="contact-item">
@@ -92,7 +108,7 @@ export default function Footer() {
 
 
             <div className="footer-social-row">
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram" className="social-btn">
+              <a href="https://www.instagram.com/omrishomekichen" target="_blank" rel="noreferrer" aria-label="Instagram" className="social-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
               </a>
               <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook" className="social-btn">

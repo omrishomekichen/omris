@@ -115,7 +115,7 @@ export const emailLayout = ({ title, preheader, content }: EmailLayoutOptions): 
       </div>
       <div class="email-footer">
         <p>&copy; ${new Date().getFullYear()} Omri's Home Kichen. All rights reserved.</p>
-        <p>Hyderabad, Telangana, India • Support: <a href="mailto:orders@omrishomekichen.com">orders@omrishomekichen.com</a></p>
+        <p>Hyderabad, Telangana, India • Support: <a href="mailto:omrishomekichen@gmail.com">omrishomekichen@gmail.com</a></p>
         <p style="margin-top: 12px; color: #94a3b8; font-size: 11px;">If you did not initiate this request, please ignore this email or contact support immediately.</p>
       </div>
     </div>

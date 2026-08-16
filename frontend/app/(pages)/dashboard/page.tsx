@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Flame,
   Star,
+  MessageCircle,
 } from "lucide-react";
 import Api from "../../__apis/api";
 import { useCart } from "../../components/CartContext";
@@ -412,57 +413,8 @@ export default function DashboardPage() {
                         <p className="product-desc">{product.description}</p>
 
 
-                        {priceOpts.length > 1 && (
-                          <div className="dash-size-selector-box">
-                            <div className="size-selector-header">
-                              <span className="size-selector-label">
-                                Select Size:
-                              </span>
-                              <span className="starting-price-note">
-                                Basic Price First
-                              </span>
-                            </div>
-                            <div className="size-pills-row">
-                              {priceOpts.map((opt: any, idx: number) => {
-                                const label = `${opt.quantity}${opt.unit}`;
-                                const isSelected = selectedSizeIdx === idx;
-                                return (
-                                  <button
-                                    key={idx}
-                                    type="button"
-                                    className={`size-pill ${
-                                      isSelected ? "selected" : ""
-                                    }`}
-                                    onClick={() =>
-                                      setSelectedSizes((prev) => ({
-                                        ...prev,
-                                        [product.id]: idx,
-                                      }))
-                                    }
-                                  >
-                                    <span className="size-name">{label}</span>
-                                    <span className="size-price">
-                                      ₹{opt.price}
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-
-                        <div className="menu-highlights-chips">
-                          <span className="chip-tag">
-                            <ShieldCheck size={12} />
-                            <span>6 Months Shelf Life</span>
-                          </span>
-                          <span className="chip-tag">
-                            <Flame size={12} />
-                            <span>Cold-Pressed Oil</span>
-                          </span>
-                        </div>
-
+                 
+                       
 
                         <div className="product-action-row">
                           <div className="price-display-box">
@@ -644,6 +596,17 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <a
+        href="https://wa.me/916301453780"
+        target="_blank"
+        rel="noreferrer"
+        className="whatsapp-float"
+        aria-label="Chat with us on WhatsApp"
+        title="Chat with us on WhatsApp"
+      >
+        <MessageCircle size={28} aria-hidden="true" />
+      </a>
     </div>
   );
 }
