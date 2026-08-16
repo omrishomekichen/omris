@@ -177,6 +177,57 @@ const Api = {
       return { status: "error", success: false };
     }
   },
+  createReview: async (reviewData: {
+    orderId: string;
+    productName: string;
+    productId?: string;
+    rating: number;
+    comment: string;
+  }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(reviewData),
+      });
+      return await response.json();
+    } catch {
+      return { success: false, message: "Network error submitting review." };
+    }
+  },
+  getRecentReviews: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/recent`);
+      return await response.json();
+    } catch {
+      return { success: false, reviews: [] };
+    }
+  },
+  getProductReviews: async (productId: string) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/reviews/product/${encodeURIComponent(productId)}`
+      );
+      return await response.json();
+    } catch {
+      return { success: false, reviews: [], averageRating: 5.0, totalReviews: 0 };
+    }
+  },
+  getOrderReviews: async (orderId: string) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/reviews/order/${encodeURIComponent(orderId)}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      return await response.json();
+    } catch {
+      return { success: false, reviews: [] };
+    }
+  },
   logout: async () => {
     await fetch(`${API_BASE_URL}/api/logout`, {
       method: "POST",

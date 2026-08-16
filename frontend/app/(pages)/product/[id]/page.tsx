@@ -34,6 +34,26 @@ export default function ProductDetailPage() {
   const [selectedSizeIdx, setSelectedSizeIdx] = useState<number>(0);
   const [itemQuantity, setItemQuantity] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
+  const [productReviews, setProductReviews] = useState<any[]>([]);
+  const [averageRating, setAverageRating] = useState<number>(5.0);
+  const [totalReviewsCount, setTotalReviewsCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!productId) return;
+    const fetchReviews = async () => {
+      try {
+        const res = await Api.getProductReviews(productId);
+        if (res?.success) {
+          setProductReviews(res.reviews || []);
+          setAverageRating(res.averageRating || 5.0);
+          setTotalReviewsCount(res.totalReviews || res.reviews?.length || 0);
+        }
+      } catch {
+        console.error("Failed to load product reviews");
+      }
+    };
+    fetchReviews();
+  }, [productId]);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -318,6 +338,64 @@ export default function ProductDetailPage() {
 
         </section>
 
+        {/* Customer Reviews Section */}
+        <section className="product-reviews-section">
+          <div className="reviews-header-row">
+            <h2 className="reviews-section-title">Verified Customer Reviews ({totalReviewsCount})</h2>
+            <div className="rating-summary-pill">
+              <span className="avg-num">{averageRating}</span>
+              <div className="stars-inline">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    size={14}
+                    fill={s <= Math.round(averageRating) ? "#d97706" : "transparent"}
+                    color={s <= Math.round(averageRating) ? "#d97706" : "#cbd5e1"}
+                  />
+                ))}
+              </div>
+              <span className="summary-label">Based on verified orders</span>
+            </div>
+          </div>
+
+          {productReviews.length > 0 ? (
+            <div className="product-reviews-grid">
+              {productReviews.map((rev, idx) => (
+                <div key={rev._id || idx} className="product-review-card">
+                  <div className="review-card-top">
+                    <div className="reviewer-info">
+                      <div className="avatar-circle">
+                        {rev.userName ? rev.userName.charAt(0).toUpperCase() : "C"}
+                      </div>
+                      <div>
+                        <h4 className="reviewer-name">{rev.userName}</h4>
+                        <span className="verified-tag">✓ Verified Purchase</span>
+                      </div>
+                    </div>
+                    <div className="stars-row">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          size={14}
+                          fill={s <= rev.rating ? "#d97706" : "transparent"}
+                          color={s <= rev.rating ? "#d97706" : "#cbd5e1"}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="review-comment">"{rev.comment}"</p>
+                  <span className="review-date">
+                    {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }) : "Recent"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-reviews-box">
+              <p>No verified customer reviews yet for this product. Place an order and be the first to share your feedback!</p>
+            </div>
+          )}
+        </section>
 
         {relatedProducts.length > 0 && (
           <section className="related-products-section">

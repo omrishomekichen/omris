@@ -2709,3 +2709,153 @@
   color: #8d706b;
   font-weight: 500;
 }
+
+/* Dashboard Reviews Section & Horizontal Auto-Scrolling Marquee */
+.dashboard-reviews-section {
+  padding: 4.5rem 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fff8f3 100%);
+  border-top: 1px solid rgba(225, 191, 184, 0.5);
+  border-bottom: 1px solid rgba(225, 191, 184, 0.5);
+  overflow: hidden;
+}
+
+.reviews-section-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 3rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviews-section-header h2 {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.reviews-section-header p {
+  font-size: 0.95rem;
+  color: #59413c;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.reviews-marquee-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.reviews-marquee-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: reviewsMarquee 35s linear infinite;
+}
+
+.reviews-marquee-wrapper:hover .reviews-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes reviewsMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.review-card-item {
+  width: 320px;
+  flex: 0 0 320px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e1bfb8;
+  padding: 1.4rem;
+  box-shadow: 0 6px 20px rgba(101, 7, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(101, 7, 0, 0.12);
+  border-color: #650700;
+}
+
+.review-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.review-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #650700;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reviewer-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.verified-badge {
+  font-size: 0.72rem;
+  color: #166534;
+  font-weight: 600;
+}
+
+.review-stars-row {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.review-comment-text {
+  font-size: 0.88rem;
+  color: #44322e;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.review-card-footer {
+  display: flex;
+  align-items: center;
+}
+
+.reviewed-product-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #650700;
+  background: #fff8f3;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #e1bfb8;
+}

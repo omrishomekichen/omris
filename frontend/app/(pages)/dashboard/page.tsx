@@ -34,8 +34,23 @@ export default function DashboardPage() {
   const [expandedInfoMap, setExpandedInfoMap] = useState<
     Record<string, boolean>
   >({});
+  const [reviews, setReviews] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { addItem, getQuantity, updateQuantity } = useCart();
+
+  useEffect(() => {
+    const fetchRecentReviews = async () => {
+      try {
+        const res = await Api.getRecentReviews();
+        if (res?.success && Array.isArray(res.reviews)) {
+          setReviews(res.reviews.slice(0, 10));
+        }
+      } catch {
+        console.error("Failed to load customer reviews.");
+      }
+    };
+    fetchRecentReviews();
+  }, []);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -558,6 +573,60 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {/* Customer Reviews Auto-Scrolling Marquee Section */}
+      {reviews.length > 0 && (
+        <section className="dashboard-reviews-section">
+          <div className="section-container">
+            <div className="reviews-section-header">
+              <div className="simple-badge">
+                <Star size={14} fill="#d97706" color="#d97706" />
+                <span>Verified Customer Feedback</span>
+              </div>
+              <h2>Loved by Artisanal Spice Enthusiasts</h2>
+              <p>Read real stories and verified reviews from families across India who enjoy Omri's Home Kitchen pickles.</p>
+            </div>
+
+            <div className="reviews-marquee-wrapper">
+              <div className="reviews-marquee-track">
+                {[...reviews, ...reviews].map((rev, index) => (
+                  <div key={`${rev._id || index}-${index}`} className="review-card-item">
+                    <div className="review-card-top">
+                      <div className="review-user-info">
+                        <div className="avatar-circle">
+                          {rev.userName ? rev.userName.charAt(0).toUpperCase() : "C"}
+                        </div>
+                        <div>
+                          <h4 className="reviewer-name">{rev.userName}</h4>
+                          <span className="verified-badge">✓ Verified Buyer</span>
+                        </div>
+                      </div>
+                      <div className="review-stars-row">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            size={14}
+                            fill={s <= rev.rating ? "#d97706" : "transparent"}
+                            color={s <= rev.rating ? "#d97706" : "#cbd5e1"}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="review-comment-text">"{rev.comment}"</p>
+
+                    <div className="review-card-footer">
+                      <span className="reviewed-product-pill">
+                        🍃 {rev.productName}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="contact-banner">
         <div className="section-container banner-box">

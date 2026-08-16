@@ -18,6 +18,8 @@ import {
   HelpCircle,
   AlertTriangle,
   ShoppingBag,
+  Star,
+  X,
 } from "lucide-react";
 
 import Api from "../../../__apis/api";
@@ -63,6 +65,11 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderReviews, setOrderReviews] = useState<Record<string, { rating: number; comment: string }>>({});
+  const [activeReviewItem, setActiveReviewItem] = useState<OrderItem | null>(null);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>("");
+  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
 
   useEffect(() => {
     if (!orderIdParam) return;
@@ -81,6 +88,15 @@ export default function OrderDetailPage() {
         }
 
         setOrder(res.order);
+
+        const revRes = await Api.getOrderReviews(res.order.orderId || res.order._id || orderIdParam);
+        if (revRes?.success && Array.isArray(revRes.reviews)) {
+          const map: Record<string, { rating: number; comment: string }> = {};
+          revRes.reviews.forEach((r: any) => {
+            map[r.productName] = { rating: r.rating, comment: r.comment };
+          });
+          setOrderReviews(map);
+        }
       } catch (err) {
         console.error("Error fetching order details:", err);
         setError("Unable to load order details. Please try again.");
@@ -91,6 +107,82 @@ export default function OrderDetailPage() {
 
     fetchOrderDetail();
   }, [orderIdParam]);
+
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const QUICK_TAGS = [
+    "🌶️ Super Spicy",
+    "👵 Grandma's Recipe",
+    "🌿 100% Fresh",
+    "🏺 Perfect Jar",
+    "🔥 Authentic Andhra Flavor",
+    "⭐ Must-Try Delicacy",
+  ];
+
+  const handleToggleTag = (tag: string) => {
+    const isSelected = selectedTags.includes(tag);
+    let newTags: string[];
+    if (isSelected) {
+      newTags = selectedTags.filter((t) => t !== tag);
+    } else {
+      newTags = [...selectedTags, tag];
+    }
+    setSelectedTags(newTags);
+
+    const baseComment = reviewComment.split("\n\nTags: ")[0];
+    if (newTags.length > 0) {
+      setReviewComment(`${baseComment.trim()}\n\nTags: ${newTags.join(", ")}`);
+    } else {
+      setReviewComment(baseComment.trim());
+    }
+  };
+
+  const handleOpenReview = (item: OrderItem) => {
+    const existing = orderReviews[item.name];
+    setActiveReviewItem(item);
+    setReviewRating(existing ? existing.rating : 5);
+    setReviewComment(existing ? existing.comment : "");
+    setSelectedTags([]);
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeReviewItem || !order) return;
+
+    if (!reviewComment.trim()) {
+      toast.error("Please write a short comment for your review.");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      const res = await Api.createReview({
+        orderId: order.orderId || order._id || orderIdParam || "",
+        productName: activeReviewItem.name,
+        productId: activeReviewItem._id || activeReviewItem.name.toLowerCase().replace(/\s+/g, "-"),
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+
+      if (res?.success) {
+        toast.success("🎉 +50 Spice Points Earned! Badge Unlocked: Gourmet Reviewer 🏅", {
+          duration: 4500,
+          style: { background: "#78350f", color: "#fef3c7", fontWeight: "bold" },
+        });
+        setOrderReviews((prev) => ({
+          ...prev,
+          [activeReviewItem.name]: { rating: reviewRating, comment: reviewComment },
+        }));
+        setActiveReviewItem(null);
+      } else {
+        toast.error(res?.message || "Failed to submit review.");
+      }
+    } catch {
+      toast.error("An error occurred while submitting your review.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const formatDate = (dateStr?: string): string => {
     if (!dateStr) return "N/A";
@@ -356,6 +448,19 @@ export default function OrderDetailPage() {
           </div>
         )}
 
+        {/* Completed Order Review Call-To-Action Banner */}
+        {order.status === "delivered" && (
+          <div className="completed-order-review-banner">
+            <div className="banner-content">
+              <Star size={24} fill="#d97706" color="#d97706" style={{ flexShrink: 0 }} />
+              <div>
+                <h3>Order Delivered! How was your experience?</h3>
+                <p>We'd love to hear your feedback! Click "Write Review" on any of the items below to leave your rating and comments.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content 2-Column Grid */}
         <div className="order-detail-grid">
           {/* Left Column: Ordered Items List */}
@@ -369,6 +474,7 @@ export default function OrderDetailPage() {
               {items.map((item, idx) => {
                 const itemKey = `${item._id || idx}-${item.name}`;
                 const itemTotal = (item.price || 0) * (item.quantity || 1);
+                const existingReview = orderReviews[item.name];
 
                 return (
                   <div key={itemKey} className="order-item-row">
@@ -386,9 +492,33 @@ export default function OrderDetailPage() {
                         <span className="item-unit-price">
                           ₹{formatPrice(item.price)} each
                         </span>
-                        <span className="item-qty-badge">
-                          Quantity: <strong>{item.quantity}</strong>
-                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.25rem" }}>
+                          <span className="item-qty-badge">
+                            Quantity: <strong>{item.quantity}</strong>
+                          </span>
+                          {order.status !== "cancelled" && order.status !== "rejected" && (
+                            existingReview ? (
+                              <button
+                                type="button"
+                                className="review-badge-btn reviewed"
+                                onClick={() => handleOpenReview(item)}
+                                title="Edit your review"
+                              >
+                                <Star size={12} fill="#d97706" color="#d97706" />
+                                <span>{existingReview.rating}/5 Reviewed</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="review-badge-btn action"
+                                onClick={() => handleOpenReview(item)}
+                              >
+                                <Star size={12} />
+                                <span>Write Review</span>
+                              </button>
+                            )
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -488,6 +618,76 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Interactive Product Review Modal */}
+      {activeReviewItem && (
+        <div className="review-modal-backdrop" onClick={() => setActiveReviewItem(null)}>
+          <div className="review-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="review-modal-header">
+              <h3>Review {activeReviewItem.name}</h3>
+              <button
+                type="button"
+                className="close-modal-btn"
+                onClick={() => setActiveReviewItem(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitReview} className="review-modal-form">
+              <div className="star-rating-picker-group">
+                <label className="picker-label">Your Rating</label>
+                <div className="stars-row">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`star-btn ${star <= reviewRating ? "active" : ""}`}
+                      onClick={() => setReviewRating(star)}
+                    >
+                      <Star
+                        size={28}
+                        fill={star <= reviewRating ? "#d97706" : "transparent"}
+                        color={star <= reviewRating ? "#d97706" : "#cbd5e1"}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="review-comment-group">
+                <label htmlFor="reviewCommentInput" className="picker-label">Your Review & Comments</label>
+                <textarea
+                  id="reviewCommentInput"
+                  rows={4}
+                  className="review-textarea"
+                  placeholder="Tell us what you loved about this artisanal batch (taste, aroma, freshness, packaging)..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="review-modal-actions">
+                <button
+                  type="button"
+                  className="action-cancel-btn"
+                  onClick={() => setActiveReviewItem(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="action-submit-btn"
+                  disabled={submittingReview}
+                >
+                  {submittingReview ? "Submitting..." : "Submit Review"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

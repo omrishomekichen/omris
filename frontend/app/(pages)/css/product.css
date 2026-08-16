@@ -507,3 +507,118 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Product Reviews Section Styles */
+.product-reviews-section {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 2.5rem;
+  margin-bottom: 4rem;
+  box-shadow: 0 8px 28px rgba(45, 42, 38, 0.04);
+}
+
+.reviews-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f4ede6;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reviews-section-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.rating-summary-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #fff8f3;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #e1bfb8;
+}
+
+.avg-num {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #d97706;
+}
+
+.stars-inline {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.summary-label {
+  font-size: 0.78rem;
+  color: #8d706b;
+  font-weight: 500;
+}
+
+.product-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-review-card {
+  background: #fff8f3;
+  border-radius: 16px;
+  border: 1px solid #e1bfb8;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.reviewer-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.verified-tag {
+  font-size: 0.7rem;
+  color: #166534;
+  font-weight: 600;
+}
+
+.review-comment {
+  font-size: 0.88rem;
+  color: #44322e;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.review-date {
+  font-size: 0.75rem;
+  color: #8d706b;
+  margin-top: auto;
+}
+
+.no-reviews-box {
+  padding: 2rem;
+  text-align: center;
+  background: #fff8f3;
+  border-radius: 16px;
+  border: 1px dashed #e1bfb8;
+  color: #59413c;
+  font-size: 0.92rem;
+}

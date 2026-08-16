@@ -220,7 +220,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         name: `${user.firstName} ${user.lastName}`.trim(),
       },
       JWT_SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "60m" },
     );
     res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
 
