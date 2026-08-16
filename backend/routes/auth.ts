@@ -8,12 +8,17 @@ import {
   AUTH_COOKIE_NAME,
   authCookieOptions,
   JWT_SECRET,
+  getAuthToken,
 } from "../config/security";
 
 const authRouter: express.Router = express.Router();
 
 const buildUserResponse = (user: any) => ({
-  name: `${user.firstName} ${user.lastName}`.trim(),
+  id: user._id?.toString() || user.id,
+  _id: user._id?.toString() || user.id,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Customer",
   email: user.email,
   verified: user.verified,
 });
@@ -389,5 +394,66 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
     });
   }
 });
+
+const handleGetMe = async (req: Request, res: Response) => {
+  try {
+    const token = getAuthToken(req.headers.cookie);
+    if (!token) {
+      return res.status(401).json({
+        status: "error",
+        success: false,
+        message: "Authentication token missing",
+      });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId?: string;
+      id?: string;
+    };
+
+    const userId = decoded.userId || decoded.id;
+    if (!userId) {
+      return res.status(401).json({
+        status: "error",
+        success: false,
+        message: "Invalid token payload",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      success: true,
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({
+        status: "error",
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+
+    return res.status(500).json({
+      status: "error",
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+authRouter.get("/auth/me", handleGetMe);
+authRouter.post("/auth/me", handleGetMe);
+authRouter.get("/me", handleGetMe);
+authRouter.post("/me", handleGetMe);
 
 export default authRouter;

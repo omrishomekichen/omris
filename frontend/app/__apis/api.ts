@@ -140,10 +140,42 @@ const Api = {
       data = {};
     }
 
-    if (!response.ok) {
+    return data;
+  },
+  getOrderById: async (id: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/user/orders/${encodeURIComponent(id)}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    let data: any = {};
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
     }
 
     return data;
+  },
+  me: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        return { status: "error", success: false };
+      }
+
+      return await response.json();
+    } catch {
+      return { status: "error", success: false };
+    }
   },
   logout: async () => {
     await fetch(`${API_BASE_URL}/api/logout`, {

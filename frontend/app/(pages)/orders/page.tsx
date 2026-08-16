@@ -495,8 +495,8 @@ export default function OrdersPage() {
 
                                   </div>
 
-                                  <button
-                                    type="button"
+                                  <Link
+                                    href={`/orders/${order.orderId || order._id}`}
                                     className="view-details-btn"
                                   >
                                     <span>
@@ -506,7 +506,7 @@ export default function OrdersPage() {
                                     <ArrowRight
                                       size={16}
                                     />
-                                  </button>
+                                  </Link>
 
                                 </div>
 
@@ -831,6 +831,20 @@ export default function OrdersPage() {
 
 
                                 <div className="past-card-actions">
+
+                                  <Link
+                                    href={`/orders/${order.orderId || order._id}`}
+                                    className="view-details-btn"
+                                    style={{ textDecoration: "none" }}
+                                  >
+                                    <span>
+                                      View Details
+                                    </span>
+
+                                    <ArrowRight
+                                      size={14}
+                                    />
+                                  </Link>
 
                                   <Link
                                     href="/menu"

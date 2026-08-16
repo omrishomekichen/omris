@@ -1,0 +1,747 @@
+/* Order Details Page - Artisanal Omri's Home Kitchen Theme */
+
+.order-detail-root {
+  background-color: #fff8f3;
+  color: #1e1b17;
+  min-height: 100vh;
+  font-family: var(--font-sans, "Work Sans", system-ui, sans-serif);
+  padding-bottom: 5rem;
+}
+
+.order-detail-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Navigation & Top Bar */
+.order-detail-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.back-to-orders-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #650700;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  background: #ffffff;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+  transition: all 0.2s ease;
+}
+
+.back-to-orders-btn:hover {
+  background: #fdf5f0;
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(101, 7, 0, 0.12);
+}
+
+.top-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.action-outline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #e1bfb8;
+  color: #59413c;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-outline-btn:hover {
+  background: #650700;
+  color: #ffffff;
+  border-color: #650700;
+  box-shadow: 0 4px 12px rgba(101, 7, 0, 0.18);
+}
+
+/* Header Banner Card */
+.order-header-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 24px rgba(45, 42, 38, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.order-header-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: #650700;
+}
+
+.order-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.order-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.order-detail-h1 {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.order-status-badge {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.order-status-badge.status-pending,
+.order-status-badge.status-payment_verification {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.order-status-badge.status-confirmed,
+.order-status-badge.status-processing {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.order-status-badge.status-shipped {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.order-status-badge.status-delivered {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.order-status-badge.status-cancelled,
+.order-status-badge.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.order-header-meta {
+  font-size: 0.9rem;
+  color: #59413c;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.order-header-meta .meta-divider {
+  color: #e1bfb8;
+}
+
+.estimated-delivery-badge {
+  background: #fff8f3;
+  border: 1px solid #e1bfb8;
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.est-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(101, 7, 0, 0.08);
+  color: #650700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.est-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.est-label {
+  font-size: 0.75rem;
+  color: #8d706b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.est-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e1b17;
+}
+
+/* Stepper Tracker Card */
+.order-tracker-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 24px rgba(45, 42, 38, 0.05);
+}
+
+.tracker-card-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-stepper-wrapper {
+  position: relative;
+  margin: 1rem 0;
+  padding: 0 1rem;
+}
+
+.detail-stepper-track-bg {
+  position: absolute;
+  top: 22px;
+  left: 3rem;
+  right: 3rem;
+  height: 4px;
+  background: #e8e1db;
+  z-index: 1;
+}
+
+.detail-stepper-track-fill {
+  height: 100%;
+  background: #650700;
+  transition: width 0.5s ease;
+  border-radius: 999px;
+}
+
+.detail-stepper-steps {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+}
+
+.detail-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 120px;
+}
+
+.detail-step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e8e1db;
+  color: #8d706b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.detail-step.completed .detail-step-icon {
+  background: #650700;
+  color: #ffffff;
+}
+
+.detail-step.current .detail-step-icon {
+  background: #ffffff;
+  color: #650700;
+  border-color: #650700;
+  box-shadow: 0 0 0 5px rgba(101, 7, 0, 0.2);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(101, 7, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(101, 7, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(101, 7, 0, 0);
+  }
+}
+
+.detail-step-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8d706b;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.detail-step.completed .detail-step-title,
+.detail-step.current .detail-step-title {
+  color: #650700;
+  font-weight: 700;
+}
+
+.detail-step-desc {
+  font-size: 0.72rem;
+  color: #7b6560;
+  text-align: center;
+}
+
+/* Alert Banner for Cancelled Orders */
+.cancelled-alert-banner {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  color: #9f1239;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cancelled-alert-banner h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.cancelled-alert-banner p {
+  font-size: 0.88rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Two Column Layout Grid */
+.order-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Column: Items Table Card */
+.order-items-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 2rem;
+  box-shadow: 0 6px 24px rgba(45, 42, 38, 0.05);
+}
+
+.card-section-title {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f4ede6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.items-count-tag {
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #fff8f3;
+  color: #650700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #e1bfb8;
+}
+
+.items-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.order-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed #e8e1db;
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-left-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item-image-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e1bfb8;
+  background: #fff8f3;
+  flex-shrink: 0;
+}
+
+.item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-details-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item-name {
+  font-family: var(--font-serif, "Libre Caslon Text", Georgia, serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e1b17;
+  margin: 0;
+}
+
+.item-unit-price {
+  font-size: 0.85rem;
+  color: #59413c;
+}
+
+.item-qty-badge {
+  font-size: 0.8rem;
+  color: #8d706b;
+  font-weight: 500;
+}
+
+.item-right-price {
+  text-align: right;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #650700;
+}
+
+/* Right Column Cards */
+.order-sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.info-sidebar-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 1.75rem;
+  box-shadow: 0 6px 24px rgba(45, 42, 38, 0.05);
+}
+
+/* Delivery Address Content */
+.address-info-block {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.info-icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff8f3;
+  color: #650700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e1bfb8;
+  flex-shrink: 0;
+}
+
+.address-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.address-recipient-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e1b17;
+}
+
+.address-full-text {
+  font-size: 0.88rem;
+  color: #59413c;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* Payment Info Content */
+.payment-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.method-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f4ede6;
+  color: #650700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.utr-row {
+  background: #fff8f3;
+  border: 1px dashed #e1bfb8;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.utr-label {
+  font-size: 0.72rem;
+  color: #8d706b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.utr-code {
+  font-family: monospace;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1e1b17;
+}
+
+/* Financial Price Breakdown Card */
+.financial-summary-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(225, 191, 184, 0.7);
+  padding: 1.75rem;
+  box-shadow: 0 6px 24px rgba(45, 42, 38, 0.05);
+}
+
+.summary-rows-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #59413c;
+}
+
+.free-tag {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.summary-total-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid #650700;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e1b17;
+}
+
+.summary-total-amount {
+  font-size: 1.35rem;
+  color: #650700;
+}
+
+/* Help & Support Banner */
+.support-banner-card {
+  background: linear-gradient(135deg, #650700 0%, #3e0400 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 8px 24px rgba(101, 7, 0, 0.25);
+}
+
+.support-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.support-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.support-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.support-sub {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.support-contact-link {
+  color: #fde68a;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .order-detail-container {
+    padding: 1.5rem 1rem;
+  }
+  .order-header-card {
+    flex-direction: column;
+  }
+  .order-detail-top-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .detail-stepper-wrapper {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+  .detail-stepper-steps {
+    min-width: 480px;
+  }
+  .detail-stepper-track-bg {
+    min-width: 420px;
+  }
+}
+
+/* Print Styles for Invoice Printing */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  .order-detail-root {
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .order-detail-top-nav,
+  .top-action-group,
+  .back-to-orders-btn,
+  .support-banner-card,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  .order-detail-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .order-header-card,
+  .order-tracker-card,
+  .order-items-card,
+  .info-sidebar-card,
+  .financial-summary-card {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+    break-inside: avoid;
+  }
+
+  .order-detail-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

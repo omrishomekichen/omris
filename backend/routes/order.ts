@@ -425,68 +425,84 @@ orderRouter.post(
 
 
 
-orderRouter.post("/user/orders", async (req, res) => {
+orderRouter.post("/user/orders", async (req: Request, res: Response) => {
   try {
-    const token = getAuthToken(req.headers.cookie);
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication is required",
-      });
-    }
-
-    const decoded = jwt.verify(
-      token,
-      JWT_SECRET
-    ) as {
-      userId?: string;
-      id?: string;
-    };
-
-    const userId =
-      decoded.userId || decoded.id;
+    const userId = getUserIdFromToken(req);
 
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Invalid authentication token",
+        message: "Invalid or missing authentication token",
       });
     }
 
-    const orders = await Order.find({
-      userId,
-    }).sort({
-      createdAt: -1,
-    });
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       orders,
     });
   } catch (error) {
-    console.error(
-      "Error fetching user orders:",
-      error
-    );
-
-    if (
-      error instanceof jwt.JsonWebTokenError
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token",
-      });
-    }
-
+    console.error("Error fetching user orders:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch orders",
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
+
+const handleGetSingleOrder = async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or missing authentication token",
+      });
+    }
+
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : (rawId as string);
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const query = isObjectId
+      ? { $or: [{ _id: id }, { orderId: id }], userId }
+      : { orderId: id, userId };
+
+    const order = await Order.findOne(query);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching single order details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch order details",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+orderRouter.get("/user/orders/:id", handleGetSingleOrder);
+orderRouter.post("/user/orders/:id", handleGetSingleOrder);
+
 export default orderRouter;
+

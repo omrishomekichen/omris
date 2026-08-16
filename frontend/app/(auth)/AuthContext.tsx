@@ -33,17 +33,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
+    const checkAuth = async () => {
+      const savedUser = localStorage.getItem("user");
+      if (savedUser) {
+        try {
+          if (savedUser.startsWith("{")) {
+            setUser(JSON.parse(savedUser));
+          } else {
+            setUser({ id: "1", email: savedUser, name: savedUser });
+          }
+        } catch {}
+      }
+
       try {
-        if (savedUser.startsWith("{")) {
-          setUser(JSON.parse(savedUser));
-        } else {
-          setUser({ id: "1", email: savedUser, name: savedUser });
+        const res = await Api.me();
+        if (res?.status === "success" && res?.user) {
+          setUser(res.user);
+          localStorage.setItem("user", JSON.stringify(res.user));
+        } else if (res?.status === "error") {
+          localStorage.removeItem("user");
+          setUser(null);
         }
-      } catch {}
-    }
-    setLoading(false);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
