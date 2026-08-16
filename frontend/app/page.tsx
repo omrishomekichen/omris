@@ -1,14 +1,15 @@
-'use client'
-
+import type { Metadata } from "next";
 import DashboardPage from "./(pages)/dashboard/page";
-import {useEffect} from "react";
-import Api from "../app/__apis/api"
+
+export const metadata: Metadata = {
+  title: "Homemade Pickles & Traditional Spices",
+  description:
+    "Shop authentic, home-made pickles and traditional spices from Omri's Home Kichen, handcrafted in small batches in Hyderabad.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
-  
-  useEffect(() => {
-    const res = Api.health();
-  }, []);
-
   return <DashboardPage />;
 }
