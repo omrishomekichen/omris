@@ -12,7 +12,7 @@ dotenv.config();
 const app: express.Express = express();
 app.set("trust proxy", 1);
 
-const allowedOrigins = (process.env.FRONTEND_ORIGI || "http://localhost:3000")
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:3000")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
