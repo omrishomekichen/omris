@@ -506,19 +506,119 @@
 }
 
 @media (max-width: 768px) {
+  .orders-page-root {
+    padding-bottom: 3rem;
+  }
+
+  .orders-container {
+    padding: 1.75rem 1rem;
+  }
+
+  .orders-header-block {
+    margin-bottom: 1.75rem;
+  }
+
+  .orders-header-title {
+    font-size: 2rem;
+    line-height: 1.15;
+  }
+
+  .orders-header-sub {
+    font-size: 0.95rem;
+  }
+
+  .orders-tabs-bar {
+    width: calc(100% + 2rem);
+    margin-left: -1rem;
+    padding: 0 1rem 1rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    margin-bottom: 1.75rem;
+  }
+
+  .orders-tab-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .section-heading {
+    font-size: 1.5rem;
+  }
+
+  .active-order-card {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .order-meta-pill-row,
+  .past-order-meta {
+    flex-wrap: wrap;
+  }
+
+  .estimated-delivery-title {
+    font-size: 1.2rem;
+  }
+
   .progress-tracker-wrapper {
     display: none;
   }
+
+  .active-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .past-order-card {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+    padding: 1.25rem;
   }
+
+  .past-card-left {
+    align-items: flex-start;
+    gap: 0;
+  }
+
   .past-card-actions {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
+
+  .reorder-btn {
+    justify-content: center;
+  }
+
   .past-order-thumb {
     display: none;
+  }
+
+  .orders-empty-state {
+    padding: 3rem 1.25rem;
+    margin: 1rem auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .orders-header-title {
+    font-size: 1.75rem;
+  }
+
+  .active-card-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .view-details-btn {
+    font-size: 0.75rem;
+  }
+
+  .past-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reorder-btn {
+    width: 100%;
   }
 }

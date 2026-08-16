@@ -807,3 +807,72 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  .checkout-page-root {
+    padding-bottom: 3rem;
+  }
+
+  .checkout-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .checkout-stepper-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .checkout-step-panel,
+  .summary-card,
+  .upi-qr-panel {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .panel-title-row {
+    margin-bottom: 1.25rem;
+  }
+
+  .panel-title-row h2 {
+    font-size: 1.3rem;
+  }
+
+  .shipping-option-card,
+  .payment-option-card {
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .option-details {
+    min-width: 0;
+  }
+
+  .option-price {
+    white-space: nowrap;
+  }
+
+  .step-actions-row {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .continue-step-btn,
+  .place-order-final-btn,
+  .prev-step-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .summary-item-row {
+    align-items: flex-start;
+  }
+
+  .coupon-input-row {
+    flex-wrap: wrap;
+  }
+
+  .coupon-input-row input {
+    min-width: 0;
+    flex: 1 1 170px;
+  }
+}

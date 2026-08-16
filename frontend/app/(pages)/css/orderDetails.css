@@ -704,6 +704,49 @@
   .detail-stepper-track-bg {
     min-width: 420px;
   }
+
+  .top-action-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .action-outline-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .order-header-card,
+  .order-items-card,
+  .info-sidebar-card,
+  .financial-summary-card {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .order-detail-h1 {
+    font-size: 1.55rem;
+  }
+
+  .order-item-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .item-left-block {
+    width: 100%;
+  }
+
+  .item-right-price {
+    align-self: flex-end;
+  }
+
+  .cancelled-alert-banner,
+  .support-banner-card,
+  .completed-order-review-banner .banner-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .completed-order-review-banner {

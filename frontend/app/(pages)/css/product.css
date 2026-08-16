@@ -508,6 +508,69 @@
   }
 }
 
+@media (max-width: 640px) {
+  .product-detail-root {
+    padding-bottom: 3rem;
+  }
+
+  .product-detail-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .product-breadcrumb {
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .product-hero-grid {
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .gallery-main-frame {
+    border-radius: 16px;
+  }
+
+  .product-main-title {
+    font-size: 2rem;
+  }
+
+  .product-size-card,
+  .product-reviews-section,
+  .artisanal-story-section {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .quantity-add-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quantity-counter,
+  .add-to-cart-primary {
+    width: 100%;
+  }
+
+  .quantity-counter {
+    justify-content: space-between;
+  }
+
+  .key-badges-grid,
+  .ingredients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reviews-section-title {
+    font-size: 1.4rem;
+  }
+
+  .product-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Product Reviews Section Styles */
 .product-reviews-section {
   background: #ffffff;
