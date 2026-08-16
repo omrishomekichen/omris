@@ -35,13 +35,13 @@ export default function Footer() {
               <div className="footer-logo-wrapper">
                 <img
                   src="/logo.jpeg"
-                  alt="Omri's Home Kitchen Logo"
+                  alt="Omri's Home Kichen Logo"
                   className="footer-logo-img"
                 />
               </div>
               <div className="footer-brand-text">
                 <span className="footer-brand-title">Omri’s</span>
-                <span className="footer-brand-sub">Home Kitchen</span>
+                <span className="footer-brand-sub">Home Kichen</span>
               </div>
             </Link>
 
@@ -79,9 +79,9 @@ export default function Footer() {
                 <span>+91 63014 53780</span>
               </a>
 
-              <a href="mailto:orders@omrishomekitchen.com" className="contact-item">
+              <a href="mailto:orders@omrishomekichen.com" className="contact-item">
                 <Mail size={16} className="contact-icon" />
-                <span>orders@omrishomekitchen.com</span>
+                <span>orders@omrishomekichen.com</span>
               </a>
 
               <div className="contact-item">
@@ -109,7 +109,7 @@ export default function Footer() {
 
         <div className="footer-bottom-bar">
           <p className="footer-copyright">
-            © {new Date().getFullYear()} Omri's Home Kitchen. All rights reserved. Handcrafted with <Heart size={14} className="inline-heart" /> in India.
+            © {new Date().getFullYear()} Omri's Home Kichen. All rights reserved. Handcrafted with <Heart size={14} className="inline-heart" /> in India.
           </p>
 
           <button onClick={scrollToTop} className="scroll-top-btn" aria-label="Scroll back to top">

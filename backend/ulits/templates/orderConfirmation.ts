@@ -40,12 +40,12 @@ export const orderConfirmationTemplate = (data: OrderConfirmationOptions): strin
   const shippingVal = data.shipping || 0;
 
   return emailLayout({
-    title: `Order Confirmed #${data.orderId} - Omri's Home Kitchen`,
+    title: `Order Confirmed #${data.orderId} - Omri's Home Kichen`,
     preheader: `Thank you for your order! Order #${data.orderId} is being prepared with care.`,
     content: `
       <h2 style="color: #0f172a; margin-top: 0; font-size: 22px;">Order Confirmed! 📦</h2>
       <p style="color: #475569;">Hello ${data.customerName || "Valued Customer"},</p>
-      <p style="color: #475569;">Thank you for ordering with <strong>Omri's Home Kitchen</strong>! We're preparing your artisanal order with fresh ingredients.</p>
+      <p style="color: #475569;">Thank you for ordering with <strong>Omri's Home Kichen</strong>! We're preparing your artisanal order with fresh ingredients.</p>
 
       <div style="background-color: #fffbeb; border-radius: 12px; padding: 16px; margin: 24px 0; border: 1px solid #fef3c7;">
         <p style="margin: 2px 0; color: #92400e; font-size: 14px;"><strong>Order ID:</strong> #${data.orderId}</p>
@@ -91,7 +91,7 @@ export const orderConfirmationTemplate = (data: OrderConfirmationOptions): strin
       </div>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="https://omris-home-kitchen.vercel.app/orders" class="btn">Track Order Status</a>
+        <a href="https://omris-home-kichen.vercel.app/orders" class="btn">Track Order Status</a>
       </div>
     `,
   });

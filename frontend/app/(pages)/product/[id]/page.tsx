@@ -318,7 +318,7 @@ export default function ProductDetailPage() {
           <div className="story-card-left">
             <h2 className="story-section-title">The Artisanal Process</h2>
             <p className="story-paragraph">
-              Every jar of Omri's Home Kitchen pickle is a labor of love. We start by hand-selecting the firmest, most tart raw green mangoes directly from local family orchards. The mangoes are washed, carefully sliced, and sun-dried to concentrate their natural tanginess.
+              Every jar of Omri's Home Kichen pickle is a labor of love. We start by hand-selecting the firmest, most tart raw green mangoes directly from local family orchards. The mangoes are washed, carefully sliced, and sun-dried to concentrate their natural tanginess.
             </p>
             <p className="story-paragraph">
               Next, we prepare our signature spice blend, slow-roasting each spice to perfection before stone-grinding them. Finally, the mangoes are folded into pure cold-pressed sesame oil, allowing the deep flavors to mature naturally over weeks. No artificial colors or factory preservatives—just time and family tradition.

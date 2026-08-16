@@ -103,11 +103,11 @@ export default function Login() {
           <div className="auth-panel-header">
             <Link href="/" className="auth-brand-link">
               <div className="auth-brand-logo-wrapper">
-                <img src="/logo.jpeg" alt="Omri's Home Kitchen Logo" className="auth-brand-logo" />
+                <img src="/logo.jpeg" alt="Omri's Home Kichen Logo" className="auth-brand-logo" />
               </div>
               <div className="auth-brand-text">
                 <span className="brand-name">Omri’s</span>
-                <span className="brand-sub">Home Kitchen</span>
+                <span className="brand-sub">Home Kichen</span>
               </div>
             </Link>
             <div className="auth-badge">

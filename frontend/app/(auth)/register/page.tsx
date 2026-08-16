@@ -151,12 +151,12 @@ export default function RegisterPage() {
           <Link href="/" className={styles.brand}>
             <img
               src="/logo.jpeg"
-              alt="Omri's Home Kitchen"
+              alt="Omri's Home Kichen"
               className={styles.logo}
             />
             <span>
               <span className={styles.brandName}>Omri’s</span>
-              <span className={styles.brandSub}>Home Kitchen</span>
+              <span className={styles.brandSub}>Home Kichen</span>
             </span>
           </Link>
 

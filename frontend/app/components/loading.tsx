@@ -15,13 +15,13 @@ export default function Loading({
   message = "Crafting authentic home-style pickles...",
 }: LoadingProps) {
   return (
-    <div className="splash-overlay" role="dialog" aria-modal="true" aria-label="Loading Omri's Home Kitchen">
+    <div className="splash-overlay" role="dialog" aria-modal="true" aria-label="Loading Omri's Home Kichen">
       <div className="splash-card">
 
 
         <div className="splash-badge">
           <Sparkles size={14} className="sparkle-icon" />
-          <span>Omri's Home Kitchen</span>
+          <span>Omri's Home Kichen</span>
         </div>
 
 
@@ -29,14 +29,14 @@ export default function Loading({
           <div className="splash-logo-glow" />
           <img
             src="/logo.jpeg"
-            alt="Omri's Home Kitchen"
+            alt="Omri's Home Kichen"
             className="splash-logo-img"
           />
         </div>
 
 
         <h1 className="splash-title">
-          Omri’s <span className="splash-title-sub">Home Kitchen</span>
+          Omri’s <span className="splash-title-sub">Home Kichen</span>
         </h1>
         <p className="splash-subtitle">Artisanal Handcrafted Heritage Pickles</p>
 

@@ -145,7 +145,7 @@ export default function ForgotPasswordPage() {
           <Link href="/" className={styles.brand}>
             <img
               src="/logo.jpeg"
-              alt="Omri's Home Kitchen"
+              alt="Omri's Home Kichen"
               className={styles.logo}
             />
 
@@ -155,7 +155,7 @@ export default function ForgotPasswordPage() {
               </span>
 
               <span className={styles.brandSub}>
-                Home Kitchen
+                Home Kichen
               </span>
             </span>
           </Link>

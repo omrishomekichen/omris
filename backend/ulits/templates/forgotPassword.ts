@@ -3,7 +3,7 @@ import { emailLayout } from "./layout";
 export const forgotPasswordTemplate = (resetLink: string, name?: string): string => {
   const greeting = name ? `Hello ${name},` : "Hello,";
   return emailLayout({
-    title: "Reset Your Password - Omri's Home Kitchen",
+    title: "Reset Your Password - Omri's Home Kichen",
     preheader: "Click the link inside to safely reset your account password.",
     content: `
       <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Reset Password Request</h2>

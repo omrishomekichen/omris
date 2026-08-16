@@ -47,7 +47,7 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                     <div className="cart-item-topline">
                       <div>
                         <h3>{item.name}</h3>
-                        <p>{item.size || item.description || "Handcrafted in our home kitchen"}</p>
+                        <p>{item.size || item.description || "Handcrafted in our home kichen"}</p>
                       </div>
                       <button type="button" className="cart-remove-button" onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}>
                         <Trash2 size={18} />

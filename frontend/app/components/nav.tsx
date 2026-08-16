@@ -75,13 +75,13 @@ export default function Navbar() {
           <div className="navbar-logo-frame">
             <img
               src="/logo.jpeg"
-              alt="Omri's Home Kitchen Logo"
+              alt="Omri's Home Kichen Logo"
               className="navbar-logo-img"
             />
           </div>
           <div className="navbar-brand-text">
             <span className="brand-title">Omri’s</span>
-            <span className="brand-subtitle">Home Kitchen</span>
+            <span className="brand-subtitle">Home Kichen</span>
           </div>
         </Link>
         <div className="navbar-spacer">

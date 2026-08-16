@@ -469,7 +469,7 @@ export default function CheckoutPage() {
                           <h4>Scan QR Code to Pay</h4>
                           <p>
                             Pay <strong>{formatCurrency(grandTotal)}</strong> to
-                            Omri's Home Kitchen
+                            Omri's Home Kichen
                           </p>
                         </div>
                       </div>

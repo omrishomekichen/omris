@@ -153,8 +153,8 @@ class MailService {
   async sendWelcomeEmail(email: string, name: string) {
     return sendMail(
       email,
-      "Welcome to Omri's Home Kitchen",
-      `Welcome to Omri's Home Kitchen, ${name}!`,
+      "Welcome to Omri's Home Kichen",
+      `Welcome to Omri's Home Kichen, ${name}!`,
       undefined,
       "welcome",
       {

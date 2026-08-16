@@ -162,12 +162,12 @@ export default function DashboardPage() {
           <div className="hero-text">
             <div className="simple-badge">
               <Sparkles size={14} />
-              <span>Traditional Home Kitchen</span>
+              <span>Traditional Home Kichen</span>
             </div>
 
             <h1 className="hero-heading">
               Taste the Heritage of <br />
-              <span className="accent-text">Omri's Home Kitchen</span>
+              <span className="accent-text">Omri's Home Kichen</span>
             </h1>
 
             <p className="hero-subtext">
@@ -536,13 +536,13 @@ export default function DashboardPage() {
 
           <div className="story-content">
             <span className="simple-badge">
-              <span>About Omri's Home Kitchen</span>
+              <span>About Omri's Home Kichen</span>
             </span>
 
             <h2>From Our Kitchen to Your Dining Table</h2>
 
             <p>
-              Omri’s Home Kitchen is a small family-run business born out of a
+              Omri’s Home Kichen is a small family-run business born out of a
               love for authentic, home-style pickles. We started making pickles
               for our family and neighbors using traditional recipes handed down
               by our elders.
@@ -584,7 +584,7 @@ export default function DashboardPage() {
                 <span>Verified Customer Feedback</span>
               </div>
               <h2>Loved by Artisanal Spice Enthusiasts</h2>
-              <p>Read real stories and verified reviews from families across India who enjoy Omri's Home Kitchen pickles.</p>
+              <p>Read real stories and verified reviews from families across India who enjoy Omri's Home Kichen pickles.</p>
             </div>
 
             <div className="reviews-marquee-wrapper">
@@ -632,7 +632,7 @@ export default function DashboardPage() {
         <div className="section-container banner-box">
           <h2>Have Questions or Special Bulk Orders?</h2>
           <p>
-            We are a growing home kitchen and love connecting with our customers
+            We are a growing home kichen and love connecting with our customers
             directly!
           </p>
 
