@@ -363,8 +363,8 @@ export default function OrdersPage() {
 
                 <p className="empty-sub">
                   You haven't placed any
-                  orders with Omri's Home
-                  Kitchen yet. Explore our
+                  orders with Aira Pickles
+                  yet. Explore our
                   handcrafted selection of
                   small-batch pickles made
                   with traditional family

@@ -150,13 +150,13 @@ export default function RegisterPage() {
         <aside className={styles.story}>
           <Link href="/" className={styles.brand}>
             <img
-              src="/logo.jpeg"
-              alt="Omri's Home Kichen"
+              src="/aira-pickles-logo.png"
+              alt="Aira Pickles"
               className={styles.logo}
             />
             <span>
-              <span className={styles.brandName}>Omri’s</span>
-              <span className={styles.brandSub}>Home Kichen</span>
+              <span className={styles.brandName}>Aira</span>
+              <span className={styles.brandSub}>Pickles</span>
             </span>
           </Link>
 
@@ -171,7 +171,7 @@ export default function RegisterPage() {
 
             <p>
               Create an account to save your favourites, reorder in a moment,
-              and receive fresh updates from Omri’s kitchen.
+              and receive fresh updates from Aira Pickles.
             </p>
           </div>
 
@@ -207,7 +207,7 @@ export default function RegisterPage() {
                     name="firstName"
                     value={formData.firstName}
                     className={styles.input}
-                    placeholder="Omri"
+                    placeholder="Aira"
                     onChange={handleInputChange}
                   />
                   <UserRound

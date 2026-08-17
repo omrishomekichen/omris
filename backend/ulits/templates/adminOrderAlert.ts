@@ -35,7 +35,7 @@ export const adminOrderAlertTemplate = (data: AdminOrderAlertOptions): string =>
 
   return emailLayout({
     title: `🚨 New Order Received #${data.orderId}`,
-    preheader: `New order #${data.orderId} of ₹${data.totalPrice} received on Omri's Home Kichen`,
+    preheader: `New order #${data.orderId} of ₹${data.totalPrice} received on Aira Pickles`,
     content: `
       <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 16px; margin-bottom: 24px; border-radius: 6px;">
         <h2 style="color: #065f46; margin: 0 0 4px 0; font-size: 20px;">📦 New Order Placed!</h2>
@@ -125,7 +125,7 @@ export const adminOrderAlertTemplate = (data: AdminOrderAlertOptions): string =>
       </table>
 
       <div style="text-align: center; margin: 28px 0;">
-        <a href="https://omris-home-kichen.vercel.app/orders" class="btn" style="background-color: #059669;">Open Order Dashboard</a>
+        <a href="https://aira-pickles.vercel.app/orders" class="btn" style="background-color: #059669;">Open Order Dashboard</a>
       </div>
     `,
   });

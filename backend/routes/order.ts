@@ -16,7 +16,7 @@ import { getAuthToken, JWT_SECRET } from "../config/security";
 
 const ADMIN_EMAIL =
   process.env.ADMIN_EMAIL ||
-  "omrishomekichen@gmail.com";
+  "airapickles@gmail.com";
 
 const mailService = new MailService();
 

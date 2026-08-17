@@ -609,8 +609,8 @@ export default function OrderDetailPage() {
                 <h4 className="support-title">Need help with your order?</h4>
                 <p className="support-sub">
                   Contact our support team anytime at{" "}
-                  <a href="mailto:omrishomekichen@gmail.com" className="support-contact-link">
-                    omrishomekichen@gmail.com
+                  <a href="mailto:airapickles@gmail.com" className="support-contact-link">
+                    airapickles@gmail.com
                   </a>
                 </p>
               </div>

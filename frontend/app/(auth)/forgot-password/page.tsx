@@ -144,18 +144,18 @@ export default function ForgotPasswordPage() {
         <aside className={styles.story}>
           <Link href="/" className={styles.brand}>
             <img
-              src="/logo.jpeg"
-              alt="Omri's Home Kichen"
+              src="/aira-pickles-logo.png"
+              alt="Aira Pickles"
               className={styles.logo}
             />
 
             <span>
               <span className={styles.brandName}>
-                Omri’s
+                Aira
               </span>
 
               <span className={styles.brandSub}>
-                Home Kichen
+                Pickles
               </span>
             </span>
           </Link>

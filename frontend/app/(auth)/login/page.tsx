@@ -103,11 +103,11 @@ export default function Login() {
           <div className="auth-panel-header">
             <Link href="/" className="auth-brand-link">
               <div className="auth-brand-logo-wrapper">
-                <img src="/logo.jpeg" alt="Omri's Home Kichen Logo" className="auth-brand-logo" />
+                <img src="/aira-pickles-logo.png" alt="Aira Pickles logo" className="auth-brand-logo" />
               </div>
               <div className="auth-brand-text">
-                <span className="brand-name">Omri’s</span>
-                <span className="brand-sub">Home Kichen</span>
+                <span className="brand-name">Aira</span>
+                <span className="brand-sub">Pickles</span>
               </div>
             </Link>
             <div className="auth-badge">
@@ -182,7 +182,7 @@ export default function Login() {
               <span>Welcome Back</span>
             </div>
             <h2>Sign In to your Account</h2>
-            <p>Enter your email and password to access your Omri’s account.</p>
+            <p>Enter your email and password to access your Aira Pickles account.</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} autoComplete="off">

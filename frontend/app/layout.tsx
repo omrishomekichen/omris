@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/artisanal-hero.jpg",
-        alt: "Omri's Home Kichen handcrafted pickles",
+        alt: "Aira Pickles handcrafted pickles",
       },
     ],
   },
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
     images: ["/artisanal-hero.jpg"],
   },
   icons: {
-    icon: "/logo.jpeg",
-    apple: "/logo.jpeg",
+    icon: "/aira-pickles-logo.png",
+    apple: "/aira-pickles-logo.png",
   },
 };
 
@@ -122,7 +122,7 @@ export default function RootLayout({
               description: siteDescription,
               url: siteUrl,
               image: `${siteUrl}/artisanal-hero.jpg`,
-              email: "omrishomekichen@gmail.com",
+              email: "airapickles@gmail.com",
               telephone: "+91 63014 53780",
               address: {
                 "@type": "PostalAddress",
@@ -130,7 +130,7 @@ export default function RootLayout({
                 addressRegion: "Telangana",
                 addressCountry: "IN",
               },
-              sameAs: ["https://www.instagram.com/omrishomekichen"],
+              sameAs: ["https://www.instagram.com/airapickles"],
             }),
           }}
         />

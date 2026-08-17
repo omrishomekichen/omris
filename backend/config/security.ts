@@ -10,7 +10,7 @@ if (!jwtSecret) {
 
 export const JWT_SECRET = jwtSecret;
 
-export const AUTH_COOKIE_NAME = "omris_auth";
+export const AUTH_COOKIE_NAME = "aira_auth";
 
 export const authCookieOptions = {
   httpOnly: true,

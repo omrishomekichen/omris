@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${siteUrl}/menu`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekladgwrgfewy",
       priority: 0.9,
     },
   ];

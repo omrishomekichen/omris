@@ -74,14 +74,14 @@ export default function Navbar() {
         <Link href="/" className="navbar-brand">
           <div className="navbar-logo-frame">
             <img
-              src="/logo.jpeg"
-              alt="Omri's Home Kichen Logo"
+              src="/aira-pickles-logo.png"
+              alt="Aira Pickles logo"
               className="navbar-logo-img"
             />
           </div>
           <div className="navbar-brand-text">
-            <span className="brand-title">Omri’s</span>
-            <span className="brand-subtitle">Home Kichen</span>
+            <span className="brand-title">Aira</span>
+            <span className="brand-subtitle">Pickles</span>
           </div>
         </Link>
         <div className="navbar-spacer">

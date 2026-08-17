@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Shop Homemade Pickles & Spices",
   description:
-    "Browse Omri's Home Kichen's small-batch homemade pickles and traditional spice blends.",
+    "Browse Aira Pickles' small-batch homemade pickles and traditional spice blends.",
   alternates: {
     canonical: "/menu",
   },

@@ -4,7 +4,7 @@ import DashboardPage from "./(pages)/dashboard/page";
 export const metadata: Metadata = {
   title: "Homemade Pickles & Traditional Spices",
   description:
-    "Shop authentic, home-made pickles and traditional spices from Omri's Home Kichen, handcrafted in small batches in Hyderabad.",
+    "Shop authentic, home-made pickles and traditional spices from Aira Pickles, handcrafted in small batches in Hyderabad.",
   alternates: {
     canonical: "/",
   },

@@ -155,8 +155,8 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
     try {
       await sendMail(
         user.email,
-        "Welcome to Omri's Home Kichen",
-        `Welcome to Omri's Home Kichen, ${user.firstName}!`,
+        "Welcome to Aira Pickles",
+        `Welcome to Aira Pickles, ${user.firstName}!`,
         undefined,
         "welcome",
         { name: `${user.firstName} ${user.lastName}`.trim() },
@@ -236,7 +236,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       await sendMail(
         user.email,
         "Security Alert: New Sign-In",
-        `We noticed a new login to your Omri's Home Kichen account at ${loginTime}.`,
+        `We noticed a new login to your Aira Pickles account at ${loginTime}.`,
         undefined,
         "login_alert",
         {

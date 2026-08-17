@@ -113,12 +113,12 @@ export default function CheckoutPage() {
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode.trim().toUpperCase() === "OMRI10") {
+    if (couponCode.trim().toUpperCase() === "AIRA10") {
       setDiscountPercent(10);
       setCouponApplied(true);
       toast.success("Coupon applied: 10% off!");
     } else {
-      toast.error("Invalid coupon code. Try 'OMRI10' for 10% off!");
+      toast.error("Invalid coupon code. Try 'AIRA10' for 10% off!");
     }
   };
 
@@ -469,7 +469,7 @@ export default function CheckoutPage() {
                           <h4>Scan QR Code to Pay</h4>
                           <p>
                             Pay <strong>{formatCurrency(grandTotal)}</strong> to
-                            Omri's Home Kichen
+                            Aira Pickles
                           </p>
                         </div>
                       </div>
@@ -478,7 +478,7 @@ export default function CheckoutPage() {
                         <div className="qr-image-wrapper">
                           <img
                             src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
-                              `upi://pay?pa=6301453780@ybl&pn=Omris%20Home%20Kitchen&am=${grandTotal}&cu=INR`,
+                              `upi://pay?pa=6301453780@ybl&pn=Aira%20Pickles&am=${grandTotal}&cu=INR`,
                             )}`}
                             alt="UPI Payment QR Code"
                             className="qr-code-img"
@@ -660,7 +660,7 @@ export default function CheckoutPage() {
                   <Tag size={16} className="tag-icon" />
                   <input
                     type="text"
-                    placeholder="Coupon Code (Try OMRI10)"
+                    placeholder="Coupon Code (Try AIRA10)"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                   />

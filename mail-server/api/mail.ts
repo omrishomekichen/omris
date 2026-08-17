@@ -33,7 +33,7 @@ export const sendMail = async (
 ) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Omri's Home Kichen" <${process.env.GMAIL_USER}>`,
+      from: `"Aira Pickles" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,

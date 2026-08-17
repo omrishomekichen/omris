@@ -5,7 +5,7 @@ dotenv.config();
 
 const MAIL_API_URL =
   process.env.MAIL_SERVICE_URL ||
-  "https://omris-mail-server.vercel.app/api/mail/send";
+  "https://aira-mail-server.vercel.app/api/mail/send";
 
 interface MailPayload {
   to: string;
@@ -153,8 +153,8 @@ class MailService {
   async sendWelcomeEmail(email: string, name: string) {
     return sendMail(
       email,
-      "Welcome to Omri's Home Kichen",
-      `Welcome to Omri's Home Kichen, ${name}!`,
+      "Welcome to Aira Pickles",
+      `Welcome to Aira Pickles, ${name}!`,
       undefined,
       "welcome",
       {
