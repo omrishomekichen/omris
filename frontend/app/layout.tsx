@@ -7,50 +7,7 @@ import { Libre_Caslon_Text, Work_Sans } from "next/font/google";
 import Footer from "./components/footer";
 import { CartProvider } from "./components/CartContext";
 import { Toaster } from "react-hot-toast";
-import { siteDescription, siteName, siteUrl } from "./seo";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: siteName,
-    template: `%s | ${siteName}`,
-  },
-  description: siteDescription,
-  keywords: [
-    "homemade pickles",
-    "Indian pickles",
-    "artisan pickles",
-    "traditional spices",
-    "Hyderabad pickles",
-  ],
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    url: "/",
-    siteName,
-    title: siteName,
-    description: siteDescription,
-    images: [
-      {
-        url: "/artisanal-hero.jpg",
-        alt: "Aira Pickles handcrafted pickles",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteName,
-    description: siteDescription,
-    images: ["/artisanal-hero.jpg"],
-  },
-  icons: {
-    icon: "/aira-pickles-logo.png",
-    apple: "/aira-pickles-logo.png",
-  },
-};
 
 const libreCaslon = Libre_Caslon_Text({
   weight: ["400", "700"],
@@ -111,29 +68,6 @@ export default function RootLayout({
             />
           </CartProvider>
         </AuthProvider>
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: siteName,
-              description: siteDescription,
-              url: siteUrl,
-              image: `${siteUrl}/artisanal-hero.jpg`,
-              email: "airapickles@gmail.com",
-              telephone: "+91 63014 53780",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Hyderabad",
-                addressRegion: "Telangana",
-                addressCountry: "IN",
-              },
-              sameAs: ["https://www.instagram.com/airapickles"],
-            }),
-          }}
-        />
       </body>
     </html>
   );
