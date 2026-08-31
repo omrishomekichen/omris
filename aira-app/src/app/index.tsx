@@ -1,29 +1,59 @@
-import { Text, View, StyleSheet } from "react-native";
-import SplashScreen from "./pages/SplashScreen";
-import React, { useState } from "react";
+import React from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  View,
+} from 'react-native';
+
+import { useAuth } from '../Context/AuthContext';
+
+import LoginScreen from './pages/Login';
+import DashboardScreen from './pages/Dashboard';
+
+
 
 export default function Index() {
-  const [showSplash, setShowSplash] = useState(true);
+  const {
+    session,
+    loading,
+  } = useAuth();
 
-  if (showSplash) {
+
+
+  if (loading) {
     return (
-      <SplashScreen
-        onFinish={() => setShowSplash(false)}
-      />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator
+          size="large"
+          color="#650700"
+        />
+      </View>
+    );
+  }
+
+      
+  if (!session) {
+    return (
+      <LoginScreen />
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Your main Aira Kitchen Console */}
-    </View>
+    <DashboardScreen
+      onNavigateTab={() => {}}
+      onSelectOrder={() => {}}
+    />
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
+
+  loadingContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#faf7f3',
   },
+
 });
