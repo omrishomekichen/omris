@@ -1,39 +1,49 @@
 {
   "expo": {
-    "name": "aira",
+    "name": "Aira Pickles",
     "slug": "aira",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+
+    "icon": "./assets/images/aira-pickles-logo.png",
+
     "scheme": "aira",
-    "userInterfaceStyle": "automatic",
-    "ios": {
-      "icon": "./assets/expo.icon"
-    },
+
+    "userInterfaceStyle": "light",
+
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#4A0500",
+        "foregroundImage": "./assets/images/aira-pickles-logo.png",
+        "monochromeImage": "./assets/images/aira-pickles-logo.png"
       },
       "predictiveBackGestureEnabled": false
     },
+
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/images/aira-pickles-logo.png"
+    },
+
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/aira-pickles-logo.png"
     },
+
     "plugins": [
       "expo-router",
+      "expo-font",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#4A0500",
+          "image": "./assets/images/aira-pickles-logo.png",
+          "imageWidth": 160,
+          "resizeMode": "contain"
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
