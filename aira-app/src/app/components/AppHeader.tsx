@@ -23,6 +23,7 @@ import {
   Smartphone,
   Shield,
 } from 'lucide-react-native';
+import {useAuth} from '../../Context/AuthContext'
 
 interface NativeMobileHeaderProps {
   activeTab?: string;
@@ -43,6 +44,7 @@ const NativeMobileHeader = ({
      ===================================================== */
 
   const [profileOpen, setProfileOpen] = useState(false);
+      const { login , session,  profile,logout} = useAuth();
 
   /* =====================================================
      PAGE TITLES
@@ -511,7 +513,7 @@ const NativeMobileHeader = ({
                   LOGOUT
                   ========================================= */}
 
-              <Pressable style={styles.logoutButton}>
+              <Pressable style={styles.logoutButton} onPress={() => logout()}>
 
                 <LogOut
                   size={16}
