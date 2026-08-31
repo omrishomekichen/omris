@@ -4,28 +4,37 @@
     "slug": "aira",
     "version": "1.0.0",
     "orientation": "portrait",
+
     "icon": "./assets/images/aira-pickles-logo.png",
+
     "scheme": "aira",
+
     "userInterfaceStyle": "light",
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#4A0500",
         "foregroundImage": "./assets/images/aira-pickles-logo.png",
         "monochromeImage": "./assets/images/aira-pickles-logo.png"
       },
+
       "predictiveBackGestureEnabled": false
     },
+
     "ios": {
       "supportsTablet": true,
       "icon": "./assets/images/aira-pickles-logo.png"
     },
+
     "web": {
-      "output": "single-page",
+      "output": "single",
       "favicon": "./assets/images/aira-pickles-logo.png"
     },
+
     "plugins": [
       "expo-router",
       "expo-font",
+
       [
         "expo-splash-screen",
         {
@@ -35,8 +44,10 @@
           "resizeMode": "contain"
         }
       ],
+
       "expo-secure-store"
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
