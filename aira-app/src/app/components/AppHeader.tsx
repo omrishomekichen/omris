@@ -7,9 +7,10 @@ import {
   Pressable,
   StyleSheet,
   Modal,
-  SafeAreaView,
   ScrollView,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   Bell,
@@ -513,7 +514,7 @@ const NativeMobileHeader = ({
                   LOGOUT
                   ========================================= */}
 
-              <Pressable style={styles.logoutButton} onPress={() => logout()}>
+             <Pressable style={styles.logoutButton} onPress={() => logout()}>
 
                 <LogOut
                   size={16}

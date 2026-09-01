@@ -16,6 +16,10 @@ import Menu from './pages/Menu';
 import StockScreen from './pages/Stock';
 import ReviewsScreen from './pages/Reviews';
 import TeamScreen from './pages/Team';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Height of the tab bar's own content (paddingTop 5 + paddingBottom 7 + tab minHeight 54)
+const TAB_BAR_HEIGHT = 66;
 
 
 /* =====================================================
@@ -25,6 +29,7 @@ import TeamScreen from './pages/Team';
 function AppShell() {
   const { session, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('home');
+  const insets = useSafeAreaInsets();
 
   // Loading state — wait for Supabase session check
   if (loading) {
@@ -42,7 +47,7 @@ function AppShell() {
 
   // Logged in — full app shell
   const renderContent = () => {
-    switch (activeTab) {
+    switch (activeTab) { 
       case 'orders':
         return <OrdersScreen />;
       case 'menu':
@@ -67,22 +72,21 @@ function AppShell() {
     <View style={styles.container}>
       <NativeMobileHeader activeTab={activeTab} />
       <StatusBar barStyle="light-content" backgroundColor="#650700" />
-      {renderContent()}
+      <View style={{ flex: 1, paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}>
+        {renderContent()}
+      </View>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
     </View>
   );
 }
 
-
-/* =====================================================
-   ROOT LAYOUT — AuthProvider wraps everything
-   ===================================================== */
-
 export default function RootLayout() {
   return (
+    <SafeAreaProvider>
     <AuthProvider>
       <AppShell />
     </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 

@@ -9,6 +9,7 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Image,
 } from 'react-native';
 
 import {
@@ -24,6 +25,9 @@ import {
 } from 'lucide-react-native';
 
 import { useAuth } from '../../Context/AuthContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const AIRA_LOGO = require('../../../assets/images/aira-pickles-logo.png');
 
 /* =====================================================
    DEMO OPERATORS
@@ -37,13 +41,9 @@ import { useAuth } from '../../Context/AuthContext';
 
 export default function LoginScreen() {
 
-    const [email, setEmail] = useState(
-        'ananya@airapickles.com'
-    );
+    const [email, setEmail] = useState("");
 
-    const [password, setPassword] = useState(
-        'admin@aira2026'
-    );
+    const [password, setPassword] = useState("");
 
     const [showPassword, setShowPassword] =
         useState(false);
@@ -102,19 +102,16 @@ export default function LoginScreen() {
     }
 };
 
-``
-
-
     return (
-
-        <KeyboardAvoidingView
-            style={styles.screen}
-            behavior={
-                Platform.OS === 'ios'
-                    ? 'padding'
-                    : undefined
-            }
-        >
+        <SafeAreaView style={styles.safeArea}>
+            <KeyboardAvoidingView
+                style={styles.screen}
+                behavior={
+                    Platform.OS === 'ios'
+                        ? 'padding'
+                        : undefined
+                }
+            >
 
             <ScrollView
                 showsVerticalScrollIndicator={false}
@@ -147,15 +144,11 @@ export default function LoginScreen() {
                         {/* LOGO */}
 
                         <View style={styles.logoOuter}>
-
-                            <View style={styles.logoInner}>
-
-                                <Text style={styles.logoText}>
-                                    A
-                                </Text>
-
-                            </View>
-
+                            <Image
+                                source={AIRA_LOGO}
+                                style={styles.logoImage}
+                                resizeMode="cover"
+                            />
                         </View>
 
 
@@ -167,22 +160,6 @@ export default function LoginScreen() {
                             Traditional Taste • Pure Ingredients
                         </Text>
 
-                        <Text style={styles.consoleText}>
-                            Operations Console
-                        </Text>
-
-
-                        {/* STATUS */}
-
-                        <View style={styles.productionStatus}>
-
-                            <View style={styles.statusDot} />
-
-                            <Text style={styles.statusText}>
-                                Production Gateway • v2.4 Active
-                            </Text>
-
-                        </View>
 
                     </View>
 
@@ -462,37 +439,7 @@ export default function LoginScreen() {
                         </Pressable>
 
 
-                        {/* =================================================
-                QUICK ACCESS
-                ================================================= */}
-
-                        <View style={styles.quickAccess}>
-
-                            <View style={styles.quickHeader}>
-
-                                <View style={styles.quickTitleRow}>
-
-                                    <KeyRound
-                                        size={14}
-                                        color="#b45309"
-                                    />
-
-                                    <Text style={styles.quickTitle}>
-                                        Quick Access Roster
-                                    </Text>
-
-                                </View>
-
-                                <Text style={styles.quickHint}>
-                                    Click to autofill
-                                </Text>
-
-                            </View>
-
-
-
-
-                        </View>
+               
 
                     </View>
 
@@ -525,6 +472,7 @@ export default function LoginScreen() {
             </ScrollView>
 
         </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
@@ -535,9 +483,13 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
 
-    screen: {
+    safeArea: {
         flex: 1,
         backgroundColor: '#faf7f4',
+    },
+
+    screen: {
+        flex: 1,
     },
 
     scrollContent: {
@@ -586,55 +538,29 @@ const styles = StyleSheet.create({
     },
 
     logoOuter: {
-        width: 105,
-        height: 105,
-
-        borderRadius: 53,
-
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         backgroundColor: '#ffffff',
-
         borderWidth: 3,
-
         borderColor: '#fcd34d',
-
-        padding: 5,
-
         elevation: 7,
-
         shadowColor: '#000',
-
         shadowOffset: {
             width: 0,
             height: 4,
         },
-
         shadowOpacity: 0.15,
-
         shadowRadius: 8,
-
-        marginBottom: 11,
-    },
-
-    logoInner: {
-        flex: 1,
-
-        borderRadius: 50,
-
-        backgroundColor: '#650700',
-
+        marginBottom: 12,
+        overflow: 'hidden',
         alignItems: 'center',
-
         justifyContent: 'center',
     },
 
-    logoText: {
-        color: '#fbbf24',
-
-        fontSize: 45,
-
-        fontWeight: '900',
-
-        fontFamily: 'serif',
+    logoImage: {
+        width: '100%',
+        height: '100%',
     },
 
     brandTitle: {

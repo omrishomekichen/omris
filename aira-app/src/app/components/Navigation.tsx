@@ -7,6 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import {
   Home,
   ShoppingBag,
@@ -35,6 +37,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onTabChange,
   isInline = false,
 }) => {
+  const insets = useSafeAreaInsets();
 
   /*
    * DESIGN-ONLY DATA
@@ -124,6 +127,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         isInline
           ? styles.inlineNavigation
           : styles.fixedNavigation,
+        { paddingBottom: insets.bottom },
       ]}
     >
 
