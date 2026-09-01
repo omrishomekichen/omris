@@ -1,13 +1,30 @@
 /**
  * API client for the Aira backend.
- * All requests go to the backend (http://localhost:5000) which
- * communicates with Supabase Auth on behalf of the app.
+ * In Expo mobile apps, localhost points to the device itself, not the dev machine.
+ * Use the explicit backend URL if set, otherwise derive the local LAN host.
  */
 
-// Local dev  → http://localhost:5000
-// Change to your deployed backend URL when going to production
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+function resolveApiBaseUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.developerTool;
+
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    return `http://${host}:5000`;
+  }
+
+  if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
+  if (Platform.OS === 'ios') return 'http://localhost:5000';
+
+  return 'http://localhost:5000';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const headers = { 'Content-Type': 'application/json' };
 

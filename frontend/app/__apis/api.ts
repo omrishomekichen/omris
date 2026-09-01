@@ -57,6 +57,16 @@ const Api = {
     return response.json();
   },
 
+  sendLoginOtp: async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/send-login-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email.trim() }),
+    });
+    return response.json();
+  },
+
   forgotPassword: async (email: string) => {
     const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
       method: "POST",

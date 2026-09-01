@@ -459,6 +459,51 @@
   color: var(--on-surface);
 }
 
+.otpInput {
+  letter-spacing: 0.35em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  padding-left: 1rem !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.otpRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.resendBtn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.resendBtn:disabled {
+  color: var(--outline);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.timerBadge {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  font-weight: 600;
+}
+
 @keyframes authCardEnter {
   from {
     opacity: 0;
