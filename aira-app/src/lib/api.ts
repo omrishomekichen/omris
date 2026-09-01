@@ -1,15 +1,19 @@
 /**
  * API client for the Aira backend.
  * In Expo mobile apps, localhost points to the device itself, not the dev machine.
- * Use the explicit backend URL if set, otherwise derive the local LAN host.
+ * Production uses the deployed API. Development derives the local LAN host.
  */
 
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
+const PRODUCTION_API_BASE_URL = 'https://omris.onrender.com';
+
 function resolveApiBaseUrl() {
   const configuredUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
   if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+  if (!__DEV__) return PRODUCTION_API_BASE_URL;
 
   const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.developerTool;
 

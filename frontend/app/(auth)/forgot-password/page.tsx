@@ -13,7 +13,7 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import styles from "../auth-pages.module.css";
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "../AuthContext";
 import toast from "react-hot-toast";
 
