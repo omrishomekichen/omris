@@ -23,7 +23,14 @@ export const authCookieOptions = {
   maxAge: 60 * 60 * 1000,
 };
 
-export const getAuthToken = (cookieHeader?: string): string | null => {
+export const getAuthToken = (
+  cookieHeader?: string,
+  authHeader?: string,
+): string | null => {
+  if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+    return authHeader.slice(7).trim();
+  }
+
   if (!cookieHeader) return null;
 
   const cookie = cookieHeader

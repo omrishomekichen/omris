@@ -9,7 +9,10 @@ const reviewRouter: Router = express.Router();
 
 const getUserIdFromToken = (req: Request): string | null => {
   try {
-    const token = getAuthToken(req.headers.cookie);
+    const token = getAuthToken(
+      req.headers.cookie,
+      req.headers.authorization,
+    );
     if (!token) return null;
 
     const decoded = jwt.verify(token, JWT_SECRET) as {

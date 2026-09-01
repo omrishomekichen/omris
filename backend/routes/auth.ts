@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
-import { supabase, supabaseAdmin } from "../config/supabase";
 import {
   AUTH_COOKIE_NAME,
   authCookieOptions,
@@ -21,7 +20,7 @@ const buildUserResponse = (user: any) => ({
   lastName: user.lastName,
   name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Customer",
   email: user.email,
-  verified: user.verified ?? true,
+  verified: user.verified ?? false,
 });
 
 /* ==========================================================================
@@ -38,106 +37,67 @@ authRouter.post("/register", async (req: Request, res: Response) => {
   }
 
   const cleanEmail = email.toLowerCase().trim();
-  const [firstName, ...rest] = fullName.trim().split(" ");
-  const lastName = rest.join(" ");
 
   try {
-    let supabaseUserId: string | undefined;
-
-    // 1. Attempt Sign up on Supabase Auth
-    try {
-      if (supabaseAdmin) {
-        // Admin API skips confirmation email issues and auto-confirms
-        const { data: adminData, error: adminError } =
-          await supabaseAdmin.auth.admin.createUser({
-            email: cleanEmail,
-            password,
-            email_confirm: true,
-            user_metadata: {
-              full_name: fullName.trim(),
-              first_name: firstName,
-              lastName: lastName,
-            },
-          });
-
-        if (adminError) {
-          console.warn("[Register] Supabase admin createUser warning:", adminError.message);
-        } else {
-          supabaseUserId = adminData.user?.id;
-        }
-      } else {
-        const { data: sbData, error: sbError } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            data: {
-              full_name: fullName.trim(),
-              first_name: firstName,
-              lastName: lastName,
-            },
-          },
-        });
-
-        if (sbError) {
-          console.warn("[Register] Supabase sign up warning:", sbError.message);
-        } else {
-          supabaseUserId = sbData.user?.id;
-        }
-      }
-    } catch (sbErr: any) {
-      console.warn("[Register] Supabase connection error:", sbErr?.message);
-    }
-
-
-    // 2. Sync to MongoDB database
-    let user = await User.findOne({ email: cleanEmail });
-    if (user) {
-      return res.status(400).json({
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      return res.status(409).json({
         status: "error",
-        message: "An account with this email already exists. Please sign in.",
+        message: "Email already registered",
       });
     }
 
+    const [firstName, ...rest] = fullName.trim().split(" ");
+    const lastName = rest.join(" ");
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+    const verificationExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    const user = new User({
       firstName,
       lastName,
       email: cleanEmail,
       password: hashedPassword,
       agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
-      verified: true,
+      verified: false,
     });
+
     await user.save();
 
-    // 3. Send welcome email asynchronously via mail service
-    try {
-      sendMail(
-        cleanEmail,
-        "Welcome to Aira Pickles!",
-        `Hello ${firstName || "there"}, welcome to Aira Pickles!`,
-        undefined,
-        "welcome",
-        { name: fullName.trim() },
-      ).catch((err) => console.error("[Mail Error]", err));
-    } catch {}
+    await Otp.deleteMany({ email: user.email });
+    await Otp.create({
+      email: user.email,
+      code: verificationCode,
+      expiresAt: verificationExpires,
+    });
 
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-        supabaseId: supabaseUserId,
-      },
-      JWT_SECRET,
-      { expiresIn: "7d" },
-    );
-    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+    try {
+      await sendMail(
+        user.email,
+        "Your verification code",
+        `Your OTP is ${verificationCode}. It expires in 15 minutes.`,
+        undefined,
+        "otp",
+        { otp: verificationCode, name: fullName.trim() },
+      );
+    } catch (mailError) {
+      console.error("Verification email error:", mailError);
+      await User.deleteOne({ _id: user._id });
+      await Otp.deleteMany({ email: user.email });
+      return res.status(500).json({
+        status: "error",
+        message:
+          "Unable to send verification email. Please check your email address and try again.",
+      });
+    }
 
     return res.status(201).json({
       status: "success",
-      message: "User registered successfully.",
-      user: buildUserResponse(user),
-      token,
+      message:
+        "User registered successfully. Check your email for the verification code.",
+      email: user.email,
     });
   } catch (error: any) {
     console.error("Registration error:", error);
@@ -146,7 +106,92 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       message: error?.message || "Internal server error",
     });
   }
+});
 
+/* ==========================================================================
+   VERIFY OTP & ACTIVATE ACCOUNT
+   ========================================================================== */
+authRouter.post("/verify", async (req: Request, res: Response) => {
+  const { email, verificationCode } = req.body || {};
+
+  if (!email || !verificationCode) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and verification code are required",
+    });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const otp = await Otp.findOne({
+      email: cleanEmail,
+      code: verificationCode.trim(),
+    });
+
+    if (!otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid verification code",
+      });
+    }
+
+    if (new Date() > otp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "Verification code expired",
+      });
+    }
+
+    user.verified = true;
+    await user.save();
+    await Otp.deleteMany({ email: cleanEmail });
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+
+    try {
+      await sendMail(
+        user.email,
+        `Welcome to Aira Pickles, ${user.firstName}!`,
+        `Welcome to Aira Pickles, ${user.firstName}!`,
+        undefined,
+        "welcome",
+        { name: `${user.firstName} ${user.lastName}`.trim() },
+      );
+    } catch (e) {
+      console.error("Failed to send welcome email:", e);
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Email verified successfully",
+      user: buildUserResponse(user),
+      token,
+    });
+  } catch (error: any) {
+    console.error("Verification error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: error?.message || "Internal server error",
+    });
+  }
 });
 
 /* ==========================================================================
@@ -165,74 +210,27 @@ authRouter.post("/login", async (req: Request, res: Response) => {
   const cleanEmail = email.toLowerCase().trim();
 
   try {
-    // 1. Authenticate with Supabase Auth
-    const { data: sbData, error: sbError } =
-      await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password,
-      });
-
-    if (sbError) {
-      // Fallback: check legacy local database if user hasn't migrated yet
-      const legacyUser = await User.findOne({ email: cleanEmail });
-      if (legacyUser && (await bcrypt.compare(password, legacyUser.password))) {
-        // Create Supabase account on the fly for legacy user
-        await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            data: {
-              full_name: `${legacyUser.firstName} ${legacyUser.lastName}`.trim(),
-              first_name: legacyUser.firstName,
-              last_name: legacyUser.lastName,
-            },
-          },
-        });
-
-        const token = jwt.sign(
-          {
-            userId: legacyUser._id,
-            email: legacyUser.email,
-            name: `${legacyUser.firstName} ${legacyUser.lastName}`.trim(),
-          },
-          JWT_SECRET,
-          { expiresIn: "7d" },
-        );
-        res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
-
-        return res.status(200).json({
-          status: "success",
-          user: buildUserResponse(legacyUser),
-          token,
-        });
-      }
-
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
       return res.status(401).json({
         status: "error",
-        message: sbError.message || "Invalid email or password",
+        message: "Invalid email or password",
       });
     }
 
-    // 2. Sync / Find Mongo User record
-    let user = await User.findOne({ email: cleanEmail });
-    if (!user) {
-      const nameParts = (
-        sbData.user?.user_metadata?.full_name ||
-        cleanEmail.split("@")[0]
-      ).split(" ");
-      const firstName = nameParts[0] || "User";
-      const lastName = nameParts.slice(1).join(" ") || "";
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      user = new User({
-        firstName,
-        lastName,
-        email: cleanEmail,
-        password: hashedPassword,
-        agreeToTerms: true,
-        verified: true,
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
       });
-      await user.save();
+    }
+
+    if (!user.verified) {
+      return res.status(403).json({
+        status: "error",
+        message: "Please verify your email address before logging in.",
+      });
     }
 
     const token = jwt.sign(
@@ -240,18 +238,41 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         userId: user._id,
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
-        supabaseId: sbData.user?.id,
       },
       JWT_SECRET,
       { expiresIn: "7d" },
     );
     res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
 
+    try {
+      const userAgent = req.headers["user-agent"] || "Web Browser";
+      const deviceType = userAgent.includes("Mobile")
+        ? "Mobile Device"
+        : "Desktop Browser";
+      const loginTime = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      });
+      await sendMail(
+        user.email,
+        "Security Alert: New Sign-In",
+        `We noticed a new login to your Aira Pickles account at ${loginTime}.`,
+        undefined,
+        "login_alert",
+        {
+          device: deviceType,
+          location: "India",
+          time: loginTime,
+          name: `${user.firstName} ${user.lastName}`.trim(),
+        },
+      );
+    } catch (e) {
+      console.error("Failed to send login alert email:", e);
+    }
+
     return res.status(200).json({
       status: "success",
       user: buildUserResponse(user),
-      token: sbData.session?.access_token || token,
-      session: sbData.session,
+      token,
     });
   } catch (error: any) {
     console.error("Login error:", error);
@@ -265,16 +286,13 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 /* ==========================================================================
    LOGOUT
    ========================================================================== */
-authRouter.post("/logout", async (_req: Request, res: Response) => {
-  try {
-    await supabase.auth.signOut();
-  } catch (e) {
-    console.error("Supabase signOut error:", e);
-  }
-
+authRouter.post("/logout", (_req: Request, res: Response) => {
   const { maxAge, ...clearCookieOptions } = authCookieOptions;
   res.clearCookie(AUTH_COOKIE_NAME, clearCookieOptions);
-  return res.status(200).json({ status: "success", message: "Logged out successfully" });
+  return res.status(200).json({
+    status: "success",
+    message: "Logged out successfully",
+  });
 });
 
 /* ==========================================================================
@@ -293,23 +311,42 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   const cleanEmail = email.toLowerCase().trim();
 
   try {
-    const { error: sbError } = await supabase.auth.resetPasswordForEmail(
-      cleanEmail,
-      {
-        redirectTo: "http://localhost:3000/forgot-password?view=update",
-      },
-    );
-
-    if (sbError) {
-      return res.status(400).json({
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
         status: "error",
-        message: sbError.message,
+        message: "User not found",
+      });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await Otp.deleteMany({ email: user.email });
+    await Otp.create({ email: user.email, code: resetCode, expiresAt });
+
+    try {
+      await sendMail(
+        user.email,
+        "Your password reset code",
+        `Your password reset OTP is ${resetCode}. It expires in 15 minutes.`,
+        undefined,
+        "otp",
+        { otp: resetCode, name: `${user.firstName} ${user.lastName}`.trim() },
+      );
+    } catch (mailError) {
+      console.error("Password reset email error:", mailError);
+      await Otp.deleteMany({ email: user.email });
+      return res.status(500).json({
+        status: "error",
+        message: "Unable to send password reset email. Please try again later.",
       });
     }
 
     return res.status(200).json({
       status: "success",
-      message: "Password reset link sent to your email via Supabase.",
+      message: "Password reset code sent to your email.",
+      email: user.email,
     });
   } catch (error: any) {
     console.error("Forgot password error:", error);
@@ -324,22 +361,60 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
    RESET PASSWORD
    ========================================================================== */
 authRouter.post("/reset-password", async (req: Request, res: Response) => {
-  const { email, newPassword } = req.body || {};
+  const { email, verificationCode, newPassword } = req.body || {};
 
-  if (!newPassword) {
+  if (!email || !verificationCode || !newPassword) {
     return res.status(400).json({
       status: "error",
-      message: "New password is required",
+      message: "Email, reset code, and new password are required",
     });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
   try {
-    if (email) {
-      const user = await User.findOne({ email: email.toLowerCase().trim() });
-      if (user) {
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
-      }
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const otp = await Otp.findOne({
+      email: user.email,
+      code: String(verificationCode).trim(),
+    });
+    if (!otp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid reset code",
+      });
+    }
+
+    if (new Date() > otp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "Reset code expired",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    await Otp.deleteMany({ email: user.email });
+
+    try {
+      await sendMail(
+        user.email,
+        "Password Updated Successfully",
+        "Your password has been changed successfully.",
+        undefined,
+        "password_reset_success",
+        { name: `${user.firstName} ${user.lastName}`.trim() },
+      );
+    } catch (e) {
+      console.error("Failed to send password reset confirmation email:", e);
     }
 
     return res.status(200).json({
@@ -360,7 +435,10 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
    ========================================================================== */
 const handleGetMe = async (req: Request, res: Response) => {
   try {
-    const token = getAuthToken(req.headers.cookie);
+    const token = getAuthToken(
+      req.headers.cookie,
+      req.headers.authorization,
+    );
     if (!token) {
       return res.status(401).json({
         status: "error",
