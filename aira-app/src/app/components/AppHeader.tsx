@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import {
   View,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Modal,
   ScrollView,
+  Animated,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,7 +46,11 @@ const NativeMobileHeader = ({
      ===================================================== */
 
   const [profileOpen, setProfileOpen] = useState(false);
-      const { login , session,  profile,logout} = useAuth();
+  const { login , session,  profile,logout} = useAuth();
+
+  // Logout loading state
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const logoutSpinAnim = useRef(new Animated.Value(0)).current;
 
   /* =====================================================
      PAGE TITLES
@@ -66,8 +71,34 @@ const NativeMobileHeader = ({
     : TAB_TITLES[activeTab] || 'Aira Admin';
 
   /* =====================================================
-     UI
+     LOGOUT WITH LOADING SPINNER
      ===================================================== */
+
+  useEffect(() => {
+    if (isLoggingOut) {
+      Animated.loop(
+        Animated.timing(logoutSpinAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        })
+      ).start();
+    }
+  }, [isLoggingOut]);
+
+  const spin = logoutSpinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const handleLogoutPress = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -514,18 +545,40 @@ const NativeMobileHeader = ({
                   LOGOUT
                   ========================================= */}
 
-             <Pressable style={styles.logoutButton} onPress={() => logout()}>
+             <Pressable
+               style={({ pressed }) => [
+                 styles.logoutButton,
+                 pressed && !isLoggingOut && styles.logoutButtonPressed,
+               ]}
+               onPress={handleLogoutPress}
+               disabled={isLoggingOut}
+             >
+               {isLoggingOut ? (
+                 <>
+                   <Animated.View
+                     style={[
+                       styles.loadingSpinner,
+                       { transform: [{ rotate: spin }] },
+                     ]}
+                   />
+                   <Text style={styles.logoutText}>
+                     Logging out...
+                   </Text>
+                 </>
+               ) : (
+                 <>
+                   <LogOut
+                     size={16}
+                     color="#b91c1c"
+                   />
 
-                <LogOut
-                  size={16}
-                  color="#b91c1c"
-                />
+                   <Text style={styles.logoutText}>
+                     Log Out of Mobile Terminal
+                   </Text>
+                 </>
+               )}
 
-                <Text style={styles.logoutText}>
-                  Log Out of Mobile Terminal
-                </Text>
-
-              </Pressable>
+             </Pressable>
 
             </ScrollView>
 
@@ -1149,6 +1202,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
+  logoutButtonPressed: {
+    backgroundColor: '#fee2e2',
+    borderColor: '#fca5a5',
+  },
+
   logoutText: {
     color: '#b91c1c',
 
@@ -1157,6 +1215,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
 
     marginLeft: 8,
+  },
+
+  loadingSpinner: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: '#fecaca',
+    borderTopColor: '#b91c1c',
   },
 
 
