@@ -104,13 +104,15 @@ const Api = {
     utrNumber: string,
     totalPrice: number,
     screenshot: File | null,
+    fullName?: string,
   ) => {
     const formData = new FormData();
     if (email) formData.append("email", email);
+    if (fullName) formData.append("fullName", fullName);
     formData.append("orderItems", JSON.stringify(orderItems));
     formData.append("shippingAddress", shippingAddress);
     formData.append("paymentMethod", paymentMethod);
-    formData.append("utrNumber", utrNumber);
+    formData.append("utrNumber", utrNumber || "N/A");
     formData.append("totalPrice", totalPrice.toString());
     if (screenshot) {
       formData.append("paymentScreenshot", screenshot);

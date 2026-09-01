@@ -22,6 +22,36 @@ export async function apiLogin(email: string, password: string) {
   return res.json();
 }
 
+export async function apiSendLoginOtp(email: string) {
+  const res = await fetch(`${API_BASE_URL}/api/send-login-otp`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email }),
+  });
+  return res.json();
+}
+
+export async function apiVerifyLoginOtp(email: string, verificationCode: string) {
+  const res = await fetch(`${API_BASE_URL}/api/verify-login`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email, verificationCode }),
+  });
+  return res.json();
+}
+
+export async function apiVerifyRegistrationOtp(
+  email: string,
+  verificationCode: string,
+) {
+  const res = await fetch(`${API_BASE_URL}/api/verify`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ email, verificationCode }),
+  });
+  return res.json();
+}
+
 export async function apiRegister(
   fullName: string,
   email: string,

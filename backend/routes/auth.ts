@@ -195,7 +195,186 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
 });
 
 /* ==========================================================================
-   LOGIN
+   SEND LOGIN OTP
+   ========================================================================== */
+const handleSendLoginOtp = async (req: Request, res: Response) => {
+  const { email } = req.body || {};
+
+  if (!email) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email address is required",
+    });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    let user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "No account found with this email address. Please register first.",
+      });
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await Otp.deleteMany({ email: cleanEmail });
+    await Otp.create({
+      email: cleanEmail,
+      code: otpCode,
+      expiresAt,
+    });
+
+    try {
+      await sendMail(
+        cleanEmail,
+        "Your Login OTP - Aira Pickles",
+        `Your Aira Pickles login OTP is ${otpCode}. It expires in 15 minutes.`,
+        undefined,
+        "otp",
+        {
+          otp: otpCode,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        },
+      );
+    } catch (mailErr) {
+      console.error("[Mail Error on Login OTP]", mailErr);
+      await Otp.deleteMany({ email: cleanEmail });
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to send OTP email. Please try again later.",
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Login OTP sent to your email.",
+      email: cleanEmail,
+    });
+  } catch (error: any) {
+    console.error("Send login OTP error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: error?.message || "Internal server error",
+    });
+  }
+};
+
+authRouter.post("/send-login-otp", handleSendLoginOtp);
+authRouter.post("/request-login-otp", handleSendLoginOtp);
+authRouter.post("/login-otp", handleSendLoginOtp);
+
+/* ==========================================================================
+   VERIFY LOGIN OTP
+   ========================================================================== */
+const handleVerifyLoginOtp = async (req: Request, res: Response) => {
+  const { email, verificationCode, otp: codeParam } = req.body || {};
+  const code = (verificationCode || codeParam || "").toString().trim();
+
+  if (!email || !code) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and OTP code are required",
+    });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+
+  try {
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    const validOtp = await Otp.findOne({
+      email: cleanEmail,
+      code,
+    });
+
+    if (!validOtp) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid OTP code",
+      });
+    }
+
+    if (new Date() > validOtp.expiresAt) {
+      return res.status(400).json({
+        status: "error",
+        message: "OTP code has expired. Please request a new one.",
+      });
+    }
+
+    // Mark user verified if they logged in with OTP
+    if (!user.verified) {
+      user.verified = true;
+      await user.save();
+    }
+
+    await Otp.deleteMany({ email: cleanEmail });
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+
+    try {
+      const userAgent = req.headers["user-agent"] || "Mobile App";
+      const deviceType = userAgent.includes("Mobile")
+        ? "Mobile Device"
+        : "Desktop Browser";
+      const loginTime = new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      });
+      await sendMail(
+        user.email,
+        "Security Alert: New Sign-In via OTP",
+        `We noticed a new OTP login to your Aira Pickles account at ${loginTime}.`,
+        undefined,
+        "login_alert",
+        {
+          device: deviceType,
+          location: "India",
+          time: loginTime,
+          name: `${user.firstName} ${user.lastName}`.trim(),
+        },
+      );
+    } catch (e) {
+      console.error("Failed to send login alert email:", e);
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Logged in successfully",
+      user: buildUserResponse(user),
+      token,
+    });
+  } catch (error: any) {
+    console.error("Verify login OTP error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: error?.message || "Internal server error",
+    });
+  }
+};
+
+authRouter.post("/verify-login", handleVerifyLoginOtp);
+authRouter.post("/verify-login-otp", handleVerifyLoginOtp);
+
+/* ==========================================================================
+   PASSWORD LOGIN
    ========================================================================== */
 authRouter.post("/login", async (req: Request, res: Response) => {
   const { email, password } = req.body || {};
