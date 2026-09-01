@@ -61,7 +61,6 @@ export default function Navbar() {
     if (logout) {
       await logout();
     } else {
-      await Api.logout();
       localStorage.removeItem("user");
       window.location.href = "/login";
     }

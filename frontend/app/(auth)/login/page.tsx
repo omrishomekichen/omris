@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Api from "../../__apis/api";
+import { useAuth } from "../AuthContext";
 import {
   Mail,
   Lock,
@@ -20,85 +20,74 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import "./login.css";
-import styles from "../auth-pages.module.css";
 
 export default function Login() {
   const router = useRouter();
-  const [FormData, setFormData] = useState({ email: "", password: "" , verificationCode: ""});
+  const auth = useAuth();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [sentotp,setsentotp] = useState(false);
-
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
-  }
-
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
-    try {
-      const res = await Api.login(
-        FormData.email,
-        FormData.password,
-      );
-      if (res.status === 'success') {
-        if (res.user) {
-          localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
-        }
-        router.push('/dashboard');
-      } else {
-        toast.error(res.message || 'Unable to login to your account. Please try again.');
-      }
-    } catch (error) {
-      toast.error('Unable to login to your account. Please try again.');
-    } finally {
-      setLoading(false);
+
+    if (!formData.email.trim()) {
+      toast.error("Please enter your email address.");
+      return;
     }
-  };
-  const handleverifySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const verificationCode = FormData.verificationCode.trim();
-    if (!/^\d{6}$/.test(verificationCode)) {
-      toast.error("Enter the six-digit verification code sent to your email.");
+
+    if (!formData.password) {
+      toast.error("Please enter your password.");
       return;
     }
 
     setLoading(true);
-    try{
-       const res = await Api.verifyLogin(
-        FormData.email,
-        verificationCode,
-      );
-      if (res.status === 'success') {
-        if (res.user) {
-          localStorage.setItem('user', typeof res.user === 'string' ? res.user : JSON.stringify(res.user));
+    try {
+      if (auth?.login) {
+        const res = await auth.login(formData.email, formData.password);
+        if (res.status === "success") {
+          toast.success("Welcome back to Aira Pickles!");
+          router.push("/dashboard");
+        } else {
+          toast.error(res.message || "Invalid email or password. Please try again.");
         }
-        router.push('/dashboard');
-      } else {
-        toast.error(res.message || 'Unable to verify your login. Please try again.');
       }
-    } catch (error) {
-      toast.error('Unable to verify your login. Please try again.');
+    } catch (error: any) {
+      toast.error(error?.message || "Unable to sign in. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      if (auth?.signInWithGoogle) {
+        const res = await auth.signInWithGoogle();
+        if (res.status === "error") {
+          toast.error(res.message || "Failed to sign in with Google.");
+        }
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "Google sign in error.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <div className="auth-page">
-
       <div className="auth-bg-glow glow-top-left" />
       <div className="auth-bg-glow glow-bottom-right" />
 
       <div className="auth-card">
-
         <aside className="auth-panel">
           <div className="auth-panel-header">
             <Link href="/" className="auth-brand-link">
@@ -174,7 +163,6 @@ export default function Login() {
           </div>
         </aside>
 
-        {!sentotp ? (
         <main className="auth-form-panel">
           <div className="auth-form-head">
             <div className="auth-welcome-pill">
@@ -193,10 +181,10 @@ export default function Login() {
                 <input
                   type="email"
                   name="email"
-                  value={FormData.email}
+                  value={formData.email}
                   onChange={handleInputChange}
                   placeholder="name@example.com"
-                  autoComplete="off"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -214,10 +202,10 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  value={FormData.password}
+                  value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••••••"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   required
                 />
                 <button
@@ -243,15 +231,13 @@ export default function Login() {
                 </span>
                 <span className="checkbox-label">Keep me signed in</span>
               </label>
-
-
             </div>
 
             <button className="auth-btn" type="submit" disabled={loading}>
               {loading ? (
                 <span className="btn-loading-state">
                   <span className="spinner" />
-                  Authenticating...
+                  Authenticating with Supabase...
                 </span>
               ) : (
                 <span className="btn-content">
@@ -266,7 +252,12 @@ export default function Login() {
             <span>or continue with</span>
           </div>
 
-          <button className="auth-google-btn" type="button">
+          <button
+            className="auth-google-btn"
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+          >
             <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
               <path
                 fill="#4285F4"
@@ -285,7 +276,7 @@ export default function Login() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>Sign in with Google</span>
+            <span>{googleLoading ? "Connecting Google..." : "Sign in with Google"}</span>
           </button>
 
           <p className="auth-register">
@@ -295,71 +286,6 @@ export default function Login() {
             </Link>
           </p>
         </main>
-        ) : (
-          <main className="auth-form-panel">
-         <div className={styles.formPanel}>
-          <span className={styles.pill}>
-            <ChefHat size={14} /> Join the family
-          </span>
-
-          <h2>
-            Verify your email
-          </h2>
-
-          <p className={styles.intro}>
-            We’ve sent a verification code to your email. Please enter it below to complete your registration.
-          </p>
-
-          <form className={styles.form} onSubmit={handleverifySubmit}>
-            <label className={styles.field}>
-              Verification Code
-              <div className={styles.inputWrap}>
-                <input
-                  name="verificationCode"
-                  value={FormData.verificationCode}
-                  className={styles.input}
-                  inputMode="numeric"
-                  pattern="[0-9]{6}"
-                  maxLength={6}
-                  placeholder="Enter code"
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </label>
-
-            <button
-              type="submit"
-              className={`${styles.button} ${loading ? styles.loading : ""}`}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className={styles.btnLoadingState}>
-                  <span className={styles.spinner} />
-                  Verifying Email...
-                </span>
-              ) : (
-                <span className={styles.btnContent}>
-                  <span>Verify Email</span>
-                  <ArrowRight size={18} className={styles.btnArrow} />
-                </span>
-              )}
-            </button>
-          </form>
-
-          <p className={styles.footer}>
-            Didn't receive the code?{" "}
-            <Link
-              href="/resend-code"
-              className={styles.textLink}
-            >
-              Resend Code
-            </Link>
-          </p>
-        </div>
-          </main>
-        )}
-
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { useCart } from "../../components/CartContext";
+import { useAuth } from "../../(auth)/AuthContext";
 import Api from "../../__apis/api";
 import toast from "react-hot-toast";
 
@@ -35,6 +36,7 @@ const formatCurrency = (val: number) =>
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const auth = useAuth();
   const { items, subtotal, clearCart } = useCart();
   const [step, setStep] = useState<number>(1);
 
@@ -68,20 +70,26 @@ export default function CheckoutPage() {
 
 
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        const u = JSON.parse(savedUser);
-        setFormData((prev) => ({
-          ...prev,
-          fullName: u.name || prev.fullName,
-          email: u.email || prev.email,
-        }));
-      }
-    } catch (e) {
-
+    if (auth?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: auth.user?.name || prev.fullName,
+        email: auth.user?.email || prev.email,
+      }));
+    } else {
+      try {
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+          const u = JSON.parse(savedUser);
+          setFormData((prev) => ({
+            ...prev,
+            fullName: u.name || prev.fullName,
+            email: u.email || prev.email,
+          }));
+        }
+      } catch (e) {}
     }
-  }, []);
+  }, [auth?.user]);
 
   const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

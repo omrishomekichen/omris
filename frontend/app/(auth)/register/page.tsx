@@ -1,15 +1,19 @@
 'use client';
+
 import Link from "next/link";
-import { ArrowRight, ChefHat, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, ChefHat, LockKeyhole, Mail, ShieldCheck, UserRound, CheckCircle2 } from "lucide-react";
 import styles from "../auth-pages.module.css";
 import { useState } from "react";
-import Api from "../../__apis/api";
+import { useAuth } from "../AuthContext";
 import toast from "react-hot-toast";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const auth = useAuth();
   const [loading, setLoading] = useState(false);
-  const [verifyLoading, setVerifyLoading] = useState(false);
-
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -18,10 +22,7 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     agreeToTerms: false,
-    verificationCode: "",
   });
-  const [sentotp, setsentotp] = useState(false);
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -29,11 +30,11 @@ export default function RegisterPage() {
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
-  }
+  };
 
   const validateRegistration = () => {
-    if (!formData.firstName.trim() || !formData.lastName.trim()) {
-      toast.error('Please enter both first and last name.');
+    if (!formData.firstName.trim()) {
+      toast.error('Please enter your first name.');
       return false;
     }
 
@@ -43,7 +44,7 @@ export default function RegisterPage() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    if (!emailRegex.test(formData.email.trim())) {
       toast.error('Please enter a valid email address.');
       return false;
     }
@@ -59,92 +60,49 @@ export default function RegisterPage() {
     }
 
     if (!formData.agreeToTerms) {
-      toast.error('You must agree to the terms.');
+      toast.error('You must agree to the terms of service.');
       return false;
     }
 
     return true;
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
 
     if (!validateRegistration()) {
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      const res = await Api.register(
-        fullName,
-        formData.email,
-        formData.password,
-      );
+      if (auth?.register) {
+        const res = await auth.register(
+          fullName,
+          formData.email,
+          formData.password,
+        );
 
-      if (res.status === 'success') {
-        setsentotp(true);
-      } else {
-        setsentotp(false);
-        toast.error(res.message || 'Unable to send verification email. Please try again.');
+        if (res.status === 'success') {
+          toast.success(res.message || "Account created successfully!");
+          setSuccessMsg(
+            res.message ||
+              "Registration successful! If required, please check your inbox for a confirmation email."
+          );
+          setIsSuccess(true);
+        } else {
+          toast.error(res.message || 'Unable to create account. Please try again.');
+        }
       }
-    } catch (error) {
-      setsentotp(false);
-      toast.error('Unable to send verification email. Please try again.');
+    } catch (error: any) {
+      toast.error(error?.message || 'Unable to create account. Please try again.');
     } finally {
       setLoading(false);
     }
-  }
-
-  const validateVerification = () => {
-    if (!formData.email.trim()) {
-      toast.error('Please enter the email address used to register.');
-      return false;
-    }
-
-    const otpRegex = /^\d{6}$/;
-    if (!otpRegex.test(formData.verificationCode.trim())) {
-      toast.error('Please enter the 6-digit verification code.');
-      return false;
-    }
-
-    return true;
-  }
-
-  const verifyemail = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateVerification()) {
-      return;
-    }
-
-    setVerifyLoading(true);
-
-    try {
-      const res = await Api.verifyEmail(
-        formData.email,
-        formData.verificationCode,
-      );
-
-      if (res.status === 'success') {
-        window.location.href = '/login';
-      } else {
-        toast.error(res.message || 'Unable to verify your email. Please try again.');
-      }
-    }
-    catch (error) {
-      toast.error('Unable to verify your email. Please try again.');
-    } finally {
-      setVerifyLoading(false);
-    }
-  }
-
-
-
-
+  };
 
   return (
-
     <main className={styles.page}>
       <section className={styles.card}>
         <aside className={styles.story}>
@@ -181,36 +139,75 @@ export default function RegisterPage() {
             </span>
 
             <span>
-              Your details are kept private and secure.
+              Protected with enterprise-grade Supabase security.
             </span>
           </div>
         </aside>
-        {(!sentotp) ? (
-        <div className={styles.formPanel}>
-          <span className={styles.pill}>
-            <ChefHat size={14} /> Join the family
-          </span>
 
-          <h2>
-            Create your account
-          </h2>
+        {!isSuccess ? (
+          <div className={styles.formPanel}>
+            <span className={styles.pill}>
+              <ChefHat size={14} /> Join the family
+            </span>
 
-          <p className={styles.intro}>
-            A few details and you’ll be ready for your next home-style order.
-          </p>
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.fieldsRow}>
+            <h2>
+              Create your account
+            </h2>
+
+            <p className={styles.intro}>
+              A few details and you’ll be ready for your next home-style order.
+            </p>
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <div className={styles.fieldsRow}>
+                <label className={styles.field}>
+                  First name
+                  <div className={styles.inputWrap}>
+                    <input
+                      name="firstName"
+                      value={formData.firstName}
+                      className={styles.input}
+                      placeholder="Aira"
+                      onChange={handleInputChange}
+                      required
+                    />
+                    <UserRound
+                      className={styles.inputIcon}
+                      size={17}
+                    />
+                  </div>
+                </label>
+
+                <label className={styles.field}>
+                  Last name
+                  <div className={styles.inputWrap}>
+                    <input
+                      name="lastName"
+                      value={formData.lastName}
+                      className={styles.input}
+                      placeholder="Kumar"
+                      onChange={handleInputChange}
+                    />
+                    <UserRound
+                      className={styles.inputIcon}
+                      size={17}
+                    />
+                  </div>
+                </label>
+              </div>
+
               <label className={styles.field}>
-                First name
+                Email address
                 <div className={styles.inputWrap}>
                   <input
-                    name="firstName"
-                    value={formData.firstName}
+                    name="email"
+                    value={formData.email}
                     className={styles.input}
-                    placeholder="Aira"
+                    type="email"
+                    placeholder="name@example.com"
                     onChange={handleInputChange}
+                    required
                   />
-                  <UserRound
+                  <Mail
                     className={styles.inputIcon}
                     size={17}
                   />
@@ -218,187 +215,119 @@ export default function RegisterPage() {
               </label>
 
               <label className={styles.field}>
-                Last name
+                Create a password
                 <div className={styles.inputWrap}>
                   <input
-                    name="lastName"
-                    value={formData.lastName}
+                    name="password"
+                    value={formData.password}
                     className={styles.input}
-                    placeholder="Kumar"
+                    type="password"
+                    placeholder="At least 6 characters"
                     onChange={handleInputChange}
+                    required
                   />
-                  <UserRound
+                  <LockKeyhole
                     className={styles.inputIcon}
                     size={17}
                   />
                 </div>
               </label>
-            </div>
 
-            <label className={styles.field}>
-              Email address
-              <div className={styles.inputWrap}>
+              <label className={styles.field}>
+                Confirm password
+                <div className={styles.inputWrap}>
+                  <input
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    className={styles.input}
+                    type="password"
+                    placeholder="Re-enter your password"
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <LockKeyhole
+                    className={styles.inputIcon}
+                    size={17}
+                  />
+                </div>
+              </label>
+
+              <label className={styles.agreement}>
                 <input
-                  name="email"
-                  value={formData.email}
-                  className={styles.input}
-                  type="email"
-                  placeholder="name@example.com"
+                  type="checkbox"
+                  name="agreeToTerms"
+                  checked={formData.agreeToTerms}
                   onChange={handleInputChange}
                 />
-                <Mail
-                  className={styles.inputIcon}
-                  size={17}
-                />
-              </div>
-            </label>
-
-            <label className={styles.field}>
-              Create a password
-              <div className={styles.inputWrap}>
-                <input
-                  name="password"
-                  value={formData.password}
-                  className={styles.input}
-                  type="password"
-                  placeholder="At least 8 characters"
-                  onChange={handleInputChange}
-                />
-                <LockKeyhole
-                  className={styles.inputIcon}
-                  size={17}
-                />
-              </div>
-            </label>
-
-            <label className={styles.field}>
-              Confirm password
-              <div className={styles.inputWrap}>
-                <input
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  className={styles.input}
-                  type="password"
-                  placeholder="Re-enter your password"
-                  onChange={handleInputChange}
-                />
-                <LockKeyhole
-                  className={styles.inputIcon}
-                  size={17}
-                />
-              </div>
-            </label>
-
-            <label className={styles.agreement}>
-              <input
-                type="checkbox"
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={handleInputChange}
-              />
-              <span>
-                I agree to the{" "}
-                <a href="#" className={styles.textLink}>
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className={styles.textLink}>
-                  Privacy Policy
-                </a>
-                .
-              </span>
-            </label>
-
-            <button
-              type="submit"
-              className={`${styles.button} ${loading ? styles.loading : ""}`}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className={styles.btnLoadingState}>
-                  <span className={styles.spinner} />
-                  Creating account...
+                <span>
+                  I agree to the{" "}
+                  <a href="#" className={styles.textLink}>
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className={styles.textLink}>
+                    Privacy Policy
+                  </a>
+                  .
                 </span>
-              ) : (
-                <span className={styles.btnContent}>
-                  <span>Create Account</span>
-                  <ArrowRight size={18} className={styles.btnArrow} />
-                </span>
-              )}
-            </button>
-          </form>
+              </label>
 
-          <p className={styles.footer}>
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className={styles.textLink}
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
+              <button
+                type="submit"
+                className={`${styles.button} ${loading ? styles.loading : ""}`}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className={styles.btnLoadingState}>
+                    <span className={styles.spinner} />
+                    Creating account...
+                  </span>
+                ) : (
+                  <span className={styles.btnContent}>
+                    <span>Create Account</span>
+                    <ArrowRight size={18} className={styles.btnArrow} />
+                  </span>
+                )}
+              </button>
+            </form>
+
+            <p className={styles.footer}>
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className={styles.textLink}
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         ) : (
-        <div className={styles.formPanel}>
-          <span className={styles.pill}>
-            <ChefHat size={14} /> Join the family
-          </span>
+          <div className={styles.formPanel}>
+            <span className={styles.pill}>
+              <CheckCircle2 size={14} color="#16a34a" /> Account Status
+            </span>
 
-          <h2>
-            Verify your email
-          </h2>
+            <h2>
+              Welcome to Aira Pickles!
+            </h2>
 
-          <p className={styles.intro}>
-            We’ve sent a verification code to your email. Please enter it below to complete your registration.
-          </p>
+            <p className={styles.intro}>
+              {successMsg}
+            </p>
 
-          <form className={styles.form} onSubmit={verifyemail}>
-            <label className={styles.field}>
-              Verification Code
-              <div className={styles.inputWrap}>
-                <input
-                  name="verificationCode"
-                  value={formData.verificationCode}
-                  className={styles.input}
-                  placeholder="Enter code"
-                  onChange={handleInputChange}
-                />
-              </div>
-            </label>
-
-            <button
-              type="submit"
-              className={`${styles.button} ${verifyLoading ? styles.loading : ""}`}
-              disabled={verifyLoading}
-            >
-              {verifyLoading ? (
-                <span className={styles.btnLoadingState}>
-                  <span className={styles.spinner} />
-                  Verifying email...
-                </span>
-              ) : (
-                <span className={styles.btnContent}>
-                  <span>Verify Email</span>
-                  <ArrowRight size={18} className={styles.btnArrow} />
-                </span>
-              )}
-            </button>
-          </form>
-
-          <p className={styles.footer}>
-            Didn't receive the code?{" "}
-            <Link
-              href="/resend-code"
-              className={styles.textLink}
-            >
-              Resend Code
-            </Link>
-          </p>
-        </div>
+            <div style={{ marginTop: '24px' }}>
+              <Link
+                href="/login"
+                className={styles.button}
+                style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+              >
+                <span>Proceed to Sign In</span>
+                <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+              </Link>
+            </div>
+          </div>
         )}
       </section>
     </main>
-
-
   );
 }
