@@ -69,6 +69,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    assign:{
+      type:String,
+      default:"owner",
+    },
+
     status: {
       type: String,
       default: "pending",
