@@ -139,7 +139,8 @@ export default function RegisterPage() {
             </span>
 
             <span>
-              Protected with enterprise-grade Supabase security.
+              Protected with enterprise-grade security.
+
             </span>
           </div>
         </aside>
