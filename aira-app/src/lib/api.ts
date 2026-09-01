@@ -1,13 +1,19 @@
 /**
  * API client for the Aira backend.
- * All requests go to the backend (http://localhost:5000) which
- * communicates with Supabase Auth on behalf of the app.
+ * The API address is selected from the single .env configuration file.
  */
 
-// Local dev  → http://localhost:5000
-// Change to your deployed backend URL when going to production
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+function resolveApiBaseUrl() {
+  const configuredUrl = Constants.expoConfig?.extra?.apiUrl;
+
+  if (typeof configuredUrl !== 'string' || !configuredUrl.trim()) {
+    throw new Error('PUBLIC_URL must be configured in .env.');
+  }
+
+  return configuredUrl.trim().replace(/\/$/, '');
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const headers = { 'Content-Type': 'application/json' };
 
@@ -89,3 +95,4 @@ export async function apiMe(token?: string) {
   if (!res.ok) return null;
   return res.json();
 }
+import Constants from 'expo-constants';

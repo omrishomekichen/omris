@@ -1,12 +1,18 @@
 import type { NextConfig } from "next";
 
+const apiBaseUrl = process.env.PUBLIC_URL?.replace(/\/$/, "");
+
+if (!apiBaseUrl) {
+  throw new Error("PUBLIC_URL must be configured in .env.");
+}
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.1.11'],
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/api/:path*`,
+        destination: `${apiBaseUrl}/api/:path*`,
       },
     ];
   },

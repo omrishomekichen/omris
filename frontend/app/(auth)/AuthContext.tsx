@@ -29,6 +29,17 @@ export interface AuthContextType {
     email: string,
     password: string,
   ) => Promise<{ status: "success" | "error"; message?: string; user?: User }>;
+  verifyEmail: (
+    email: string,
+    verificationCode: string,
+  ) => Promise<{ status: "success" | "error"; message?: string; user?: User }>;
+  sendLoginOtp: (
+    email: string,
+  ) => Promise<{ status: "success" | "error"; message?: string }>;
+  loginWithOtp: (
+    email: string,
+    verificationCode: string,
+  ) => Promise<{ status: "success" | "error"; message?: string; user?: User }>;
   forgotPassword: (
     email: string,
   ) => Promise<{ status: "success" | "error"; message?: string }>;
@@ -178,6 +189,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
 
+  const verifyEmail = async (email: string, verificationCode: string) => {
+    try {
+      const response = await Api.verifyEmail(email, verificationCode);
+      if (response.status === "success") {
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user));
+          setUser(response.user);
+        }
+        return {
+          status: "success" as const,
+          user: response.user,
+          message: response.message || "Email verified successfully.",
+        };
+      }
+      return {
+        status: "error" as const,
+        message: response.message || "Invalid or expired verification code.",
+      };
+    } catch (err: any) {
+      return {
+        status: "error" as const,
+        message: err?.message || "An error occurred while verifying email.",
+      };
+    }
+  };
+
+  const sendLoginOtp = async (email: string) => {
+    try {
+      const response = await Api.sendLoginOtp(email);
+      if (response.status === "success") {
+        return {
+          status: "success" as const,
+          message: response.message || "OTP sent successfully to your email.",
+        };
+      }
+      return {
+        status: "error" as const,
+        message: response.message || "Failed to send OTP.",
+      };
+    } catch (err: any) {
+      return {
+        status: "error" as const,
+        message: err?.message || "Network error while sending OTP.",
+      };
+    }
+  };
+
+  const loginWithOtp = async (email: string, verificationCode: string) => {
+    try {
+      const response = await Api.verifyLogin(email, verificationCode);
+      if (response.status === "success") {
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user));
+          setUser(response.user);
+        }
+        router.push("/dashboard");
+        return {
+          status: "success" as const,
+          user: response.user,
+          message: response.message || "Logged in successfully.",
+        };
+      }
+      return {
+        status: "error" as const,
+        message: response.message || "Invalid or expired OTP.",
+      };
+    } catch (err: any) {
+      return {
+        status: "error" as const,
+        message: err?.message || "An error occurred while verifying OTP.",
+      };
+    }
+  };
+
   const logout = async () => {
     try {
       await Api.logout();
@@ -195,6 +280,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     login,
     register,
+    verifyEmail,
+    sendLoginOtp,
+    loginWithOtp,
     forgotPassword,
     resetPassword,
     logout,

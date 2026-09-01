@@ -1,8 +1,6 @@
 import { DEFAULT_MENU_ITEMS } from "../data/defaultMenu";
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+const API_BASE_URL = "";
 
 const Api = {
   health: async () => {
@@ -53,6 +51,16 @@ const Api = {
         email: email.trim(),
         verificationCode: verificationCode.trim(),
       }),
+    });
+    return response.json();
+  },
+
+  sendLoginOtp: async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/send-login-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email.trim() }),
     });
     return response.json();
   },
