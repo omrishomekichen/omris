@@ -12,20 +12,9 @@ dotenv.config();
 const app: express.Express = express();
 app.set("trust proxy", 1);
 
-const allowedOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:3000")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
+// Allow all origins (CORS enabled for all sites)
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const origin = req.headers.origin;
-
-  if (origin && allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Vary", "Origin");
-  }
-
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
