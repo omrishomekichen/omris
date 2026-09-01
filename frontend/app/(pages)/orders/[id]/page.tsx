@@ -47,6 +47,8 @@ interface Order {
   _id?: string;
   userId?: string;
   orderId?: string;
+  customerName?: string;
+  customerPhone?: string;
   orderItems?: OrderItem[];
   shippingAddress?: string;
   paymentMethod?: string;
@@ -544,10 +546,15 @@ export default function OrderDetailPage() {
                   <MapPin size={20} />
                 </div>
                 <div className="address-text-wrapper">
-                  <span className="address-recipient-name">Delivery Address</span>
+                  <span className="address-recipient-name">
+                    {order.customerName || "Customer"}
+                  </span>
                   <p className="address-full-text">
                     {order.shippingAddress || "No address provided."}
                   </p>
+                  {order.customerPhone && order.customerPhone !== "N/A" && (
+                    <p className="address-full-text">Phone: {order.customerPhone}</p>
+                  )}
                 </div>
               </div>
             </div>

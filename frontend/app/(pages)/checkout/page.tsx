@@ -169,23 +169,33 @@ export default function CheckoutPage() {
         image: i.image,
       }));
 
-      const res = await Api.placeOrder(
-        formData.email,
-        formattedItems,
-        formattedShippingAddress,
-        paymentMethod === "cod" ? "Cash on Delivery" : "UPI Payment (QR)",
-        utrNumber.trim(),
-        grandTotal,
-        screenshotFile,
-      );
+      const res = await Api.placeOrder({
+        email: formData.email,
+        customerName: formData.fullName,
+        customerPhone: formData.phone,
+        orderItems: formattedItems,
+        shippingAddress: formattedShippingAddress,
+        paymentMethod:
+          paymentMethod === "cod" ? "Cash on Delivery" : "UPI Payment (QR)",
+        utrNumber: utrNumber.trim(),
+        totalPrice: grandTotal,
+        screenshot: screenshotFile,
+      });
 
+      if (!res?.success) {
+        throw new Error(res?.message || "Failed to place order. Please try again.");
+      }
 
       clearCart();
       setIsSubmitting(false);
       router.push("/orders");
-    } catch {
+    } catch (error) {
       setIsSubmitting(false);
-      toast.error("Failed to place order. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to place order. Please try again.",
+      );
     }
   };
 

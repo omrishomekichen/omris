@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import {
   Star,
   Layers,
 } from 'lucide-react-native';
+import { dashboardkpis } from '@/lib/api';
 
 interface DashboardScreenProps {
   onNavigateTab?: (tab: string) => void;
@@ -37,10 +38,39 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
      ===================================================== */
 
   const pendingVerification = 4;
-  const unassignedOrders = 2;
-  const inProgressOrders = 7;
   const criticalStockItems = 3;
-  const totalRevenue = '₹24,850';
+  const [unassignedOrders, setUnassignedOrders] = React.useState(0);
+  const [inProgressOrders, setInProgressOrders] = React.useState(0);
+  const [totalRevenue, setTotalRevenue] = React.useState(0);
+
+  const safeUnassignedOrders = Number(unassignedOrders) || 0;
+  const safeInProgressOrders = Number(inProgressOrders) || 0;
+  const safeTotalRevenue = Number(totalRevenue) || 0;
+
+  useEffect(() => {
+    const fetchUnassignedOrders = async () => {
+      try {
+        const response = await dashboardkpis();
+        if (response && response.success) {
+          setUnassignedOrders(Number(response.totalUnassignedOrders ?? 0) || 0);
+          setInProgressOrders(
+            Number(
+              response.totalpendingOrders ??
+                response.totalPendingOrders ??
+                response.inProgressOrders ??
+                0,
+            ) || 0,
+          );
+          setTotalRevenue(Number(response.totalRevenue ?? 0) || 0);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard KPIs:', error);
+      }
+    };
+
+    fetchUnassignedOrders();
+  }, []);
+
 
   const urgentOrders = [
     {
@@ -256,7 +286,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="Unassigned"
-            value={unassignedOrders.toString()}
+            value={safeUnassignedOrders.toString()}
             subtitle="Needs branch routing"
             icon={<Inbox size={17} color="#650700" />}
             highlight
@@ -268,7 +298,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="In Kitchen"
-            value={inProgressOrders.toString()}
+            value={safeInProgressOrders.toString()}
             subtitle="Processing & Packing"
             icon={<ShoppingBag size={17} color="#650700" />}
             onPress={() => onNavigateTab?.('orders')}
@@ -279,7 +309,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="Revenue"
-            value={totalRevenue}
+            value={`₹${safeTotalRevenue.toLocaleString('en-IN')}`}
             subtitle="All branches"
             icon={<TrendingUp size={17} color="#650700" />}
           />

@@ -104,19 +104,31 @@ const Api = {
       return DEFAULT_MENU_ITEMS;
     }
   },
-  placeOrder: async (
-    email: string,
-    orderItems: any[],
-    shippingAddress: string,
-    paymentMethod: string,
-    utrNumber: string,
-    totalPrice: number,
-    screenshot: File | null,
-    fullName?: string,
-  ) => {
+  placeOrder: async ({
+    email,
+    customerName,
+    customerPhone,
+    orderItems,
+    shippingAddress,
+    paymentMethod,
+    utrNumber,
+    totalPrice,
+    screenshot,
+  }: {
+    email: string;
+    customerName: string;
+    customerPhone: string;
+    orderItems: any[];
+    shippingAddress: string;
+    paymentMethod: string;
+    utrNumber: string;
+    totalPrice: number;
+    screenshot: File | null;
+  }) => {
     const formData = new FormData();
     if (email) formData.append("email", email);
-    if (fullName) formData.append("fullName", fullName);
+    formData.append("customerName", customerName.trim());
+    formData.append("customerPhone", customerPhone.trim());
     formData.append("orderItems", JSON.stringify(orderItems));
     formData.append("shippingAddress", shippingAddress);
     formData.append("paymentMethod", paymentMethod);

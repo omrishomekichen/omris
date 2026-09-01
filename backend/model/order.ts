@@ -7,6 +7,17 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
     },
 
+    customerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    customerPhone: {
+      type: String,
+      default: "N/A",
+    },
+
     orderId: {
       type: String,
       required: true,
@@ -69,9 +80,14 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
-    assign:{
-      type:String,
-      default:"owner",
+    assignTo: {
+      type: String,
+      default: "owner",
+    },
+
+    branch: {
+      type: String,
+      default: "Unassigned",
     },
 
     status: {
