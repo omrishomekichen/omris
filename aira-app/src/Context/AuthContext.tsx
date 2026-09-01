@@ -4,15 +4,45 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { apiLogin, apiLogout, apiMe } from '../lib/api';
 
-import {
-  Session,
-} from '@supabase/supabase-js';
+const TOKEN_KEY = 'aira_auth_token';
+const USER_KEY = 'aira_auth_user';
 
-import { supabase } from '../lib/supabase';
+const storage = {
+  getItem: async (key: string): Promise<string | null> => {
+    try {
+      if (Platform.OS === 'web') {
+        return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
+      }
+      return await SecureStore.getItemAsync(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    try {
+      if (Platform.OS === 'web') {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
+        return;
+      }
+      await SecureStore.setItemAsync(key, value);
+    } catch {}
+  },
+  removeItem: async (key: string): Promise<void> => {
+    try {
+      if (Platform.OS === 'web') {
+        if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
+        return;
+      }
+      await SecureStore.deleteItemAsync(key);
+    } catch {}
+  },
+};
 
-
-interface Profile {
+export interface Profile {
   id: string;
   name: string;
   email: string;
@@ -21,12 +51,21 @@ interface Profile {
   status: 'active' | 'inactive';
 }
 
+export interface User {
+  id: string;
+  _id?: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  verified?: boolean;
+}
 
 interface AuthContextType {
-  session: Session | null;
+  session: { user: User; token: string } | null;
+  user: User | null;
   profile: Profile | null;
   loading: boolean;
-
   login: (
     email: string,
     password: string
@@ -34,150 +73,127 @@ interface AuthContextType {
     success: boolean;
     error?: string;
   }>;
-
   logout: () => Promise<void>;
 }
 
-
-const AuthContext =
-  createContext<AuthContextType | undefined>(
-    undefined
-  );
-
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-  const [session, setSession] =
-    useState<Session | null>(null);
-
-  const [profile, setProfile] =
-    useState<Profile | null>(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
+  const [session, setSession] = useState<{ user: User; token: string } | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     loadSession();
-
-    const {
-      data: listener,
-    } =
-      supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-
-          setSession(session);
-
-          if (session?.user) {
-            await loadProfile(
-              session.user.id
-            );
-          } else {
-            setProfile(null);
-          }
-        }
-      );
-
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-
   }, []);
 
-
   async function loadSession() {
+    try {
+      const savedToken = await storage.getItem(TOKEN_KEY);
+      const savedUserStr = await storage.getItem(USER_KEY);
 
-    const {
-      data,
-    } = await supabase.auth.getSession();
+      if (savedToken && savedUserStr) {
+        try {
+          const parsedUser = JSON.parse(savedUserStr);
+          setUser(parsedUser);
+          setSession({ user: parsedUser, token: savedToken });
+          setProfile({
+            id: parsedUser.id || parsedUser._id || 'admin',
+            name: parsedUser.name || 'Aira Admin',
+            email: parsedUser.email || 'admin@airapickles.com',
+            role: 'owner',
+            branch: null,
+            status: 'active',
+          });
+        } catch {}
+      }
 
-    setSession(data.session);
-
-    if (data.session?.user) {
-      await loadProfile(
-        data.session.user.id
-      );
+      // Verify token with backend
+      if (savedToken) {
+        const meRes = await apiMe(savedToken);
+        if (meRes && meRes.status === 'success' && meRes.user) {
+          setUser(meRes.user);
+          setSession({ user: meRes.user, token: savedToken });
+          setProfile({
+            id: meRes.user.id || meRes.user._id,
+            name: meRes.user.name || 'Aira Admin',
+            email: meRes.user.email,
+            role: 'owner',
+            branch: null,
+            status: 'active',
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Session load error:', e);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
+  async function login(email: string, password: string) {
+    try {
+      const res = await apiLogin(email, password);
 
-  async function loadProfile(
-    userId: string
-  ) {
+      if (res.status !== 'success' || !res.user) {
+        return {
+          success: false,
+          error: res.message || 'Authentication failed',
+        };
+      }
 
-    const {
-      data,
-      error,
-    } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+      const token = res.token || 'app_session_token';
+      const currentUser: User = res.user;
 
+      await storage.setItem(TOKEN_KEY, token);
+      await storage.setItem(USER_KEY, JSON.stringify(currentUser));
 
-    if (!error) {
-      setProfile(data);
-    }
-  }
-
-
-  async function login(
-    email: string,
-    password: string
-  ) {
-
-    const {
-      data,
-      error,
-    } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
+      setUser(currentUser);
+      setSession({ user: currentUser, token });
+      setProfile({
+        id: currentUser.id || currentUser._id || 'admin',
+        name: currentUser.name || 'Aira Admin',
+        email: currentUser.email,
+        role: 'owner',
+        branch: null,
+        status: 'active',
       });
 
-
-    if (error) {
+      return {
+        success: true,
+      };
+    } catch (error: any) {
       return {
         success: false,
-        error: error.message,
+        error: error?.message || 'Network error connecting to auth server',
       };
     }
-
-
-    if (data.user) {
-      await loadProfile(
-        data.user.id
-      );
-    }
-
-
-    return {
-      success: true,
-    };
   }
-
 
   async function logout() {
+    try {
+      const token = session?.token;
+      await apiLogout(token);
+    } catch {}
 
-    await supabase.auth.signOut();
+    await storage.removeItem(TOKEN_KEY);
+    await storage.removeItem(USER_KEY);
 
     setSession(null);
+    setUser(null);
     setProfile(null);
   }
-
 
   return (
     <AuthContext.Provider
       value={{
         session,
+        user,
         profile,
         loading,
         login,
@@ -189,16 +205,11 @@ export function AuthProvider({
   );
 }
 
-
 export function useAuth() {
-
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error(
-      'useAuth must be used inside AuthProvider'
-    );
+    throw new Error('useAuth must be used inside AuthProvider');
   }
 
   return context;

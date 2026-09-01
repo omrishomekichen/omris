@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
+import { supabase } from "../config/supabase";
 import {
   AUTH_COOKIE_NAME,
   authCookieOptions,
@@ -20,9 +21,12 @@ const buildUserResponse = (user: any) => ({
   lastName: user.lastName,
   name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Customer",
   email: user.email,
-  verified: user.verified,
+  verified: user.verified ?? true,
 });
 
+/* ==========================================================================
+   REGISTER
+   ========================================================================== */
 authRouter.post("/register", async (req: Request, res: Response) => {
   const { fullName, email, password, agreeToTerms } = req.body || {};
 
@@ -33,152 +37,78 @@ authRouter.post("/register", async (req: Request, res: Response) => {
     });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+  const [firstName, ...rest] = fullName.trim().split(" ");
+  const lastName = rest.join(" ");
+
   try {
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(409).json({
+    // 1. Sign up on Supabase Auth
+    const { data: sbData, error: sbError } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          first_name: firstName,
+          lastName: lastName,
+        },
+      },
+    });
+
+    if (sbError) {
+      return res.status(400).json({
         status: "error",
-        message: "Email already registered",
+        message: sbError.message,
       });
     }
 
-    const [firstName, ...rest] = fullName.trim().split(" ");
-    const lastName = rest.join(" ");
+    // 2. Sync to local database
+    let user = await User.findOne({ email: cleanEmail });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationCode = Math.floor(
-      100000 + Math.random() * 900000,
-    ).toString();
-    const verificationExpires = new Date(Date.now() + 15 * 60 * 1000);
 
-    const user = new User({
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
-      verified: false,
-    });
-
-    await user.save();
-
-    await Otp.deleteMany({ email: user.email });
-    await Otp.create({
-      email: user.email,
-      code: verificationCode,
-      expiresAt: verificationExpires,
-    });
-
-    try {
-      await sendMail(
-        user.email,
-        "Your verification code",
-        `Your OTP is ${verificationCode}. It expires in 15 minutes.`,
-        undefined,
-        "otp",
-        { otp: verificationCode, name: fullName },
-      );
-    } catch (mailError) {
-      console.error("Verification email error:", mailError);
-      await User.deleteOne({ _id: user._id });
-      await Otp.deleteMany({ email: user.email });
-      return res.status(500).json({
-        status: "error",
-        message:
-          "Unable to send verification email. Please check your email address and try again.",
+    if (!user) {
+      user = new User({
+        firstName,
+        lastName,
+        email: cleanEmail,
+        password: hashedPassword,
+        agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
+        verified: true,
       });
+      await user.save();
     }
+
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        supabaseId: sbData.user?.id,
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
 
     return res.status(201).json({
       status: "success",
-      message:
-        "User registered successfully. Check your email for the verification code.",
-      email: user.email,
+      message: "User registered successfully with Supabase.",
+      user: buildUserResponse(user),
+      token,
+      supabaseUser: sbData.user,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
     return res.status(500).json({
       status: "error",
-      message: "Internal server error",
+      message: error?.message || "Internal server error",
     });
   }
 });
 
-authRouter.post("/verify", async (req: Request, res: Response) => {
-  const { email, verificationCode } = req.body || {};
-
-  if (!email || !verificationCode) {
-    return res.status(400).json({
-      status: "error",
-      message: "Email and verification code are required",
-    });
-  }
-
-  try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "User not found",
-      });
-    }
-
-    if (user.verified) {
-      return res.status(400).json({
-        status: "error",
-        message: "Email already verified",
-      });
-    }
-
-    const otp = await Otp.findOne({
-      email: user.email,
-      code: verificationCode,
-    });
-    if (!otp) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid verification code",
-      });
-    }
-
-    if (new Date() > otp.expiresAt) {
-      return res.status(400).json({
-        status: "error",
-        message: "Verification code expired",
-      });
-    }
-
-    user.verified = true;
-    await user.save();
-    await Otp.deleteMany({ email: user.email });
-
-
-    try {
-      await sendMail(
-        user.email,
-        "Welcome to Aira Pickles",
-        `Welcome to Aira Pickles, ${user.firstName}!`,
-        undefined,
-        "welcome",
-        { name: `${user.firstName} ${user.lastName}`.trim() },
-      );
-    } catch (e) {
-      console.error("Failed to send welcome email:", e);
-    }
-
-    return res.status(200).json({
-      status: "success",
-      message: "Email verified successfully",
-      user: buildUserResponse(user),
-    });
-  } catch (error) {
-    console.error("Verification error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
-  }
-});
-
+/* ==========================================================================
+   LOGIN
+   ========================================================================== */
 authRouter.post("/login", async (req: Request, res: Response) => {
   const { email, password } = req.body || {};
 
@@ -189,28 +119,77 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // 1. Authenticate with Supabase Auth
+    const { data: sbData, error: sbError } =
+      await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+
+    if (sbError) {
+      // Fallback: check legacy local database if user hasn't migrated yet
+      const legacyUser = await User.findOne({ email: cleanEmail });
+      if (legacyUser && (await bcrypt.compare(password, legacyUser.password))) {
+        // Create Supabase account on the fly for legacy user
+        await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              full_name: `${legacyUser.firstName} ${legacyUser.lastName}`.trim(),
+              first_name: legacyUser.firstName,
+              last_name: legacyUser.lastName,
+            },
+          },
+        });
+
+        const token = jwt.sign(
+          {
+            userId: legacyUser._id,
+            email: legacyUser.email,
+            name: `${legacyUser.firstName} ${legacyUser.lastName}`.trim(),
+          },
+          JWT_SECRET,
+          { expiresIn: "7d" },
+        );
+        res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+
+        return res.status(200).json({
+          status: "success",
+          user: buildUserResponse(legacyUser),
+          token,
+        });
+      }
+
+      return res.status(401).json({
+        status: "error",
+        message: sbError.message || "Invalid email or password",
+      });
+    }
+
+    // 2. Sync / Find Mongo User record
+    let user = await User.findOne({ email: cleanEmail });
     if (!user) {
-      return res.status(401).json({
-        status: "error",
-        message: "Invalid email or password",
-      });
-    }
+      const nameParts = (
+        sbData.user?.user_metadata?.full_name ||
+        cleanEmail.split("@")[0]
+      ).split(" ");
+      const firstName = nameParts[0] || "User";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
-    if (!passwordMatches) {
-      return res.status(401).json({
-        status: "error",
-        message: "Invalid email or password",
+      user = new User({
+        firstName,
+        lastName,
+        email: cleanEmail,
+        password: hashedPassword,
+        agreeToTerms: true,
+        verified: true,
       });
-    }
-
-    if (!user.verified) {
-      return res.status(403).json({
-        status: "error",
-        message: "Please verify your email address before logging in.",
-      });
+      await user.save();
     }
 
     const token = jwt.sign(
@@ -218,57 +197,46 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         userId: user._id,
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
+        supabaseId: sbData.user?.id,
       },
       JWT_SECRET,
-      { expiresIn: "60m" },
+      { expiresIn: "7d" },
     );
     res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
-
-
-    try {
-      const userAgent = req.headers["user-agent"] || "Web Browser";
-      const deviceType = userAgent.includes("Mobile")
-        ? "Mobile Device"
-        : "Desktop Browser";
-      const loginTime = new Date().toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      });
-      await sendMail(
-        user.email,
-        "Security Alert: New Sign-In",
-        `We noticed a new login to your Aira Pickles account at ${loginTime}.`,
-        undefined,
-        "login_alert",
-        {
-          device: deviceType,
-          location: "India",
-          time: loginTime,
-          name: `${user.firstName} ${user.lastName}`.trim(),
-        },
-      );
-    } catch (e) {
-      console.error("Failed to send login alert email:", e);
-    }
 
     return res.status(200).json({
       status: "success",
       user: buildUserResponse(user),
+      token: sbData.session?.access_token || token,
+      session: sbData.session,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
     return res.status(500).json({
       status: "error",
-      message: "Internal server error",
+      message: error?.message || "Internal server error",
     });
   }
 });
 
-authRouter.post("/logout", (_req: Request, res: Response) => {
+/* ==========================================================================
+   LOGOUT
+   ========================================================================== */
+authRouter.post("/logout", async (_req: Request, res: Response) => {
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    console.error("Supabase signOut error:", e);
+  }
+
   const { maxAge, ...clearCookieOptions } = authCookieOptions;
   res.clearCookie(AUTH_COOKIE_NAME, clearCookieOptions);
-  return res.status(204).send();
+  return res.status(200).json({ status: "success", message: "Logged out successfully" });
 });
 
+/* ==========================================================================
+   FORGOT PASSWORD
+   ========================================================================== */
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body || {};
 
@@ -279,122 +247,74 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
     });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
+
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({
+    const { error: sbError } = await supabase.auth.resetPasswordForEmail(
+      cleanEmail,
+      {
+        redirectTo: "http://localhost:3000/forgot-password?view=update",
+      },
+    );
+
+    if (sbError) {
+      return res.status(400).json({
         status: "error",
-        message: "User not found",
-      });
-    }
-
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-    await Otp.deleteMany({ email: user.email });
-    await Otp.create({ email: user.email, code: resetCode, expiresAt });
-
-    try {
-      await sendMail(
-        user.email,
-        "Your password reset code",
-        `Your password reset OTP is ${resetCode}. It expires in 15 minutes.`,
-        undefined,
-        "otp",
-        { otp: resetCode, name: `${user.firstName} ${user.lastName}`.trim() },
-      );
-    } catch (mailError) {
-      console.error("Password reset email error:", mailError);
-      await Otp.deleteMany({ email: user.email });
-      return res.status(500).json({
-        status: "error",
-        message: "Unable to send password reset email. Please try again later.",
+        message: sbError.message,
       });
     }
 
     return res.status(200).json({
       status: "success",
-      message: "Password reset code sent to your email.",
-      email: user.email,
+      message: "Password reset link sent to your email via Supabase.",
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Forgot password error:", error);
     return res.status(500).json({
       status: "error",
-      message: "Internal server error",
+      message: error?.message || "Internal server error",
     });
   }
 });
 
+/* ==========================================================================
+   RESET PASSWORD
+   ========================================================================== */
 authRouter.post("/reset-password", async (req: Request, res: Response) => {
-  const { email, verificationCode, newPassword } = req.body || {};
+  const { email, newPassword } = req.body || {};
 
-  if (!email || !verificationCode || !newPassword) {
+  if (!newPassword) {
     return res.status(400).json({
       status: "error",
-      message: "Email, reset code, and new password are required",
+      message: "New password is required",
     });
   }
 
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "User not found",
-      });
-    }
-
-    const otp = await Otp.findOne({
-      email: user.email,
-      code: verificationCode,
-    });
-    if (!otp) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid reset code",
-      });
-    }
-
-    if (new Date() > otp.expiresAt) {
-      return res.status(400).json({
-        status: "error",
-        message: "Reset code expired",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
-    await Otp.deleteMany({ email: user.email });
-
-
-    try {
-      await sendMail(
-        user.email,
-        "Password Updated Successfully",
-        "Your password has been changed successfully.",
-        undefined,
-        "password_reset_success",
-        { name: `${user.firstName} ${user.lastName}`.trim() },
-      );
-    } catch (e) {
-      console.error("Failed to send password reset confirmation email:", e);
+    if (email) {
+      const user = await User.findOne({ email: email.toLowerCase().trim() });
+      if (user) {
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+      }
     }
 
     return res.status(200).json({
       status: "success",
       message: "Password reset successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Reset password error:", error);
     return res.status(500).json({
       status: "error",
-      message: "Internal server error",
+      message: error?.message || "Internal server error",
     });
   }
 });
 
+/* ==========================================================================
+   ME / SESSION CHECK
+   ========================================================================== */
 const handleGetMe = async (req: Request, res: Response) => {
   try {
     const token = getAuthToken(req.headers.cookie);

@@ -77,7 +77,7 @@ function ForgotPasswordContent() {
     setLoading(true);
     try {
       if (auth?.resetPassword) {
-        const res = await auth.resetPassword(newPassword);
+        const res = await auth.resetPassword(email, newPassword);
         if (res.status === "success") {
           toast.success("Password updated successfully!");
           router.push("/login");

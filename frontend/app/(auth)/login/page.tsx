@@ -28,7 +28,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -66,21 +65,10 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    try {
-      if (auth?.signInWithGoogle) {
-        const res = await auth.signInWithGoogle();
-        if (res.status === "error") {
-          toast.error(res.message || "Failed to sign in with Google.");
-        }
-      }
-    } catch (error: any) {
-      toast.error(error?.message || "Google sign in error.");
-    } finally {
-      setGoogleLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    toast("Google Sign-In is configured on the mobile application.");
   };
+
 
   return (
     <div className="auth-page">
@@ -256,7 +244,6 @@ export default function Login() {
             className="auth-google-btn"
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={googleLoading}
           >
             <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
               <path
@@ -276,8 +263,9 @@ export default function Login() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>{googleLoading ? "Connecting Google..." : "Sign in with Google"}</span>
+            <span>Sign in with Google</span>
           </button>
+
 
           <p className="auth-register">
             Don’t have an account?{" "}
