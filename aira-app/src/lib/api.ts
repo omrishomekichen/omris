@@ -1,31 +1,16 @@
 /**
  * API client for the Aira backend.
- * In Expo mobile apps, localhost points to the device itself, not the dev machine.
- * Production uses the deployed API. Development derives the local LAN host.
+ * The API address is selected from the single .env configuration file.
  */
 
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
-
-const PRODUCTION_API_BASE_URL = 'https://omris.onrender.com';
-
 function resolveApiBaseUrl() {
-  const configuredUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
-  if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+  const configuredUrl = Constants.expoConfig?.extra?.apiUrl;
 
-  if (!__DEV__) return PRODUCTION_API_BASE_URL;
-
-  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGo?.developerTool;
-
-  if (hostUri) {
-    const host = hostUri.split(':')[0];
-    return `http://${host}:5000`;
+  if (typeof configuredUrl !== 'string' || !configuredUrl.trim()) {
+    throw new Error('PUBLIC_URL must be configured in .env.');
   }
 
-  if (Platform.OS === 'android') return 'http://10.0.2.2:5000';
-  if (Platform.OS === 'ios') return 'http://localhost:5000';
-
-  return 'http://localhost:5000';
+  return configuredUrl.trim().replace(/\/$/, '');
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
@@ -110,3 +95,4 @@ export async function apiMe(token?: string) {
   if (!res.ok) return null;
   return res.json();
 }
+import Constants from 'expo-constants';

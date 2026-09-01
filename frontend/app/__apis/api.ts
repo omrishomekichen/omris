@@ -1,13 +1,6 @@
 import { DEFAULT_MENU_ITEMS } from "../data/defaultMenu";
 
-const DEFAULT_API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://omris.onrender.com"
-    : "http://localhost:5000";
-
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL
-).replace(/\/$/, "");
+const API_BASE_URL = "";
 
 const Api = {
   health: async () => {
