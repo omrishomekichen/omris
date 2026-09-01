@@ -40,10 +40,12 @@ const AIRA_LOGO = require('../../../assets/images/aira-pickles-logo.png');
    ===================================================== */
 
 export default function LoginScreen() {
-
+    const [loginMode, setLoginMode] = useState<'password' | 'otp'>('password');
     const [email, setEmail] = useState("");
-
     const [password, setPassword] = useState("");
+    const [otpCode, setOtpCode] = useState("");
+    const [otpSent, setOtpSent] = useState(false);
+    const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
     const [showPassword, setShowPassword] =
         useState(false);
@@ -59,48 +61,113 @@ export default function LoginScreen() {
 
     const [successAnimation, setSuccessAnimation] =
         useState(false);
-    const { login } = useAuth();
-
+    const { login, sendLoginOtp, loginWithOtp } = useAuth();
 
     /* ===================================================
-       LOGIN
+       PASSWORD LOGIN
        =================================================== */
+    const handleLogin = async () => {
+        setErrorMessage(null);
+        setInfoMessage(null);
 
-  const handleLogin = async () => {
-    setErrorMessage(null);
-
-    if (!email.trim()) {
-        setErrorMessage('Operator email address is required.');
-        return;
-    }
-
-    if (!email.includes('@')) {
-        setErrorMessage('Please enter a valid business email address.');
-        return;
-    }
-
-    if (!password || password.length < 4) {
-        setErrorMessage('Security passcode must be at least 4 characters.');
-        return;
-    }
-
-    setIsLoading(true);
-
-    try {
-        const result = await login(email, password);
-
-        if (!result.success) {
-            setErrorMessage(result.error || 'Login failed');
+        if (!email.trim()) {
+            setErrorMessage('Operator email address is required.');
             return;
         }
 
-        setSuccessAnimation(true);
-    } catch (error) {
-        setErrorMessage('Something went wrong. Please try again.');
-    } finally {
-        setIsLoading(false);
-    }
-};
+        if (!email.includes('@')) {
+            setErrorMessage('Please enter a valid business email address.');
+            return;
+        }
+
+        if (!password || password.length < 4) {
+            setErrorMessage('Security passcode must be at least 4 characters.');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const result = await login(email.trim(), password);
+
+            if (!result.success) {
+                setErrorMessage(result.error || 'Login failed');
+                return;
+            }
+
+            setSuccessAnimation(true);
+        } catch (error) {
+            setErrorMessage('Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    /* ===================================================
+       SEND OTP
+       =================================================== */
+    const handleSendOtp = async () => {
+        setErrorMessage(null);
+        setInfoMessage(null);
+
+        if (!email.trim()) {
+            setErrorMessage('Email address is required to send OTP.');
+            return;
+        }
+
+        if (!email.includes('@')) {
+            setErrorMessage('Please enter a valid email address.');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const result = await sendLoginOtp(email.trim());
+
+            if (!result.success) {
+                setErrorMessage(result.error || 'Failed to send OTP.');
+                return;
+            }
+
+            setOtpSent(true);
+            setInfoMessage(result.message || `OTP sent to ${email.trim()}`);
+        } catch (error) {
+            setErrorMessage('Failed to send OTP. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    /* ===================================================
+       VERIFY OTP & LOGIN
+       =================================================== */
+    const handleVerifyOtp = async () => {
+        setErrorMessage(null);
+        setInfoMessage(null);
+
+        if (!otpCode.trim() || otpCode.trim().length < 4) {
+            setErrorMessage('Please enter the 6-digit OTP sent to your email.');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const result = await loginWithOtp(email.trim(), otpCode.trim());
+
+            if (!result.success) {
+                setErrorMessage(result.error || 'Invalid or expired OTP.');
+                return;
+            }
+
+            setSuccessAnimation(true);
+        } catch (error) {
+            setErrorMessage('Something went wrong verifying OTP.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -182,8 +249,7 @@ export default function LoginScreen() {
                                 </Text>
 
                                 <Text style={styles.loginSubtitle}>
-                                    Authenticate with your assigned
-                                    staff clearance
+                                    Authenticate with your assigned staff clearance
                                 </Text>
 
                             </View>
@@ -200,46 +266,96 @@ export default function LoginScreen() {
 
                         </View>
 
+                        {/* MODE SELECTOR */}
+                        <View style={styles.modeSwitcher}>
+                            <Pressable
+                                onPress={() => {
+                                    setLoginMode('password');
+                                    setErrorMessage(null);
+                                    setInfoMessage(null);
+                                }}
+                                style={[
+                                    styles.modeTab,
+                                    loginMode === 'password' && styles.modeTabActive,
+                                ]}
+                            >
+                                <Lock
+                                    size={14}
+                                    color={loginMode === 'password' ? '#650700' : '#78716c'}
+                                />
+                                <Text
+                                    style={[
+                                        styles.modeTabText,
+                                        loginMode === 'password' && styles.modeTabTextActive,
+                                    ]}
+                                >
+                                    Passcode
+                                </Text>
+                            </Pressable>
 
-                        {/* =================================================
-                ERROR
-                ================================================= */}
+                            <Pressable
+                                onPress={() => {
+                                    setLoginMode('otp');
+                                    setErrorMessage(null);
+                                    setInfoMessage(null);
+                                }}
+                                style={[
+                                    styles.modeTab,
+                                    loginMode === 'otp' && styles.modeTabActive,
+                                ]}
+                            >
+                                <KeyRound
+                                    size={14}
+                                    color={loginMode === 'otp' ? '#650700' : '#78716c'}
+                                />
+                                <Text
+                                    style={[
+                                        styles.modeTabText,
+                                        loginMode === 'otp' && styles.modeTabTextActive,
+                                    ]}
+                                >
+                                    Email OTP
+                                </Text>
+                            </Pressable>
+                        </View>
 
+                        {/* ERROR MESSAGE */}
                         {errorMessage && (
-
                             <View style={styles.errorBox}>
-
                                 <AlertCircle
                                     size={17}
                                     color="#b91c1c"
                                 />
-
                                 <Text style={styles.errorText}>
                                     {errorMessage}
                                 </Text>
-
                             </View>
-
                         )}
 
+                        {/* INFO MESSAGE */}
+                        {infoMessage && (
+                            <View style={styles.infoBox}>
+                                <CheckCircle2
+                                    size={17}
+                                    color="#166534"
+                                />
+                                <Text style={styles.infoText}>
+                                    {infoMessage}
+                                </Text>
+                            </View>
+                        )}
 
-                        {/* =================================================
-                EMAIL
-                ================================================= */}
-
+                        {/* EMAIL INPUT */}
                         <View style={styles.inputGroup}>
-
                             <Text style={styles.inputLabel}>
                                 Operator Email
                             </Text>
 
                             <View style={styles.inputContainer}>
-
                                 <Mail
                                     size={17}
                                     color="#a8a29e"
                                 />
-
                                 <TextInput
                                     value={email}
                                     onChangeText={(value) => {
@@ -253,190 +369,221 @@ export default function LoginScreen() {
                                     autoCorrect={false}
                                     style={styles.input}
                                 />
-
                             </View>
-
                         </View>
 
+                        {/* PASSCODE MODE */}
+                        {loginMode === 'password' && (
+                            <>
+                                <View style={styles.inputGroup}>
+                                    <View style={styles.passwordLabelRow}>
+                                        <Text style={styles.inputLabel}>
+                                            Security Passcode
+                                        </Text>
+                                        <Text style={styles.demoText}>
+                                            Demo: Any passcode
+                                        </Text>
+                                    </View>
 
-                        {/* =================================================
-                PASSWORD
-                ================================================= */}
-
-                        <View style={styles.inputGroup}>
-
-                            <View style={styles.passwordLabelRow}>
-
-                                <Text style={styles.inputLabel}>
-                                    Security Passcode
-                                </Text>
-
-                                <Text style={styles.demoText}>
-                                    Demo: Any passcode
-                                </Text>
-
-                            </View>
-
-
-                            <View style={styles.inputContainer}>
-
-                                <Lock
-                                    size={17}
-                                    color="#a8a29e"
-                                />
-
-                                <TextInput
-                                    value={password}
-                                    onChangeText={(value) => {
-                                        setPassword(value);
-                                        setErrorMessage(null);
-                                    }}
-                                    placeholder="••••••••"
-                                    placeholderTextColor="#a8a29e"
-                                    secureTextEntry={!showPassword}
-                                    autoCapitalize="none"
-                                    style={styles.input}
-                                />
-
+                                    <View style={styles.inputContainer}>
+                                        <Lock
+                                            size={17}
+                                            color="#a8a29e"
+                                        />
+                                        <TextInput
+                                            value={password}
+                                            onChangeText={(value) => {
+                                                setPassword(value);
+                                                setErrorMessage(null);
+                                            }}
+                                            placeholder="••••••••"
+                                            placeholderTextColor="#a8a29e"
+                                            secureTextEntry={!showPassword}
+                                            autoCapitalize="none"
+                                            style={styles.input}
+                                        />
+                                        <Pressable
+                                            onPress={() => setShowPassword(!showPassword)}
+                                            style={styles.eyeButton}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff size={17} color="#78716c" />
+                                            ) : (
+                                                <Eye size={17} color="#78716c" />
+                                            )}
+                                        </Pressable>
+                                    </View>
+                                </View>
 
                                 <Pressable
-                                    onPress={() =>
-                                        setShowPassword(
-                                            !showPassword
-                                        )
-                                    }
-                                    style={styles.eyeButton}
+                                    onPress={() => setRememberMe(!rememberMe)}
+                                    style={styles.rememberRow}
                                 >
-
-                                    {showPassword ? (
-
-                                        <EyeOff
-                                            size={17}
-                                            color="#78716c"
-                                        />
-
-                                    ) : (
-
-                                        <Eye
-                                            size={17}
-                                            color="#78716c"
-                                        />
-
-                                    )}
-
+                                    <View
+                                        style={[
+                                            styles.checkbox,
+                                            rememberMe && styles.checkboxActive,
+                                        ]}
+                                    >
+                                        {rememberMe && (
+                                            <CheckCircle2 size={13} color="#ffffff" />
+                                        )}
+                                    </View>
+                                    <Text style={styles.rememberText}>
+                                        Persist token on this terminal
+                                    </Text>
                                 </Pressable>
 
-                            </View>
+                                <Pressable
+                                    onPress={handleLogin}
+                                    disabled={isLoading || successAnimation}
+                                    style={({ pressed }) => [
+                                        styles.loginButton,
+                                        pressed && styles.loginButtonPressed,
+                                        (isLoading || successAnimation) && styles.loginButtonDisabled,
+                                    ]}
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <View style={styles.loadingSpinner} />
+                                            <Text style={styles.loginButtonText}>
+                                                Verifying clearance...
+                                            </Text>
+                                        </>
+                                    ) : successAnimation ? (
+                                        <>
+                                            <CheckCircle2 size={17} color="#86efac" />
+                                            <Text style={styles.successButtonText}>
+                                                Access Granted!
+                                            </Text>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Text style={styles.loginButtonText}>
+                                                Authenticate Operator
+                                            </Text>
+                                            <ArrowRight size={17} color="#ffffff" />
+                                        </>
+                                    )}
+                                </Pressable>
+                            </>
+                        )}
 
-                        </View>
+                        {/* OTP MODE */}
+                        {loginMode === 'otp' && (
+                            <>
+                                {otpSent ? (
+                                    <>
+                                        <View style={styles.inputGroup}>
+                                            <Text style={styles.inputLabel}>
+                                                Enter 6-Digit Email OTP
+                                            </Text>
+                                            <View style={styles.inputContainer}>
+                                                <KeyRound
+                                                    size={17}
+                                                    color="#a8a29e"
+                                                />
+                                                <TextInput
+                                                    value={otpCode}
+                                                    onChangeText={(value) => {
+                                                        setOtpCode(value);
+                                                        setErrorMessage(null);
+                                                    }}
+                                                    placeholder="123456"
+                                                    placeholderTextColor="#a8a29e"
+                                                    keyboardType="number-pad"
+                                                    maxLength={6}
+                                                    style={styles.input}
+                                                />
+                                            </View>
+                                        </View>
 
+                                        <View style={styles.otpActionRow}>
+                                            <Pressable
+                                                onPress={handleSendOtp}
+                                                disabled={isLoading}
+                                                style={styles.otpTextAction}
+                                            >
+                                                <Text style={styles.otpActionLink}>
+                                                    Resend OTP
+                                                </Text>
+                                            </Pressable>
+                                            <Pressable
+                                                onPress={() => {
+                                                    setOtpSent(false);
+                                                    setOtpCode("");
+                                                    setInfoMessage(null);
+                                                }}
+                                                style={styles.otpTextAction}
+                                            >
+                                                <Text style={styles.otpActionLink}>
+                                                    Change Email
+                                                </Text>
+                                            </Pressable>
+                                        </View>
 
-                        {/* =================================================
-                REMEMBER
-                ================================================= */}
-
-                        <Pressable
-                            onPress={() =>
-                                setRememberMe(!rememberMe)
-                            }
-                            style={styles.rememberRow}
-                        >
-
-                            <View
-                                style={[
-                                    styles.checkbox,
-                                    rememberMe &&
-                                    styles.checkboxActive,
-                                ]}
-                            >
-
-                                {rememberMe && (
-
-                                    <CheckCircle2
-                                        size={13}
-                                        color="#ffffff"
-                                    />
-
+                                        <Pressable
+                                            onPress={handleVerifyOtp}
+                                            disabled={isLoading || successAnimation}
+                                            style={({ pressed }) => [
+                                                styles.loginButton,
+                                                pressed && styles.loginButtonPressed,
+                                                (isLoading || successAnimation) && styles.loginButtonDisabled,
+                                            ]}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <View style={styles.loadingSpinner} />
+                                                    <Text style={styles.loginButtonText}>
+                                                        Verifying OTP...
+                                                    </Text>
+                                                </>
+                                            ) : successAnimation ? (
+                                                <>
+                                                    <CheckCircle2 size={17} color="#86efac" />
+                                                    <Text style={styles.successButtonText}>
+                                                        OTP Verified!
+                                                    </Text>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Text style={styles.loginButtonText}>
+                                                        Verify OTP & Sign In
+                                                    </Text>
+                                                    <ArrowRight size={17} color="#ffffff" />
+                                                </>
+                                            )}
+                                        </Pressable>
+                                    </>
+                                ) : (
+                                    <Pressable
+                                        onPress={handleSendOtp}
+                                        disabled={isLoading}
+                                        style={({ pressed }) => [
+                                            styles.loginButton,
+                                            pressed && styles.loginButtonPressed,
+                                            isLoading && styles.loginButtonDisabled,
+                                        ]}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <View style={styles.loadingSpinner} />
+                                                <Text style={styles.loginButtonText}>
+                                                    Sending OTP...
+                                                </Text>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Text style={styles.loginButtonText}>
+                                                    Send Login OTP to Email
+                                                </Text>
+                                                <ArrowRight size={17} color="#ffffff" />
+                                            </>
+                                        )}
+                                    </Pressable>
                                 )}
-
-                            </View>
-
-                            <Text style={styles.rememberText}>
-                                Persist token on this terminal
-                            </Text>
-
-                        </Pressable>
-
-
-                        {/* =================================================
-                LOGIN BUTTON
-                ================================================= */}
-
-                        <Pressable
-                            onPress={handleLogin}
-                            disabled={
-                                isLoading ||
-                                successAnimation
-                            }
-                            style={({ pressed }) => [
-
-                                styles.loginButton,
-
-                                pressed &&
-                                styles.loginButtonPressed,
-
-                                (isLoading ||
-                                    successAnimation) &&
-                                styles.loginButtonDisabled,
-
-                            ]}
-                        >
-
-                            {isLoading ? (
-
-                                <>
-
-                                    <View style={styles.loadingSpinner} />
-
-                                    <Text style={styles.loginButtonText}>
-                                        Verifying clearance...
-                                    </Text>
-
-                                </>
-
-                            ) : successAnimation ? (
-
-                                <>
-
-                                    <CheckCircle2
-                                        size={17}
-                                        color="#86efac"
-                                    />
-
-                                    <Text style={styles.successButtonText}>
-                                        Access Granted!
-                                    </Text>
-
-                                </>
-
-                            ) : (
-
-                                <>
-
-                                    <Text style={styles.loginButtonText}>
-                                        Authenticate Operator
-                                    </Text>
-
-                                    <ArrowRight
-                                        size={17}
-                                        color="#ffffff"
-                                    />
-
-                                </>
-
-                            )}
-
-                        </Pressable>
+                            </>
+                        )}
 
 
                
@@ -704,6 +851,89 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
         marginLeft: 10,
+    },
+
+
+    /* MODE SWITCHER */
+    modeSwitcher: {
+        flexDirection: 'row',
+        backgroundColor: '#f5f5f4',
+        borderRadius: 12,
+        padding: 4,
+        marginBottom: 16,
+        gap: 6,
+    },
+
+    modeTab: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 8,
+        borderRadius: 9,
+        gap: 6,
+    },
+
+    modeTabActive: {
+        backgroundColor: '#ffffff',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+    },
+
+    modeTabText: {
+        fontSize: 10,
+        fontWeight: '700',
+        color: '#78716c',
+    },
+
+    modeTabTextActive: {
+        color: '#650700',
+        fontWeight: '800',
+    },
+
+    /* INFO */
+    infoBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 9,
+        backgroundColor: '#f0fdf4',
+        borderWidth: 1,
+        borderColor: '#bbf7d0',
+        borderRadius: 12,
+        padding: 12,
+        marginBottom: 15,
+    },
+
+    infoText: {
+        flex: 1,
+        color: '#166534',
+        fontSize: 10,
+        lineHeight: 15,
+        fontWeight: '600',
+    },
+
+    /* OTP ACTIONS */
+    otpActionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        paddingHorizontal: 4,
+    },
+
+    otpTextAction: {
+        paddingVertical: 4,
+        paddingHorizontal: 6,
+    },
+
+    otpActionLink: {
+        color: '#650700',
+        fontSize: 10,
+        fontWeight: '700',
+        textDecorationLine: 'underline',
     },
 
 

@@ -73,6 +73,20 @@ interface AuthContextType {
     success: boolean;
     error?: string;
   }>;
+  sendLoginOtp: (
+    email: string
+  ) => Promise<{
+    success: boolean;
+    message?: string;
+    error?: string;
+  }>;
+  loginWithOtp: (
+    email: string,
+    otp: string
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
   logout: () => Promise<void>;
 }
 
@@ -175,6 +189,59 @@ export function AuthProvider({
     }
   }
 
+  async function sendLoginOtp(email: string) {
+    try {
+      const { apiSendLoginOtp } = await import('../lib/api');
+      const res = await apiSendLoginOtp(email);
+      if (res.status === 'success') {
+        return { success: true, message: res.message || 'OTP sent successfully' };
+      }
+      return { success: false, error: res.message || 'Failed to send OTP' };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Network error sending OTP' };
+    }
+  }
+
+  async function loginWithOtp(email: string, otp: string) {
+    try {
+      const { apiVerifyLoginOtp } = await import('../lib/api');
+      const res = await apiVerifyLoginOtp(email, otp);
+
+      if (res.status !== 'success' || !res.user) {
+        return {
+          success: false,
+          error: res.message || 'OTP verification failed',
+        };
+      }
+
+      const token = res.token || 'app_session_token';
+      const currentUser: User = res.user;
+
+      await storage.setItem(TOKEN_KEY, token);
+      await storage.setItem(USER_KEY, JSON.stringify(currentUser));
+
+      setUser(currentUser);
+      setSession({ user: currentUser, token });
+      setProfile({
+        id: currentUser.id || currentUser._id || 'admin',
+        name: currentUser.name || 'Aira Admin',
+        email: currentUser.email,
+        role: 'owner',
+        branch: null,
+        status: 'active',
+      });
+
+      return {
+        success: true,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error?.message || 'Network error verifying OTP',
+      };
+    }
+  }
+
   async function logout() {
     try {
       const token = session?.token;
@@ -197,6 +264,8 @@ export function AuthProvider({
         profile,
         loading,
         login,
+        sendLoginOtp,
+        loginWithOtp,
         logout,
       }}
     >

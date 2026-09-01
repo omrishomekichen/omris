@@ -2,7 +2,6 @@
   "name": "vercel-express-mail",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@11.14.0",
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "prestart": "pnpm build",

@@ -111,36 +111,46 @@ orderRouter.post(
     try {
      
 
-      const userId = getUserIdFromToken(req);
-
-      if (!userId) {
-        return res.status(401).json({
-          success: false,
-          message:
-            "Invalid or missing authentication token",
-        });
-      }
-
-     
-
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found",
-        });
-      }
-
-     
-
       const {
+        email,
+        fullName,
         orderItems,
         shippingAddress,
         paymentMethod,
         utrNumber,
         totalPrice,
       } = req.body || {};
+
+      let userId = getUserIdFromToken(req);
+      let user: any = null;
+
+      if (userId) {
+        user = await User.findById(userId);
+      }
+
+      if (!user && email) {
+        const cleanEmail = String(email).toLowerCase().trim();
+        user = await User.findOne({ email: cleanEmail });
+        if (!user) {
+          const [firstName, ...rest] = String(fullName || "Customer").trim().split(" ");
+          user = new User({
+            firstName: firstName || "Customer",
+            lastName: rest.join(" ") || "",
+            email: cleanEmail,
+            password: "guest_order_account",
+            agreeToTerms: true,
+            verified: true,
+          });
+          await user.save();
+        }
+      }
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Please sign in or provide a valid email to place your order.",
+        });
+      }
 
      
 

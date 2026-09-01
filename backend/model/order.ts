@@ -51,17 +51,17 @@ const orderSchema = new mongoose.Schema(
     paymentScreenshot: {
       data: {
         type: Buffer,
-        required: true,
+        default: () => Buffer.from(""),
       },
       contentType: {
         type: String,
-        required: true,
+        default: "image/none",
       },
     },
 
     utrNumber: {
       type: String,
-      required: true,
+      default: "N/A",
     },
 
     totalPrice: {
