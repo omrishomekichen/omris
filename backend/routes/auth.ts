@@ -42,48 +42,78 @@ authRouter.post("/register", async (req: Request, res: Response) => {
   const lastName = rest.join(" ");
 
   try {
-    // 1. Sign up on Supabase Auth
-    const { data: sbData, error: sbError } = await supabase.auth.signUp({
-      email: cleanEmail,
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-          first_name: firstName,
-          lastName: lastName,
-        },
-      },
-    });
+    let supabaseUserId: string | undefined;
 
-    if (sbError) {
+    // 1. Attempt Sign up on Supabase Auth
+    try {
+      const { data: sbData, error: sbError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            first_name: firstName,
+            lastName: lastName,
+          },
+        },
+      });
+
+      if (sbError) {
+        console.warn("[Register] Supabase sign up warning:", sbError.message);
+        if (sbError.message.toLowerCase().includes("already registered")) {
+          const existingUser = await User.findOne({ email: cleanEmail });
+          if (existingUser) {
+            return res.status(400).json({
+              status: "error",
+              message: "An account with this email already exists. Please sign in.",
+            });
+          }
+        }
+      } else {
+        supabaseUserId = sbData.user?.id;
+      }
+    } catch (sbErr: any) {
+      console.warn("[Register] Supabase connection error:", sbErr?.message);
+    }
+
+    // 2. Sync to MongoDB database
+    let user = await User.findOne({ email: cleanEmail });
+    if (user) {
       return res.status(400).json({
         status: "error",
-        message: sbError.message,
+        message: "An account with this email already exists. Please sign in.",
       });
     }
 
-    // 2. Sync to local database
-    let user = await User.findOne({ email: cleanEmail });
     const hashedPassword = await bcrypt.hash(password, 10);
+    user = new User({
+      firstName,
+      lastName,
+      email: cleanEmail,
+      password: hashedPassword,
+      agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
+      verified: true,
+    });
+    await user.save();
 
-    if (!user) {
-      user = new User({
-        firstName,
-        lastName,
-        email: cleanEmail,
-        password: hashedPassword,
-        agreeToTerms: typeof agreeToTerms === "boolean" ? agreeToTerms : true,
-        verified: true,
-      });
-      await user.save();
-    }
+    // 3. Send welcome email asynchronously via mail service
+    try {
+      sendMail(
+        cleanEmail,
+        "Welcome to Aira Pickles!",
+        `Hello ${firstName || "there"}, welcome to Aira Pickles!`,
+        undefined,
+        "welcome",
+        { name: fullName.trim() },
+      ).catch((err) => console.error("[Mail Error]", err));
+    } catch {}
 
     const token = jwt.sign(
       {
         userId: user._id,
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
-        supabaseId: sbData.user?.id,
+        supabaseId: supabaseUserId,
       },
       JWT_SECRET,
       { expiresIn: "7d" },
@@ -92,10 +122,9 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 
     return res.status(201).json({
       status: "success",
-      message: "User registered successfully with Supabase.",
+      message: "User registered successfully.",
       user: buildUserResponse(user),
       token,
-      supabaseUser: sbData.user,
     });
   } catch (error: any) {
     console.error("Registration error:", error);
@@ -104,6 +133,7 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       message: error?.message || "Internal server error",
     });
   }
+
 });
 
 /* ==========================================================================
