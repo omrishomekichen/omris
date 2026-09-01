@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+
 /**
  * API client for the Aira backend.
  * The API address is selected from the single .env configuration file.
@@ -95,4 +97,3 @@ export async function apiMe(token?: string) {
   if (!res.ok) return null;
   return res.json();
 }
-import Constants from 'expo-constants';
