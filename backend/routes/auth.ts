@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../model/user";
 import { Otp } from "../model/otp";
 import { sendMail } from "../ulits/mail";
-import { supabase } from "../config/supabase";
+import { supabase, supabaseAdmin } from "../config/supabase";
 import {
   AUTH_COOKIE_NAME,
   authCookieOptions,
@@ -46,35 +46,48 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 
     // 1. Attempt Sign up on Supabase Auth
     try {
-      const { data: sbData, error: sbError } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
-            first_name: firstName,
-            lastName: lastName,
-          },
-        },
-      });
+      if (supabaseAdmin) {
+        // Admin API skips confirmation email issues and auto-confirms
+        const { data: adminData, error: adminError } =
+          await supabaseAdmin.auth.admin.createUser({
+            email: cleanEmail,
+            password,
+            email_confirm: true,
+            user_metadata: {
+              full_name: fullName.trim(),
+              first_name: firstName,
+              lastName: lastName,
+            },
+          });
 
-      if (sbError) {
-        console.warn("[Register] Supabase sign up warning:", sbError.message);
-        if (sbError.message.toLowerCase().includes("already registered")) {
-          const existingUser = await User.findOne({ email: cleanEmail });
-          if (existingUser) {
-            return res.status(400).json({
-              status: "error",
-              message: "An account with this email already exists. Please sign in.",
-            });
-          }
+        if (adminError) {
+          console.warn("[Register] Supabase admin createUser warning:", adminError.message);
+        } else {
+          supabaseUserId = adminData.user?.id;
         }
       } else {
-        supabaseUserId = sbData.user?.id;
+        const { data: sbData, error: sbError } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              full_name: fullName.trim(),
+              first_name: firstName,
+              lastName: lastName,
+            },
+          },
+        });
+
+        if (sbError) {
+          console.warn("[Register] Supabase sign up warning:", sbError.message);
+        } else {
+          supabaseUserId = sbData.user?.id;
+        }
       }
     } catch (sbErr: any) {
       console.warn("[Register] Supabase connection error:", sbErr?.message);
     }
+
 
     // 2. Sync to MongoDB database
     let user = await User.findOne({ email: cleanEmail });
