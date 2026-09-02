@@ -25,6 +25,14 @@ const headers = { 'Content-Type': 'application/json' };
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+export async function healthCheck() {
+  const res = await fetch(`${API_BASE_URL}/api/health`, {
+    method: 'GET',
+    headers,
+  });
+  return res.json();
+}
+
 export async function apiLogin(email: string, password: string) {
   const res = await fetch(`${API_BASE_URL}/api/login`, {
     method: 'POST',
@@ -113,6 +121,25 @@ export async function dashboardkpis(token?: string) {
 }
 export async function  apiGetAdminOrders(token?: string) {
   const res = await fetch(`${API_BASE_URL}/api/admin-orders`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+
+export async function apiGetRecentPendingOrders(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/recent-pending-orders`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function dashboardreviews(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-reviews`, {
     method: 'GET',
     headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });

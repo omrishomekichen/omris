@@ -21,7 +21,7 @@ import {
   Star,
   Layers,
 } from 'lucide-react-native';
-import { dashboardkpis } from '@/lib/api';
+import { apiGetRecentPendingOrders, dashboardkpis } from '@/lib/api';
 
 interface DashboardScreenProps {
   onNavigateTab?: (tab: string) => void;
@@ -42,6 +42,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [unassignedOrders, setUnassignedOrders] = React.useState(0);
   const [inProgressOrders, setInProgressOrders] = React.useState(0);
   const [totalRevenue, setTotalRevenue] = React.useState(0);
+  const [urgentOrders ,seturgentOrders]= React.useState<any[]>([]);
 
   const safeUnassignedOrders = Number(unassignedOrders) || 0;
   const safeInProgressOrders = Number(inProgressOrders) || 0;
@@ -68,42 +69,23 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       }
     };
 
+    const pandingorders = async () => {
+      try {
+        const response = await apiGetRecentPendingOrders();
+        if (response && response.success) {
+          seturgentOrders(response.orders || []);
+        }
+      } catch (error) {
+        console.error('Failed to load recent pending orders:', error);
+      }
+    };
+
     fetchUnassignedOrders();
+    pandingorders();
   }, []);
 
 
-  const urgentOrders = [
-    {
-      id: '1',
-      customerName: 'Rahul Kumar',
-      orderNumber: 'ORD-1042',
-      totalAmount: 850,
-      items: 2,
-      itemName: 'Mango Pickle',
-      status: 'Payment Verification',
-      initials: 'RK',
-    },
-    {
-      id: '2',
-      customerName: 'Priya Sharma',
-      orderNumber: 'ORD-1041',
-      totalAmount: 1240,
-      items: 3,
-      itemName: 'Avakaya Pickle',
-      status: 'Pending',
-      initials: 'PS',
-    },
-    {
-      id: '3',
-      customerName: 'Arun Kumar',
-      orderNumber: 'ORD-1040',
-      totalAmount: 650,
-      items: 1,
-      itemName: 'Gongura Pickle',
-      status: 'Confirmed',
-      initials: 'AK',
-    },
-  ];
+
 
   const inventory = [
     {
@@ -422,8 +404,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {urgentOrders.map((order) => (
 
             <Pressable
-              key={order.id}
-              onPress={() => onSelectOrder?.(order.id)}
+              key={order.orderId}
+              onPress={() => onSelectOrder?.(order.orderId)}
               style={styles.orderCard}
             >
 
@@ -448,8 +430,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
                       {order.customerName}
                     </Text>
 
-                    <Text style={styles.orderNumber}>
-                      #{order.orderNumber.split('-')[1]}
+                    <Text style={styles.orderId}>
+                      #{order.orderId.split('-')[1]}
                     </Text>
 
                   </View>
@@ -1277,7 +1259,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
 
-  orderNumber: {
+  orderId: {
     color: '#a8a29e',
 
     fontSize: 8,

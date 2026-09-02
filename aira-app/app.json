@@ -32,16 +32,16 @@
         {
           "backgroundColor": "#4A0500",
           "image": "./assets/images/aira-pickles-logo.png",
-          "imageWidth": 50,
+          "imageWidth": 200,
           "resizeMode": "contain"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     }
-    
   }
 }
