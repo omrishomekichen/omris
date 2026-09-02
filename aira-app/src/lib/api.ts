@@ -2,14 +2,18 @@ import Constants from 'expo-constants';
 
 /**
  * API client for the Aira backend.
- * The API address is selected from the single .env configuration file.
+ * The API address is selected from the configured Expo environment variables.
  */
 
 function resolveApiBaseUrl() {
-  const configuredUrl = Constants.expoConfig?.extra?.apiUrl;
+  const configuredUrl =
+    Constants.expoConfig?.extra?.apiUrl ??
+    process.env.EXPO_PUBLIC_API_URL;
 
   if (typeof configuredUrl !== 'string' || !configuredUrl.trim()) {
-    throw new Error('PUBLIC_URL must be configured in .env.');
+    throw new Error(
+      'Set EXPO_PUBLIC_API_URL or PUBLIC_URL in aira-app/.env before starting the app.',
+    );
   }
 
   return configuredUrl.trim().replace(/\/$/, '');
@@ -20,6 +24,14 @@ const API_BASE_URL = resolveApiBaseUrl();
 const headers = { 'Content-Type': 'application/json' };
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
+
+export async function healthCheck() {
+  const res = await fetch(`${API_BASE_URL}/api/health`, {
+    method: 'GET',
+    headers,
+  });
+  return res.json();
+}
 
 export async function apiLogin(email: string, password: string) {
   const res = await fetch(`${API_BASE_URL}/api/login`, {
@@ -91,6 +103,43 @@ export async function apiForgotPassword(email: string) {
 
 export async function apiMe(token?: string) {
   const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+
+export async function dashboardkpis(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-kpis`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+export async function  apiGetAdminOrders(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-orders`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+
+export async function apiGetRecentPendingOrders(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/recent-pending-orders`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function dashboardreviews(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-reviews`, {
     method: 'GET',
     headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });

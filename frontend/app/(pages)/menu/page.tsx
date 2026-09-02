@@ -21,12 +21,41 @@ import {
   Tag,
 } from "lucide-react";
 import Api from "../../__apis/api";
+import { DEFAULT_MENU_ITEMS } from "../../data/defaultMenu";
 import { useCart } from "../../components/CartContext";
 import toast from "react-hot-toast";
 
+const getDefaultProducts = () =>
+  DEFAULT_MENU_ITEMS.map((item) => {
+    const category = item.category || "veg";
+    const priceOptions = [...item.priceOptions].sort(
+      (a, b) => Number(a.price) - Number(b.price),
+    );
+    const image =
+      item.image ||
+      (category === "nonVeg"
+        ? "/images/chicken_pickle.png"
+        : category === "spicedPowder"
+          ? "/images/garlic_pickle.png"
+          : category === "combo" || category === "offer"
+            ? "/images/kitchen_craft.png"
+            : "/images/mango_pickle.png");
+
+    return {
+      ...item,
+      id: item.menuId,
+      category,
+      image,
+      rawPrice: priceOptions[0]?.price || 299,
+      priceOptions,
+      badge: item.isFeatured ? "Best Seller" : "",
+      spiceLevel: category === "nonVeg" ? "🌶️🌶️ Spicy" : "🌶️ Medium-Spicy",
+    };
+  });
+
 export default function MenuPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(getDefaultProducts);
   const [loading, setLoading] = useState<boolean>(true);
   const [favoritesMap, setFavoritesMap] = useState<Record<string, boolean>>({});
   const [selectedSizes, setSelectedSizes] = useState<Record<string, number>>(
@@ -384,7 +413,7 @@ export default function MenuPage() {
           </div>
         </div>
 
-        {loading ? (
+        {loading && products.length === 0 ? (
           <div className="menu-empty-state">
             <p>Loading artisanal delicacies...</p>
           </div>

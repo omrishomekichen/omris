@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import {
     View,
@@ -10,6 +10,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     Image,
+    Animated,
 } from 'react-native';
 
 import {
@@ -62,6 +63,34 @@ export default function LoginScreen() {
     const [successAnimation, setSuccessAnimation] =
         useState(false);
     const { login, sendLoginOtp, loginWithOtp } = useAuth();
+
+    // Spinner animation ref
+    const spinValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (isLoading) {
+            spinValue.setValue(0);
+            Animated.loop(
+                Animated.timing(spinValue, {
+                    toValue: 1,
+                    duration: 800,
+                    useNativeDriver: true,
+                })
+            ).start();
+        } else {
+            Animated.timing(spinValue, {
+                toValue: 0,
+                duration: 0,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isLoading]);
+
+    // Calculate spin rotation
+    const spin = spinValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+    });
 
     /* ===================================================
        PASSWORD LOGIN
@@ -445,7 +474,12 @@ export default function LoginScreen() {
                                 >
                                     {isLoading ? (
                                         <>
-                                            <View style={styles.loadingSpinner} />
+                                            <Animated.View
+                                                style={[
+                                                    styles.loadingSpinner,
+                                                    { transform: [{ rotate: spin }] },
+                                                ]}
+                                            />
                                             <Text style={styles.loginButtonText}>
                                                 Verifying clearance...
                                             </Text>
@@ -533,7 +567,12 @@ export default function LoginScreen() {
                                         >
                                             {isLoading ? (
                                                 <>
-                                                    <View style={styles.loadingSpinner} />
+                                                    <Animated.View
+                                                        style={[
+                                                            styles.loadingSpinner,
+                                                            { transform: [{ rotate: spin }] },
+                                                        ]}
+                                                    />
                                                     <Text style={styles.loginButtonText}>
                                                         Verifying OTP...
                                                     </Text>
@@ -567,7 +606,12 @@ export default function LoginScreen() {
                                     >
                                         {isLoading ? (
                                             <>
-                                                <View style={styles.loadingSpinner} />
+                                                <Animated.View
+                                                    style={[
+                                                        styles.loadingSpinner,
+                                                        { transform: [{ rotate: spin }] },
+                                                    ]}
+                                                />
                                                 <Text style={styles.loginButtonText}>
                                                     Sending OTP...
                                                 </Text>

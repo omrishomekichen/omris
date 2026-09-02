@@ -18,19 +18,6 @@ export default function Index() {
     loading,
   } = useAuth();
 
-
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator
-          size="large"
-          color="#650700"
-        />
-      </View>
-    );
-  }
-
       
   if (!session) {
     return (

@@ -7,6 +7,10 @@ import { MailSender } from "./ulits/mail";
 import menuRouter from "./routes/menu";
 import orderRouter from "./routes/order";
 import reviewRouter from "./routes/review";
+import admindashboardRouter from "./routes/admin/dashboard";
+import adminorderRouter from "./routes/admin/orders";
+
+
 dotenv.config();
 
 const app: express.Express = express();
@@ -51,7 +55,8 @@ app.use("/api", authRouter);
 app.use("/api", menuRouter);
 app.use("/api", orderRouter);
 app.use("/api", reviewRouter);
-
+app.use("/api", admindashboardRouter);
+app.use("/api", adminorderRouter);
 async function connectDatabase(): Promise<void> {
   let uri: string | undefined = process.env.MONGODB_URI;
 

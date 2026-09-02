@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -17,6 +17,7 @@ import StockScreen from './pages/Stock';
 import ReviewsScreen from './pages/Reviews';
 import TeamScreen from './pages/Team';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {healthCheck} from '../lib/api';
 
 // Height of the tab bar's own content (paddingTop 5 + paddingBottom 7 + tab minHeight 54)
 const TAB_BAR_HEIGHT = 66;
@@ -32,6 +33,16 @@ function AppShell() {
   const insets = useSafeAreaInsets();
 
   // Loading state — wait for Supabase session check
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const response = await healthCheck();
+      } catch (error) {
+      }
+
+    };
+    checkHealth();
+  }, []);
   if (loading) {
     return (
       <View style={styles.loading}>

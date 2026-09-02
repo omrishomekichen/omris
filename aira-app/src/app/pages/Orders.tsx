@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   View,
@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Package,
 } from 'lucide-react-native';
+import {apiGetAdminOrders}from '@/lib/api';
 
 interface OrdersScreenProps {
   onSelectOrder?: (orderId: string) => void;
@@ -52,119 +53,7 @@ interface FilterTab {
   count: number;
   badge?: boolean;
 }
-
-
-/* =====================================================
-   STATIC DESIGN DATA
-   ===================================================== */
-
-const ORDERS: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'ORD-1042',
-    customerName: 'Rahul Kumar',
-    customerPhone: '9876543210',
-    city: 'Bangalore',
-    pincode: '560001',
-    branch: 'Central',
-    items: 2,
-    itemName: 'Mango Pickle',
-    totalAmount: 850,
-    status: 'payment_verification',
-    assigned: true,
-  },
-
-  {
-    id: '2',
-    orderNumber: 'ORD-1041',
-    customerName: 'Priya Sharma',
-    customerPhone: '9988776655',
-    city: 'Mysore',
-    pincode: '570001',
-    branch: 'Mysore',
-    items: 3,
-    itemName: 'Avakaya Pickle',
-    totalAmount: 1240,
-    status: 'pending',
-    assigned: false,
-  },
-
-  {
-    id: '3',
-    orderNumber: 'ORD-1040',
-    customerName: 'Arun Kumar',
-    customerPhone: '9123456789',
-    city: 'Bangalore',
-    pincode: '560034',
-    branch: 'Central',
-    items: 1,
-    itemName: 'Gongura Pickle',
-    totalAmount: 650,
-    status: 'confirmed',
-    assigned: true,
-  },
-
-  {
-    id: '4',
-    orderNumber: 'ORD-1039',
-    customerName: 'Sneha Reddy',
-    customerPhone: '9012345678',
-    city: 'Hyderabad',
-    pincode: '500001',
-    branch: 'Hyderabad',
-    items: 4,
-    itemName: 'Tomato Pickle',
-    totalAmount: 1560,
-    status: 'processing',
-    assigned: true,
-  },
-
-  {
-    id: '5',
-    orderNumber: 'ORD-1038',
-    customerName: 'Vikram Singh',
-    customerPhone: '9345678901',
-    city: 'Bangalore',
-    pincode: '560068',
-    branch: 'Central',
-    items: 2,
-    itemName: 'Garlic Pickle',
-    totalAmount: 920,
-    status: 'shipped',
-    assigned: true,
-  },
-
-  {
-    id: '6',
-    orderNumber: 'ORD-1037',
-    customerName: 'Anjali Rao',
-    customerPhone: '9456789012',
-    city: 'Mangalore',
-    pincode: '575001',
-    branch: 'Mangalore',
-    items: 3,
-    itemName: 'Lemon Pickle',
-    totalAmount: 1100,
-    status: 'delivered',
-    assigned: true,
-  },
-
-  {
-    id: '7',
-    orderNumber: 'ORD-1036',
-    customerName: 'Kiran Patel',
-    customerPhone: '9567890123',
-    city: 'Bangalore',
-    pincode: '560040',
-    branch: 'Central',
-    items: 2,
-    itemName: 'Mixed Pickle',
-    totalAmount: 780,
-    status: 'pending',
-    assigned: false,
-  },
-];
-
+ 
 
 /* =====================================================
    BRANCHES
@@ -179,7 +68,7 @@ const BRANCHES = [
 
 
 /* =====================================================
-   ORDERS SCREEN
+   orders SCREEN
    ===================================================== */
 
 const OrdersScreen: React.FC<OrdersScreenProps> = ({
@@ -193,14 +82,29 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
   const [branchFilter, setBranchFilter] = useState('all');
 
+    const [orders, setOrders] = useState<Order[]>([]);
 
-  /* ===================================================
-     FILTER ORDERS
-     =================================================== */
+
+useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await apiGetAdminOrders();
+        setOrders(response?.orders ?? []);
+      } catch (error) {
+        console.error('Error fetching admin orders:', error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+
+
+  
 
   const filteredOrders = useMemo(() => {
 
-    return ORDERS.filter((order) => {
+    return orders.filter((order) => {
 
       /* TAB FILTER */
 
@@ -311,30 +215,30 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
      COUNTS
      =================================================== */
 
-  const countVerification = ORDERS.filter(
+  const countVerification = orders.filter(
     (order) =>
       order.status === 'pending' ||
       order.status === 'payment_verification'
   ).length;
 
-  const countRouting = ORDERS.filter(
+  const countRouting = orders.filter(
     (order) =>
       !order.assigned &&
       order.status === 'pending'
   ).length;
 
-  const countProcessing = ORDERS.filter(
+  const countProcessing = orders.filter(
     (order) =>
       order.status === 'processing' ||
       order.status === 'confirmed'
   ).length;
 
-  const countShipped = ORDERS.filter(
+  const countShipped = orders.filter(
     (order) =>
       order.status === 'shipped'
   ).length;
 
-  const countDelivered = ORDERS.filter(
+  const countDelivered = orders.filter(
     (order) =>
       order.status === 'delivered'
   ).length;
@@ -349,7 +253,7 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
     {
       id: 'all',
       label: 'All Orders',
-      count: ORDERS.length,
+      count: orders.length,
     },
 
     {
@@ -621,6 +525,7 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
         <ScrollView
           horizontal
+          style={styles.tabsScroll}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabsContainer}
         >
@@ -1012,7 +917,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f3f0ee',
   },
 
   scrollView: {
@@ -1031,30 +936,30 @@ const styles = StyleSheet.create({
      =================================================== */
 
   headerCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fffdfb',
 
     borderRadius: 20,
 
     borderWidth: 1,
 
-    borderColor: '#e7e5e4',
+    borderColor: '#e7e2df',
 
     padding: 14,
 
-    marginBottom: 10,
+    marginBottom: 12,
 
-    elevation: 1,
+    elevation: 2,
 
     shadowColor: '#000',
 
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
 
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.06,
 
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
 
   headerTop: {
@@ -1171,43 +1076,51 @@ const styles = StyleSheet.create({
 
     alignItems: 'center',
 
-    marginTop: 11,
+    marginTop: 12,
 
-    gap: 6,
+    gap: 8,
   },
 
   branchLabel: {
-    color: '#78716c',
+    color: '#57534e',
 
     fontSize: 10,
 
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   branchList: {
     gap: 6,
 
-    paddingRight: 5,
+    paddingRight: 8,
   },
 
   branchChip: {
-    backgroundColor: '#fafaf9',
+    backgroundColor: '#f7f3f1',
 
     borderWidth: 1,
 
-    borderColor: '#e7e5e4',
+    borderColor: '#e7e2df',
 
-    paddingHorizontal: 9,
+    paddingHorizontal: 10,
 
-    paddingVertical: 6,
+    paddingVertical: 7,
 
-    borderRadius: 10,
+    borderRadius: 11,
   },
 
   branchChipActive: {
     backgroundColor: '#650700',
 
     borderColor: '#650700',
+
+    shadowColor: '#650700',
+
+    shadowOpacity: 0.18,
+
+    shadowRadius: 8,
+
+    shadowOffset: { width: 0, height: 4 },
   },
 
   branchChipText: {
@@ -1215,7 +1128,7 @@ const styles = StyleSheet.create({
 
     fontSize: 9,
 
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   branchChipTextActive: {
@@ -1230,11 +1143,23 @@ const styles = StyleSheet.create({
      =================================================== */
 
   tabsContainer: {
-    gap: 7,
+    flexDirection: 'row',
 
-    paddingBottom: 10,
+    alignItems: 'center',
 
-    paddingRight: 10,
+    gap: 8,
+
+    paddingBottom: 12,
+
+    paddingRight: 12,
+  },
+
+  tabsScroll: {
+    flexGrow: 0,
+
+    flexShrink: 0,
+
+    maxHeight: 60,
   },
 
   filterTab: {
@@ -1242,19 +1167,27 @@ const styles = StyleSheet.create({
 
     alignItems: 'center',
 
-    gap: 6,
+    justifyContent: 'space-between',
+
+    gap: 8,
 
     backgroundColor: '#ffffff',
 
     borderWidth: 1,
 
-    borderColor: '#e7e5e4',
+    borderColor: '#e7e2df',
 
-    borderRadius: 15,
+    borderRadius: 16,
 
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
 
-    paddingVertical: 8,
+    paddingVertical: 9,
+
+    minWidth: 112,
+
+    height: 44,
+
+    alignSelf: 'flex-start',
   },
 
   filterTabActive: {
@@ -1263,6 +1196,14 @@ const styles = StyleSheet.create({
     borderColor: '#650700',
 
     elevation: 2,
+
+    shadowColor: '#650700',
+
+    shadowOffset: { width: 0, height: 4 },
+
+    shadowOpacity: 0.15,
+
+    shadowRadius: 8,
   },
 
   filterTabText: {
@@ -1539,13 +1480,23 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
 
-    borderColor: '#e7e5e4',
+    borderColor: '#e7e2df',
 
-    paddingVertical: 45,
+    paddingVertical: 42,
 
-    paddingHorizontal: 25,
+    paddingHorizontal: 24,
 
     alignItems: 'center',
+
+    marginTop: 8,
+
+    shadowColor: '#000',
+
+    shadowOffset: { width: 0, height: 1 },
+
+    shadowOpacity: 0.03,
+
+    shadowRadius: 6,
   },
 
   emptyIcon: {
@@ -1555,13 +1506,13 @@ const styles = StyleSheet.create({
 
     borderRadius: 16,
 
-    backgroundColor: '#fffbeb',
+    backgroundColor: '#fff7ed',
 
     alignItems: 'center',
 
     justifyContent: 'center',
 
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   emptyTitle: {
@@ -1583,7 +1534,7 @@ const styles = StyleSheet.create({
 
     textAlign: 'center',
 
-    marginTop: 6,
+    marginTop: 8,
 
     maxWidth: 260,
   },

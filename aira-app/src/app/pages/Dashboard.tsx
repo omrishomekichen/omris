@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import {
   Star,
   Layers,
 } from 'lucide-react-native';
+import { apiGetRecentPendingOrders, dashboardkpis } from '@/lib/api';
 
 interface DashboardScreenProps {
   onNavigateTab?: (tab: string) => void;
@@ -37,43 +38,54 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
      ===================================================== */
 
   const pendingVerification = 4;
-  const unassignedOrders = 2;
-  const inProgressOrders = 7;
   const criticalStockItems = 3;
-  const totalRevenue = '₹24,850';
+  const [unassignedOrders, setUnassignedOrders] = React.useState(0);
+  const [inProgressOrders, setInProgressOrders] = React.useState(0);
+  const [totalRevenue, setTotalRevenue] = React.useState(0);
+  const [urgentOrders ,seturgentOrders]= React.useState<any[]>([]);
 
-  const urgentOrders = [
-    {
-      id: '1',
-      customerName: 'Rahul Kumar',
-      orderNumber: 'ORD-1042',
-      totalAmount: 850,
-      items: 2,
-      itemName: 'Mango Pickle',
-      status: 'Payment Verification',
-      initials: 'RK',
-    },
-    {
-      id: '2',
-      customerName: 'Priya Sharma',
-      orderNumber: 'ORD-1041',
-      totalAmount: 1240,
-      items: 3,
-      itemName: 'Avakaya Pickle',
-      status: 'Pending',
-      initials: 'PS',
-    },
-    {
-      id: '3',
-      customerName: 'Arun Kumar',
-      orderNumber: 'ORD-1040',
-      totalAmount: 650,
-      items: 1,
-      itemName: 'Gongura Pickle',
-      status: 'Confirmed',
-      initials: 'AK',
-    },
-  ];
+  const safeUnassignedOrders = Number(unassignedOrders) || 0;
+  const safeInProgressOrders = Number(inProgressOrders) || 0;
+  const safeTotalRevenue = Number(totalRevenue) || 0;
+
+  useEffect(() => {
+    const fetchUnassignedOrders = async () => {
+      try {
+        const response = await dashboardkpis();
+        if (response && response.success) {
+          setUnassignedOrders(Number(response.totalUnassignedOrders ?? 0) || 0);
+          setInProgressOrders(
+            Number(
+              response.totalpendingOrders ??
+                response.totalPendingOrders ??
+                response.inProgressOrders ??
+                0,
+            ) || 0,
+          );
+          setTotalRevenue(Number(response.totalRevenue ?? 0) || 0);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard KPIs:', error);
+      }
+    };
+
+    const pandingorders = async () => {
+      try {
+        const response = await apiGetRecentPendingOrders();
+        if (response && response.success) {
+          seturgentOrders(response.orders || []);
+        }
+      } catch (error) {
+        console.error('Failed to load recent pending orders:', error);
+      }
+    };
+
+    fetchUnassignedOrders();
+    pandingorders();
+  }, []);
+
+
+
 
   const inventory = [
     {
@@ -256,7 +268,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="Unassigned"
-            value={unassignedOrders.toString()}
+            value={safeUnassignedOrders.toString()}
             subtitle="Needs branch routing"
             icon={<Inbox size={17} color="#650700" />}
             highlight
@@ -268,7 +280,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="In Kitchen"
-            value={inProgressOrders.toString()}
+            value={safeInProgressOrders.toString()}
             subtitle="Processing & Packing"
             icon={<ShoppingBag size={17} color="#650700" />}
             onPress={() => onNavigateTab?.('orders')}
@@ -279,7 +291,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           <MetricCard
             title="Revenue"
-            value={totalRevenue}
+            value={`₹${safeTotalRevenue.toLocaleString('en-IN')}`}
             subtitle="All branches"
             icon={<TrendingUp size={17} color="#650700" />}
           />
@@ -392,8 +404,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
           {urgentOrders.map((order) => (
 
             <Pressable
-              key={order.id}
-              onPress={() => onSelectOrder?.(order.id)}
+              key={order.orderId}
+              onPress={() => onSelectOrder?.(order.orderId)}
               style={styles.orderCard}
             >
 
@@ -418,8 +430,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
                       {order.customerName}
                     </Text>
 
-                    <Text style={styles.orderNumber}>
-                      #{order.orderNumber.split('-')[1]}
+                    <Text style={styles.orderId}>
+                      #{order.orderId.split('-')[1]}
                     </Text>
 
                   </View>
@@ -1247,7 +1259,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
 
-  orderNumber: {
+  orderId: {
     color: '#a8a29e',
 
     fontSize: 8,

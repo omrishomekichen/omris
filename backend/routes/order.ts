@@ -109,17 +109,35 @@ orderRouter.post(
     res: Response,
   ) => {
     try {
-     
+
 
       const {
         email,
-        fullName,
+        customerName: submittedCustomerName,
+        customerPhone: submittedCustomerPhone,
+        // Keep supporting previous checkout clients during their rollout.
+        fullName: legacyFullName,
+        phone: legacyPhone,
         orderItems,
         shippingAddress,
         paymentMethod,
         utrNumber,
         totalPrice,
       } = req.body || {};
+
+      const requestedCustomerName = String(
+        submittedCustomerName || legacyFullName || "",
+      ).trim();
+      const requestedCustomerPhone = String(
+        submittedCustomerPhone || legacyPhone || "",
+      ).trim();
+
+      if (!requestedCustomerName) {
+        return res.status(400).json({
+          success: false,
+          message: "Customer name is required to place an order.",
+        });
+      }
 
       let userId = getUserIdFromToken(req);
       let user: any = null;
@@ -132,7 +150,7 @@ orderRouter.post(
         const cleanEmail = String(email).toLowerCase().trim();
         user = await User.findOne({ email: cleanEmail });
         if (!user) {
-          const [firstName, ...rest] = String(fullName || "Customer").trim().split(" ");
+          const [firstName, ...rest] = requestedCustomerName.split(" ");
           user = new User({
             firstName: firstName || "Customer",
             lastName: rest.join(" ") || "",
@@ -152,7 +170,7 @@ orderRouter.post(
         });
       }
 
-     
+
 
       if (
         !orderItems ||
@@ -168,7 +186,7 @@ orderRouter.post(
         });
       }
 
-     
+
 
       let parsedOrderItems: unknown;
 
@@ -196,7 +214,7 @@ orderRouter.post(
         });
       }
 
-     
+
 
       const isUpi = String(
         paymentMethod,
@@ -204,7 +222,7 @@ orderRouter.post(
         .toLowerCase()
         .includes("upi");
 
-     
+
 
       if (
         isUpi &&
@@ -218,7 +236,7 @@ orderRouter.post(
         });
       }
 
-     
+
 
       const orderId =
         `ORD-${Date.now()}-${crypto
@@ -226,7 +244,7 @@ orderRouter.post(
           .toString("hex")
           .toUpperCase()}`;
 
-     
+
 
       const paymentScreenshot = req.file
         ? {
@@ -239,10 +257,16 @@ orderRouter.post(
           contentType: "image/none",
         };
 
-     
+
 
       const order = new Order({
         userId: user._id,
+
+        customerName:
+          requestedCustomerName,
+
+        customerPhone:
+          requestedCustomerPhone || "N/A",
 
         orderId,
 
@@ -264,32 +288,22 @@ orderRouter.post(
         status: "pending",
       });
 
-      await order.save();
 
-     
+      await order.save();
 
       const customerEmail =
         user.email;
 
       const customerName =
-        `${user.firstName || ""} ${user.lastName || ""
-          }`.trim() || "Customer";
+        order.customerName;
 
-     
       const customerPhone =
-        (user as any).phone ||
-        undefined;
-
-     
-
-     
+        order.customerPhone === "N/A" ? undefined : order.customerPhone;
 
       const createdAt =
         order.createdAt
           ? order.createdAt.toISOString()
           : new Date().toISOString();
-
-     
 
       const screenshotBase64 =
         req.file
@@ -298,13 +312,13 @@ orderRouter.post(
           )}`
           : undefined;
 
-     
+
 
       void (async () => {
-       
+
 
         try {
-         
+
 
           await mailService.sendAdminOrderNotificationEmail(
             ADMIN_EMAIL,
@@ -336,7 +350,7 @@ orderRouter.post(
             screenshotBase64,
           );
 
-        
+
         } catch (mailError) {
           console.error(
             "[Order Mail] Admin email error:",
@@ -344,11 +358,11 @@ orderRouter.post(
           );
         }
 
-       
+
 
         if (customerEmail) {
           try {
-           
+
 
             await mailService.sendOrderConfirmationEmail(
               customerEmail,
@@ -366,7 +380,7 @@ orderRouter.post(
               order.paymentMethod,
             );
 
-           
+
           } catch (mailError) {
             console.error(
               "[Order Mail] Customer email error:",
@@ -376,7 +390,7 @@ orderRouter.post(
         }
       })();
 
-     
+
 
       return res.status(201).json({
         success: true,
@@ -387,6 +401,12 @@ orderRouter.post(
         order: {
           orderId:
             order.orderId,
+
+          customerName:
+            order.customerName,
+
+          customerPhone:
+            order.customerPhone,
 
           userId:
             order.userId,
@@ -518,4 +538,3 @@ orderRouter.get("/user/orders/:id", handleGetSingleOrder);
 orderRouter.post("/user/orders/:id", handleGetSingleOrder);
 
 export default orderRouter;
-
