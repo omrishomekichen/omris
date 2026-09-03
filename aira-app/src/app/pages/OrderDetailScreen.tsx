@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  ActivityIndicator,
   Pressable,
   Image,
   ScrollView,
@@ -13,7 +14,14 @@ import {
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 
-import { Order } from "@/app/types";
+import type {
+  ForwardOrderSheetProps,
+  Order,
+  OrderDetailScreenProps,
+  ScreenshotViewerProps,
+  StatusBadgeProps,
+  StatusStepperProps,
+} from "@/app/types";
 
 import { useAuth } from "../../Context/AuthContext";
 import { apiGetAdminOrders } from "../../lib/api";
@@ -38,19 +46,9 @@ import {
   Eye,
 } from "lucide-react-native";
 
-interface OrderDetailScreenProps {
-  orderId: string;
-  onBack: () => void;
-}
-
 /* =========================================================
    STATUS BADGE
 ========================================================= */
-
-interface StatusBadgeProps {
-  status: string;
-  size?: "sm" | "md";
-}
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({
   status,
@@ -138,10 +136,6 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
 /* =========================================================
    STATUS STEPPER
 ========================================================= */
-
-interface StatusStepperProps {
-  order: Order;
-}
 
 const StatusStepper: React.FC<StatusStepperProps> = ({
   order,
@@ -246,12 +240,6 @@ const StatusStepper: React.FC<StatusStepperProps> = ({
 /* =========================================================
    FORWARD ORDER SHEET
 ========================================================= */
-
-interface ForwardOrderSheetProps {
-  order: Order;
-  isOpen: boolean;
-  onClose: () => void;
-}
 
 const ForwardOrderSheet: React.FC<
   ForwardOrderSheetProps
@@ -402,14 +390,6 @@ const ForwardOrderSheet: React.FC<
    SCREENSHOT VIEWER
 ========================================================= */
 
-interface ScreenshotViewerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  imageUrl: string;
-  utrNumber?: string;
-  customerName: string;
-}
-
 const ScreenshotViewer: React.FC<
   ScreenshotViewerProps
 > = ({
@@ -477,9 +457,10 @@ const ScreenshotViewer: React.FC<
 export const OrderDetailScreen: React.FC<
   OrderDetailScreenProps
 > = ({ orderId, onBack }) => {
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const isOwner = profile?.role === "owner";
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [forwardSheetOpen, setForwardSheetOpen] =
     useState(false);
@@ -493,18 +474,54 @@ export const OrderDetailScreen: React.FC<
 
   useEffect(() => {
     const loadOrders = async () => {
-      const response = await apiGetAdminOrders();
-      setOrders(response?.orders ?? []);
+      const response = await apiGetAdminOrders(session?.token);
+      const normalizedOrders = (response?.orders ?? []).map((rawOrder: any) => ({
+        ...rawOrder,
+        createdAt: rawOrder.createdAt || new Date().toISOString(),
+        items: (Array.isArray(rawOrder.orderItems)
+          ? rawOrder.orderItems
+          : Array.isArray(rawOrder.items)
+            ? rawOrder.items
+            : []
+        ).map((item: any) => ({
+          ...item,
+          image: item.image || "",
+          variant: item.variant || "",
+          unitPrice: Number(item.unitPrice ?? item.price ?? 0),
+          subtotal: Number(item.subtotal ?? item.total ?? 0),
+        })),
+        shippingAddress: typeof rawOrder.shippingAddress === "object"
+          ? rawOrder.shippingAddress
+          : {
+            line1: rawOrder.shippingAddress || "Address unavailable",
+            city: rawOrder.city || "",
+            state: "",
+            pincode: rawOrder.pincode || "",
+          },
+      }));
+      setOrders(normalizedOrders);
     };
 
-    loadOrders().catch((error) => {
-      console.error("Error fetching order details:", error);
-    });
-  }, []);
+    loadOrders()
+      .catch((error) => {
+        console.error("Error fetching order details:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [session?.token]);
 
   const order = orders.find(
     (o) => o.id === orderId
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#650700" />
+      </View>
+    );
+  }
 
   /* -------------------------------------------------------
      ORDER NOT FOUND
@@ -1705,6 +1722,13 @@ const styles = StyleSheet.create({
   pincode: {
     fontFamily: "monospace",
     fontWeight: "800",
+  },
+
+  loading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#faf7f3",
   },
 
   /* NOT FOUND */

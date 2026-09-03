@@ -652,7 +652,7 @@ export default function LoginScreen() {
 
                         <Text style={styles.rbacText}>
                             • Branch Operators / Staff: Authorized
-                            for local branch orders & Stock Management.
+                            for local branch orders.
                         </Text>
 
                     </View>

@@ -9,6 +9,7 @@ import orderRouter from "./routes/order";
 import reviewRouter from "./routes/review";
 import admindashboardRouter from "./routes/admin/dashboard";
 import adminorderRouter from "./routes/admin/orders";
+import adminmenuRouter from "./routes/admin/menu";
 
 
 dotenv.config();
@@ -57,6 +58,7 @@ app.use("/api", orderRouter);
 app.use("/api", reviewRouter);
 app.use("/api", admindashboardRouter);
 app.use("/api", adminorderRouter);
+app.use("/api", adminmenuRouter);
 async function connectDatabase(): Promise<void> {
   let uri: string | undefined = process.env.MONGODB_URI;
 

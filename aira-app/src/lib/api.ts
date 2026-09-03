@@ -34,7 +34,7 @@ export async function healthCheck() {
 }
 
 export async function apiLogin(email: string, password: string) {
-  const res = await fetch(`${API_BASE_URL}/api/login`, {
+  const res = await fetch(`${API_BASE_URL}/api/adminlogin`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ email, password }),
@@ -140,6 +140,50 @@ export async function apiGetRecentPendingOrders(token?: string) {
 
 export async function dashboardreviews(token?: string) {
   const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-reviews`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function apiGetAdminLatestReviews(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-latest-reviews`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function apiGetRecentReviews(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/reviews/recent`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function apiGetAdminReviews(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/admin-reviews`, {
+    method: 'GET',
+    headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+
+
+
+
+
+/* menu Routes */
+
+
+export async function apiGetMenuItems(token?: string) {
+  const res = await fetch(`${API_BASE_URL}/api/menu-items`, {
     method: 'GET',
     headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });

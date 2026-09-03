@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import Order from "../../model/order";
+import { Review } from "../../model/review";
 
 const admindashboardRouter: express.Router = express.Router();
 
@@ -46,4 +47,65 @@ admindashboardRouter.get(
     }
   }
 );
+
+
+
+
+
+admindashboardRouter.get(
+    "/admin-dashboard-latest-reviews",
+    async (req: Request, res: Response) => {
+        try {
+            const reviews = await Review.find({
+                comment: { $exists: true, $ne: "" },
+            })
+                .sort({ createdAt: -1 })
+                .limit(5)
+                .select(
+                    "userId userName productId productName orderId rating comment verifiedPurchase createdAt"
+                )
+                .lean();
+
+            return res.status(200).json({
+                success: true,
+                reviews,
+            });
+        } catch (error) {
+            console.error("Error fetching latest reviews:", error);
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to fetch latest reviews",
+            });
+        }
+    }
+);
+
+  admindashboardRouter.get(
+    "/admin-reviews",
+    async (_req: Request, res: Response) => {
+      try {
+        const reviews = await Review.find({
+          comment: { $exists: true, $ne: "" },
+        })
+          .sort({ createdAt: -1 })
+          .select(
+            "userId userName productId productName orderId rating comment verifiedPurchase createdAt"
+          )
+          .lean();
+
+        return res.status(200).json({
+          success: true,
+          reviews,
+        });
+      } catch (error) {
+        console.error("Error fetching admin reviews:", error);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch reviews",
+        });
+      }
+    }
+  );
 export default admindashboardRouter;

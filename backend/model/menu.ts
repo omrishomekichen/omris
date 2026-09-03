@@ -1,6 +1,4 @@
-import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import crypto from "crypto";
 
 const priceOptionSchema = new mongoose.Schema(
   {
@@ -8,13 +6,11 @@ const priceOptionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
     unit: {
       type: String,
       enum: ["g", "kg", "ml", "l", "piece"],
       required: true,
     },
-
     price: {
       type: Number,
       required: true,
@@ -31,12 +27,10 @@ const comboItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-
     quantity: {
       type: Number,
       required: true,
     },
-
     unit: {
       type: String,
       enum: ["g", "kg", "ml", "l", "piece"],
@@ -48,7 +42,6 @@ const comboItemSchema = new mongoose.Schema(
 
 const menuSchema = new mongoose.Schema(
   {
-
     menuId: {
       type: String,
       unique: true,
@@ -56,110 +49,84 @@ const menuSchema = new mongoose.Schema(
       immutable: true,
       index: true,
     },
-
-
     name: {
       type: String,
       required: true,
       trim: true,
     },
-
     category: {
       type: String,
       required: true,
       enum: ["veg", "nonVeg", "spicedPowder", "combo", "offer"],
     },
-
     description: {
       type: String,
       required: true,
       trim: true,
     },
-
-
     ingredients: {
       type: [String],
       default: [],
     },
-
-
     storage: {
       instructions: {
         type: String,
         trim: true,
       },
-
       shelfLife: {
         value: {
           type: Number,
           min: 0,
         },
-
         unit: {
           type: String,
           enum: ["days", "weeks", "months", "years"],
         },
       },
     },
-
-
     image: {
       type: String,
       default: null,
     },
-
-
     priceOptions: {
       type: [priceOptionSchema],
       default: [],
     },
-
-
     comboItems: {
       type: [comboItemSchema],
       default: [],
     },
-
-
     offer: {
       enabled: {
         type: Boolean,
         default: false,
       },
-
       title: {
         type: String,
         trim: true,
       },
-
       description: {
         type: String,
         trim: true,
       },
-
       price: {
         type: Number,
         min: 0,
       },
     },
-
-
     isAvailable: {
       type: Boolean,
       default: true,
     },
-
     isFeatured: {
       type: Boolean,
       default: false,
     },
-
     sortOrder: {
       type: Number,
       default: 0,
     },
   },
-
   {
     timestamps: true,
   },

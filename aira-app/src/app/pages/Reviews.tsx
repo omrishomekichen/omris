@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -15,91 +15,16 @@ import {
   CheckCircle2,
   MessageSquare,
 } from 'lucide-react-native';
-
-
-/* =====================================================
-   TYPES
-   ===================================================== */
-
-interface Review {
-  id: string;
-  customerName: string;
-  menuItemName: string;
-  rating: number;
-  comment: string;
-  isVerifiedPurchase: boolean;
-}
+import type { Review, ReviewCardProps } from '../types';
+import { useAuth } from '../../Context/AuthContext';
+import { apiGetAdminReviews } from '../../lib/api';
 
 
 /* =====================================================
    STATIC REVIEW DATA
    ===================================================== */
 
-const REVIEWS: Review[] = [
-  {
-    id: '1',
-    customerName: 'Ananya Sharma',
-    menuItemName: 'Mango Pickle',
-    rating: 5,
-    comment:
-      'Amazing traditional taste! Just like homemade pickle. The spice level was perfect.',
-    isVerifiedPurchase: true,
-  },
-  {
-    id: '2',
-    customerName: 'Rahul Kumar',
-    menuItemName: 'Avakaya Pickle',
-    rating: 5,
-    comment:
-      'Excellent quality and authentic Andhra flavour. Will definitely order again.',
-    isVerifiedPurchase: true,
-  },
-  {
-    id: '3',
-    customerName: 'Priya Reddy',
-    menuItemName: 'Gongura Pickle',
-    rating: 4,
-    comment:
-      'Really tasty and fresh. A little spicy for me, but the flavour is excellent.',
-    isVerifiedPurchase: true,
-  },
-  {
-    id: '4',
-    customerName: 'Karthik Rao',
-    menuItemName: 'Garlic Pickle',
-    rating: 4,
-    comment:
-      'Strong garlic flavour and very good texture. Goes perfectly with rice.',
-    isVerifiedPurchase: true,
-  },
-  {
-    id: '5',
-    customerName: 'Sneha Patel',
-    menuItemName: 'Curry Leaf Podi',
-    rating: 5,
-    comment:
-      'The podi is fantastic. Very fresh aroma and perfect with dosa.',
-    isVerifiedPurchase: true,
-  },
-  {
-    id: '6',
-    customerName: 'Vijay Kumar',
-    menuItemName: 'Idli Podi',
-    rating: 3,
-    comment:
-      'Good taste but I expected a little more spice.',
-    isVerifiedPurchase: false,
-  },
-  {
-    id: '7',
-    customerName: 'Divya Nair',
-    menuItemName: 'Lemon Pickle',
-    rating: 5,
-    comment:
-      'Loved the balance of sourness and spice. Highly recommended!',
-    isVerifiedPurchase: true,
-  },
-];
+
 
 
 /* =====================================================
@@ -107,12 +32,44 @@ const REVIEWS: Review[] = [
    ===================================================== */
 
 export default function ReviewsScreen() {
+  const { session } = useAuth();
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   const [selectedRating, setSelectedRating] =
     useState<number | 'all'>('all');
 
   const [searchQuery, setSearchQuery] =
     useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadReviews = async () => {
+      const response = await apiGetAdminReviews(session?.token);
+      const fetchedReviews = response?.reviews;
+
+      if (isMounted && response?.success && Array.isArray(fetchedReviews)) {
+        setReviews(
+          fetchedReviews.map((review: Record<string, unknown>) => ({
+            id: String(review._id ?? review.id),
+            customerName: String(review.userName ?? 'Customer'),
+            menuItemName: String(review.productName ?? 'Product'),
+            rating: Number(review.rating),
+            comment: String(review.comment ?? ''),
+            isVerifiedPurchase: Boolean(review.verifiedPurchase),
+          })),
+        );
+      }
+    };
+
+    loadReviews().catch(() => {
+      // Keep the sample reviews visible when the API is unavailable.
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session?.token]);
 
 
   /* ===================================================
@@ -121,7 +78,7 @@ export default function ReviewsScreen() {
 
   const filteredReviews = useMemo(() => {
 
-    return REVIEWS.filter(review => {
+    return reviews.filter(review => {
 
       if (
         selectedRating !== 'all' &&
@@ -166,6 +123,7 @@ export default function ReviewsScreen() {
   }, [
     selectedRating,
     searchQuery,
+    reviews,
   ]);
 
 
@@ -175,16 +133,16 @@ export default function ReviewsScreen() {
 
   const averageRating =
     (
-      REVIEWS.reduce(
+      reviews.reduce(
         (sum, review) =>
           sum + review.rating,
         0
-      ) / (REVIEWS.length || 1)
+      ) / (reviews.length || 1)
     ).toFixed(1);
 
 
   const verifiedCount =
-    REVIEWS.filter(
+    reviews.filter(
       review =>
         review.isVerifiedPurchase
     ).length;
@@ -194,7 +152,7 @@ export default function ReviewsScreen() {
     stars => {
 
       const count =
-        REVIEWS.filter(
+        reviews.filter(
           review =>
             review.rating === stars
         ).length;
@@ -202,7 +160,7 @@ export default function ReviewsScreen() {
       const percentage =
         Math.round(
           (count /
-            (REVIEWS.length || 1)) *
+            (reviews.length || 1)) *
             100
         );
 
@@ -265,7 +223,7 @@ export default function ReviewsScreen() {
               </View>
 
               <Text style={styles.reviewCount}>
-                {REVIEWS.length} reviews
+                {reviews.length} reviews
               </Text>
 
             </View>
@@ -436,7 +394,7 @@ export default function ReviewsScreen() {
                     styles.filterCountTextActive,
                 ]}
               >
-                {REVIEWS.length}
+                {reviews.length}
               </Text>
 
             </View>
@@ -449,7 +407,7 @@ export default function ReviewsScreen() {
           {[5, 4, 3, 2, 1].map(stars => {
 
             const count =
-              REVIEWS.filter(
+                reviews.filter(
                 review =>
                   review.rating === stars
               ).length;
@@ -575,10 +533,6 @@ export default function ReviewsScreen() {
 /* =====================================================
    REVIEW CARD
    ===================================================== */
-
-interface ReviewCardProps {
-  review: Review;
-}
 
 const ReviewCard: React.FC<
   ReviewCardProps

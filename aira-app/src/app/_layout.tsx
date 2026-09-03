@@ -13,9 +13,9 @@ import LoginScreen from './pages/Login';
 import DashboardScreen from './pages/Dashboard';
 import OrdersScreen from './pages/Orders';
 import Menu from './pages/Menu';
-import StockScreen from './pages/Stock';
 import ReviewsScreen from './pages/Reviews';
 import TeamScreen from './pages/Team';
+import { OrderDetailScreen } from './pages/OrderDetailScreen';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {healthCheck} from '../lib/api';
 
@@ -30,6 +30,7 @@ const TAB_BAR_HEIGHT = 66;
 function AppShell() {
   const { session, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('home');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   // Loading state — wait for Supabase session check
@@ -58,13 +59,24 @@ function AppShell() {
 
   // Logged in — full app shell
   const renderContent = () => {
+    if (selectedOrderId) {
+      return (
+        <OrderDetailScreen
+          orderId={selectedOrderId}
+          onBack={() => setSelectedOrderId(null)}
+        />
+      );
+    }
+
     switch (activeTab) { 
       case 'orders':
-        return <OrdersScreen />;
+        return (
+          <OrdersScreen
+            onSelectOrder={setSelectedOrderId}
+          />
+        );
       case 'menu':
         return <Menu />;
-      case 'stock':
-        return <StockScreen />;
       case 'reviews':
         return <ReviewsScreen />;
       case 'team':
@@ -74,6 +86,7 @@ function AppShell() {
         return (
           <DashboardScreen
             onNavigateTab={(tab) => setActiveTab(tab)}
+            onSelectOrder={setSelectedOrderId}
           />
         );
     }
@@ -81,12 +94,22 @@ function AppShell() {
 
   return (
     <View style={styles.container}>
-      <NativeMobileHeader activeTab={activeTab} />
+      <NativeMobileHeader
+        activeTab={activeTab}
+        isOrderDetail={Boolean(selectedOrderId)}
+        onBackFromOrder={() => setSelectedOrderId(null)}
+      />
       <StatusBar barStyle="light-content" backgroundColor="#650700" />
       <View style={{ flex: 1, paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}>
         {renderContent()}
       </View>
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setSelectedOrderId(null);
+          setActiveTab(tab);
+        }}
+      />
     </View>
   );
 }

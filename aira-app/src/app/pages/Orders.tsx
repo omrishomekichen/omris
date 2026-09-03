@@ -18,42 +18,10 @@ import {
   ChevronRight,
   Package,
 } from 'lucide-react-native';
-import {apiGetAdminOrders}from '@/lib/api';
+import { apiGetAdminOrders } from '@/lib/api';
+import { useAuth } from '../../Context/AuthContext';
+import type { AdminOrder, FilterTab, OrderCardProps, OrdersScreenProps } from '../types';
 
-interface OrdersScreenProps {
-  onSelectOrder?: (orderId: string) => void;
-  selectedOrderId?: string | null;
-}
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  city: string;
-  pincode: string;
-  branch: string;
-  items: number;
-  itemName: string;
-  totalAmount: number;
-  status:
-    | 'pending'
-    | 'payment_verification'
-    | 'confirmed'
-    | 'processing'
-    | 'shipped'
-    | 'delivered'
-    | 'cancelled';
-  assigned: boolean;
-}
-
-interface FilterTab {
-  id: string;
-  label: string;
-  count: number;
-  badge?: boolean;
-}
- 
 
 /* =====================================================
    BRANCHES
@@ -75,6 +43,7 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
   onSelectOrder,
   selectedOrderId,
 }) => {
+  const { session } = useAuth();
 
   const [activeTab, setActiveTab] = useState('all');
 
@@ -82,13 +51,15 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
   const [branchFilter, setBranchFilter] = useState('all');
 
-    const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
 
 
-useEffect(() => {
+
+
+  useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await apiGetAdminOrders();
+        const response = await apiGetAdminOrders(session?.token);
         setOrders(response?.orders ?? []);
       } catch (error) {
         console.error('Error fetching admin orders:', error);
@@ -96,120 +67,118 @@ useEffect(() => {
     };
 
     fetchOrders();
-  }, []);
+  }, [session?.token]);
 
 
-
-  
 
   const filteredOrders = useMemo(() => {
 
-    return orders.filter((order) => {
+      return orders.filter((order) => {
 
-      /* TAB FILTER */
+        /* TAB FILTER */
 
-      if (activeTab === 'needs_verification') {
+        if (activeTab === 'needs_verification') {
 
-        if (
-          order.status !== 'pending' &&
-          order.status !== 'payment_verification'
-        ) {
-          return false;
-        }
-
-      } else if (activeTab === 'needs_routing') {
-
-        if (
-          order.assigned ||
-          order.status !== 'pending'
-        ) {
-          return false;
-        }
-
-      } else if (activeTab === 'processing') {
-
-        if (
-          order.status !== 'processing' &&
-          order.status !== 'confirmed'
-        ) {
-          return false;
-        }
-
-      } else if (activeTab === 'shipped') {
-
-        if (order.status !== 'shipped') {
-          return false;
-        }
-
-      } else if (activeTab === 'delivered') {
-
-        if (order.status !== 'delivered') {
-          return false;
-        }
-
-      }
-
-
-      /* BRANCH FILTER */
-
-      if (branchFilter !== 'all') {
-
-        if (branchFilter === 'unassigned') {
-
-          if (order.assigned) {
+          if (
+            order.status !== 'pending' &&
+            order.status !== 'payment_verification'
+          ) {
             return false;
           }
 
-        } else if (order.branch !== branchFilter) {
+        } else if (activeTab === 'needs_routing') {
 
-          return false;
+          if (
+            order.assigned ||
+            order.status !== 'pending'
+          ) {
+            return false;
+          }
+
+        } else if (activeTab === 'processing') {
+
+          if (
+            order.status !== 'processing' &&
+            order.status !== 'confirmed'
+          ) {
+            return false;
+          }
+
+        } else if (activeTab === 'shipped') {
+
+          if (order.status !== 'shipped') {
+            return false;
+          }
+
+        } else if (activeTab === 'delivered') {
+
+          if (order.status !== 'delivered') {
+            return false;
+          }
 
         }
 
-      }
 
+        /* BRANCH FILTER */
 
-      /* SEARCH */
+        if (branchFilter !== 'all') {
 
-      if (searchQuery.trim()) {
+          if (branchFilter === 'unassigned') {
 
-        const query = searchQuery
-          .toLowerCase()
-          .trim();
+            if (order.assigned) {
+              return false;
+            }
 
-        const matches =
-          order.orderNumber
-            .toLowerCase()
-            .includes(query) ||
+          } else if (order.branch !== branchFilter) {
 
-          order.customerName
-            .toLowerCase()
-            .includes(query) ||
+            return false;
 
-          order.customerPhone
-            .includes(query) ||
+          }
 
-          order.city
-            .toLowerCase()
-            .includes(query) ||
-
-          order.pincode.includes(query);
-
-        if (!matches) {
-          return false;
         }
-      }
 
-      return true;
 
-    });
+        /* SEARCH */
+
+        if (searchQuery.trim()) {
+
+          const query = searchQuery
+            .toLowerCase()
+            .trim();
+
+          const matches =
+            order.orderNumber
+              .toLowerCase()
+              .includes(query) ||
+
+            order.customerName
+              .toLowerCase()
+              .includes(query) ||
+
+            order.customerPhone
+              .includes(query) ||
+
+            order.city
+              .toLowerCase()
+              .includes(query) ||
+
+            order.pincode.includes(query);
+
+          if (!matches) {
+            return false;
+          }
+        }
+
+        return true;
+
+      });
 
   }, [
+    orders,
     activeTab,
     searchQuery,
     branchFilter,
   ]);
-
 
   /* ===================================================
      COUNTS
@@ -439,7 +408,7 @@ useEffect(() => {
                 style={[
                   styles.branchChip,
                   branchFilter === 'all' &&
-                    styles.branchChipActive,
+                  styles.branchChipActive,
                 ]}
               >
 
@@ -447,7 +416,7 @@ useEffect(() => {
                   style={[
                     styles.branchChipText,
                     branchFilter === 'all' &&
-                      styles.branchChipTextActive,
+                    styles.branchChipTextActive,
                   ]}
                 >
                   All Branches
@@ -465,7 +434,7 @@ useEffect(() => {
                 style={[
                   styles.branchChip,
                   branchFilter === 'unassigned' &&
-                    styles.branchChipActive,
+                  styles.branchChipActive,
                 ]}
               >
 
@@ -473,7 +442,7 @@ useEffect(() => {
                   style={[
                     styles.branchChipText,
                     branchFilter === 'unassigned' &&
-                      styles.branchChipTextActive,
+                    styles.branchChipTextActive,
                   ]}
                 >
                   ⚠️ Unassigned
@@ -494,7 +463,7 @@ useEffect(() => {
                   style={[
                     styles.branchChip,
                     branchFilter === branch &&
-                      styles.branchChipActive,
+                    styles.branchChipActive,
                   ]}
                 >
 
@@ -502,7 +471,7 @@ useEffect(() => {
                     style={[
                       styles.branchChipText,
                       branchFilter === branch &&
-                        styles.branchChipTextActive,
+                      styles.branchChipTextActive,
                     ]}
                   >
                     {branch}
@@ -545,9 +514,9 @@ useEffect(() => {
                 style={({ pressed }) => [
                   styles.filterTab,
                   isActive &&
-                    styles.filterTabActive,
+                  styles.filterTabActive,
                   pressed &&
-                    styles.pressed,
+                  styles.pressed,
                 ]}
               >
 
@@ -555,7 +524,7 @@ useEffect(() => {
                   style={[
                     styles.filterTabText,
                     isActive &&
-                      styles.filterTabTextActive,
+                    styles.filterTabTextActive,
                   ]}
                 >
                   {tab.label}
@@ -565,11 +534,11 @@ useEffect(() => {
                   style={[
                     styles.tabCount,
                     isActive &&
-                      styles.tabCountActive,
+                    styles.tabCountActive,
 
                     tab.badge &&
-                      !isActive &&
-                      styles.tabCountWarning,
+                    !isActive &&
+                    styles.tabCountWarning,
                   ]}
                 >
 
@@ -577,11 +546,11 @@ useEffect(() => {
                     style={[
                       styles.tabCountText,
                       isActive &&
-                        styles.tabCountTextActive,
+                      styles.tabCountTextActive,
 
                       tab.badge &&
-                        !isActive &&
-                        styles.tabCountWarningText,
+                      !isActive &&
+                      styles.tabCountWarningText,
                     ]}
                   >
                     {tab.count}
@@ -676,17 +645,18 @@ useEffect(() => {
    ORDER CARD
    ===================================================== */
 
-interface OrderCardProps {
-  order: Order;
-  selected: boolean;
-  onPress: () => void;
-}
-
 const OrderCard: React.FC<OrderCardProps> = ({
   order,
   selected,
   onPress,
 }) => {
+  const formattedDate = order.createdAt
+    ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+    : 'Date unavailable';
 
   const initials = order.customerName
     .split(' ')
@@ -709,10 +679,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
         styles.orderCard,
 
         selected &&
-          styles.orderCardSelected,
+        styles.orderCardSelected,
 
         pressed &&
-          styles.pressed,
+        styles.pressed,
       ]}
     >
 
@@ -752,6 +722,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
             <Text style={styles.customerLocation}>
               {order.city} • {order.pincode}
+            </Text>
+
+            <Text style={styles.orderDate}>
+              Placed {formattedDate}
             </Text>
 
           </View>
@@ -844,7 +818,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
    ===================================================== */
 
 const getStatusInfo = (
-  status: Order['status']
+  status: AdminOrder['status']
 ) => {
 
   switch (status) {
@@ -1382,6 +1356,14 @@ const styles = StyleSheet.create({
   },
 
   customerLocation: {
+    color: '#a8a29e',
+
+    fontSize: 8,
+
+    marginTop: 3,
+  },
+
+  orderDate: {
     color: '#a8a29e',
 
     fontSize: 8,

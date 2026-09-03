@@ -13,24 +13,11 @@ import {
   Home,
   ShoppingBag,
   UtensilsCrossed,
-  Layers,
   Star,
   Users,
   Zap,
 } from 'lucide-react-native';
-
-interface NavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  isInline?: boolean;
-}
-
-interface TabItem {
-  key: string;
-  label: string;
-  icon: React.ReactNode;
-  badge?: number;
-}
+import type { NavigationProps, TabItem } from '../types';
 
 export const Navigation: React.FC<NavigationProps> = ({
   activeTab,
@@ -80,18 +67,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         <UtensilsCrossed
           size={19}
           color={activeTab === 'menu' ? '#650700' : '#8d706b'}
-        />
-      ),
-    },
-
-    {
-      key: 'stock',
-      label: 'Stock',
-      badge: 3,
-      icon: (
-        <Layers
-          size={19}
-          color={activeTab === 'stock' ? '#650700' : '#8d706b'}
         />
       ),
     },

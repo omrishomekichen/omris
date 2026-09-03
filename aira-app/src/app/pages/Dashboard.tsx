@@ -11,7 +11,6 @@ import {
   Inbox,
   Clock,
   TrendingUp,
-  AlertTriangle,
   ShoppingBag,
   ArrowRight,
   Sparkles,
@@ -19,30 +18,28 @@ import {
   ChevronRight,
   Flame,
   Star,
-  Layers,
 } from 'lucide-react-native';
-import { apiGetRecentPendingOrders, dashboardkpis } from '@/lib/api';
-
-interface DashboardScreenProps {
-  onNavigateTab?: (tab: string) => void;
-  onSelectOrder?: (orderId: string) => void;
-}
+import { apiGetRecentPendingOrders, dashboardkpis ,apiGetAdminLatestReviews} from '@/lib/api';
+import { useAuth } from '../../Context/AuthContext';
+import type { DashboardReview, DashboardScreenProps, MetricCardProps } from '../types';
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateTab,
   onSelectOrder,
 }) => {
+  const { session } = useAuth();
   /* =====================================================
      STATIC DESIGN DATA
      No API / Context / Database logic
      ===================================================== */
 
-  const pendingVerification = 4;
-  const criticalStockItems = 3;
   const [unassignedOrders, setUnassignedOrders] = React.useState(0);
   const [inProgressOrders, setInProgressOrders] = React.useState(0);
   const [totalRevenue, setTotalRevenue] = React.useState(0);
   const [urgentOrders ,seturgentOrders]= React.useState<any[]>([]);
+  const [latestReview, setLatestReview] = React.useState<DashboardReview | null>(null);
+  const pendingVerification = urgentOrders.length;
+  const reviewRating = Math.max(0, Math.min(5, Number(latestReview?.rating) || 0));
 
   const safeUnassignedOrders = Number(unassignedOrders) || 0;
   const safeInProgressOrders = Number(inProgressOrders) || 0;
@@ -51,7 +48,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
   useEffect(() => {
     const fetchUnassignedOrders = async () => {
       try {
-        const response = await dashboardkpis();
+        const response = await dashboardkpis(session?.token);
         if (response && response.success) {
           setUnassignedOrders(Number(response.totalUnassignedOrders ?? 0) || 0);
           setInProgressOrders(
@@ -71,7 +68,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
     const pandingorders = async () => {
       try {
-        const response = await apiGetRecentPendingOrders();
+        const response = await apiGetRecentPendingOrders(session?.token);
         if (response && response.success) {
           seturgentOrders(response.orders || []);
         }
@@ -80,9 +77,21 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       }
     };
 
+    const fetchLatestReviews = async () => {
+      try{
+        const response = await apiGetAdminLatestReviews(session?.token);
+        if (response && response.success) {
+          setLatestReview(response.reviews?.[0] || null);
+        }
+      } catch (error) {
+        console.error('Failed to load latest reviews:', error);
+      }
+    };
+
     fetchUnassignedOrders();
     pandingorders();
-  }, []);
+    fetchLatestReviews();
+  }, [session?.token]);
 
 
 
@@ -111,13 +120,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
     },
   ];
 
-  const latestReview = {
-    customerName: 'Sneha Reddy',
-    rating: 5,
-    comment:
-      'Excellent taste and authentic homemade flavour. Will definitely order again!',
-    item: 'Mango Pickle',
-  };
+
 
   /* =====================================================
      DESIGN
@@ -133,9 +136,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       bounces={true}
     >
 
-        {/* =================================================
-            WELCOME HERO
-            ================================================= */}
 
         <View style={styles.hero}>
 
@@ -241,22 +241,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </Pressable>
 
 
-            <Pressable
-              onPress={() => onNavigateTab?.('stock')}
-              style={styles.quickAction}
-            >
-
-              <Layers
-                size={16}
-                color="#fcd34d"
-              />
-
-              <Text style={styles.quickActionText}>
-                Stock ({criticalStockItems})
-              </Text>
-
-            </Pressable>
-
           </View>
 
         </View>
@@ -297,65 +281,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
           />
 
 
-          {/* LOW STOCK */}
-
-          <MetricCard
-            title="Low Stock"
-            value={criticalStockItems.toString()}
-            subtitle="Restock required"
-            icon={<AlertTriangle size={17} color="#dc2626" />}
-            alert
-            onPress={() => onNavigateTab?.('stock')}
-          />
-
         </View>
-
-
-        <Pressable
-          onPress={() => onNavigateTab?.('stock')}
-          style={styles.warningCard}
-        >
-
-          <View style={styles.warningLeft}>
-
-            <View style={styles.warningIcon}>
-
-              <AlertTriangle
-                size={17}
-                color="#ffffff"
-              />
-
-            </View>
-
-            <View style={styles.warningTextContainer}>
-
-              <Text style={styles.warningTitle}>
-                {criticalStockItems} Items Below Restock Threshold
-              </Text>
-
-              <Text style={styles.warningDescription}>
-                Mango Pickle, Gongura Pickle, Tomato Pickle
-              </Text>
-
-            </View>
-
-          </View>
-
-
-          <View style={styles.viewRow}>
-
-            <Text style={styles.viewText}>
-              View
-            </Text>
-
-            <ChevronRight
-              size={15}
-              color="#78350f"
-            />
-
-          </View>
-
-        </Pressable>
 
         <View style={styles.sectionCard}>
 
@@ -401,11 +327,22 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
           {/* ORDERS */}
 
-          {urgentOrders.map((order) => (
+          {urgentOrders.map((order, index) => {
+            const displayOrderId = order.orderNumber || order.orderId || 'N/A';
+            const orderKey = order.orderId || order.orderNumber || `order-${index}`;
+            const orderDate = order.createdAt
+              ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })
+              : 'Date unavailable';
+
+            return (
 
             <Pressable
-              key={order.orderId}
-              onPress={() => onSelectOrder?.(order.orderId)}
+              key={orderKey}
+              onPress={() => onSelectOrder?.(order.id || order.orderId || order.orderNumber)}
               style={styles.orderCard}
             >
 
@@ -431,7 +368,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     </Text>
 
                     <Text style={styles.orderId}>
-                      #{order.orderId.split('-')[1]}
+                      #{displayOrderId.split('-')[1] || displayOrderId}
                     </Text>
 
                   </View>
@@ -440,7 +377,11 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
                     style={styles.orderItems}
                     numberOfLines={1}
                   >
-                    {order.items} jars • {order.itemName}
+                    {order.items} jars •
+                  </Text>
+
+                  <Text style={styles.orderDate}>
+                    Placed {orderDate}
                   </Text>
 
                 </View>
@@ -471,88 +412,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
             </Pressable>
 
-          ))}
-
-        </View>
-
-        <View style={styles.sectionCard}>
-
-          <View style={styles.sectionHeader}>
-
-            <View style={styles.sectionTitleRow}>
-
-              <Layers
-                size={15}
-                color="#650700"
-              />
-
-              <Text style={styles.sectionTitle}>
-                Inventory Radar
-              </Text>
-
-            </View>
-
-            <Pressable
-              onPress={() => onNavigateTab?.('stock')}
-            >
-
-              <Text style={styles.viewAllText}>
-                Manage Stock
-              </Text>
-
-            </Pressable>
-
-          </View>
-
-
-          {inventory.map((item, index) => (
-
-            <View
-              key={index}
-              style={styles.inventoryItem}
-            >
-
-              <View style={styles.inventoryHeader}>
-
-                <Text
-                  style={styles.inventoryName}
-                  numberOfLines={1}
-                >
-                  {item.name}
-                </Text>
-
-                <Text
-                  style={[
-                    styles.inventoryQuantity,
-                    item.low && styles.lowQuantity,
-                  ]}
-                >
-                  {item.quantity} {item.unit}
-                  {item.low ? ' ⚠️ Low' : ''}
-                </Text>
-
-              </View>
-
-
-              <View style={styles.progressBackground}>
-
-                <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      width: `${item.percentage}%`,
-                      backgroundColor: item.low
-                        ? '#ef4444'
-                        : '#059669',
-                    },
-                  ]}
-                />
-
-              </View>
-
-            </View>
-
-          ))}
+            );
+          })}
 
         </View>
 
@@ -574,9 +435,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </Text>
 
               <View style={styles.ratingBadge}>
-
                 <Text style={styles.ratingText}>
-                  4.8 ★ (24)
+                  {reviewRating.toFixed(1)} / 5
                 </Text>
 
               </View>
@@ -603,21 +463,25 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
             <View style={styles.reviewTop}>
 
               <Text style={styles.reviewCustomer}>
-                {latestReview.customerName}
+                {latestReview?.userName || 'No reviews yet'}
               </Text>
 
               <Text style={styles.stars}>
-                {'★'.repeat(latestReview.rating)}
+                {'★'.repeat(reviewRating)}
               </Text>
 
             </View>
 
             <Text style={styles.reviewComment}>
-              "{latestReview.comment}"
+              {latestReview?.comment
+                ? `"${latestReview.comment}"`
+                : 'Customer reviews will appear here.'}
             </Text>
 
             <Text style={styles.reviewMeta}>
-              Ordered: {latestReview.item} • Verified Customer
+              {latestReview?.productName
+                ? `Ordered: ${latestReview.productName} • Verified Customer`
+                : 'No verified customer review available'}
             </Text>
 
           </View>
@@ -639,16 +503,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 /* =====================================================
    METRIC CARD
    ===================================================== */
-
-interface MetricCardProps {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
-  alert?: boolean;
-  onPress?: () => void;
-}
 
 const MetricCard = ({
   title,
@@ -1271,6 +1125,14 @@ const styles = StyleSheet.create({
     color: '#78716c',
 
     fontSize: 9,
+
+    marginTop: 3,
+  },
+
+  orderDate: {
+    color: '#a8a29e',
+
+    fontSize: 8,
 
     marginTop: 3,
   },

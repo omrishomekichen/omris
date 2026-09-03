@@ -15,14 +15,7 @@ import {
   Smartphone,
   HardDrive,
 } from 'lucide-react-native';
-
-
-
-interface SplashScreenProps {
-  onFinish?: () => void;
-  autoDismiss?: boolean;
-  dismissDelayMs?: number;
-}
+import type { SplashScreenProps } from '../types';
 
 const { width, height } = Dimensions.get('window');
 

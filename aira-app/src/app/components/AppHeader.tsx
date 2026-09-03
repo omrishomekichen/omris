@@ -26,12 +26,7 @@ import {
   Shield,
 } from 'lucide-react-native';
 import {useAuth} from '../../Context/AuthContext'
-
-interface NativeMobileHeaderProps {
-  activeTab?: string;
-  isOrderDetail?: boolean;
-  onBackFromOrder?: () => void;
-}
+import type { NativeMobileHeaderProps } from '../types';
 
 const AIRA_LOGO = require('../../../assets/images/aira-pickles-logo.png');
 
@@ -60,7 +55,6 @@ const NativeMobileHeader = ({
     home: 'Dashboard',
     orders: 'Orders',
     menu: 'Menu Catalog',
-    stock: 'Stock Inventory',
     reviews: 'Customer Reviews',
     simple: 'Kitchen Counter',
     team: 'Team & Roles',
@@ -222,42 +216,7 @@ const NativeMobileHeader = ({
       </SafeAreaView>
 
 
-      {/* =================================================
-          ADMIN RIBBON
-          ================================================= */}
-
-      <View style={styles.adminRibbon}>
-
-        <View style={styles.adminRibbonLeft}>
-
-          <Crown
-            size={15}
-            color="#451a03"
-          />
-
-          <Text style={styles.adminRibbonText}>
-            Viewing as Kitchen Admin
-          </Text>
-
-        </View>
-
-        <Pressable style={styles.exitButton}>
-
-          <Text style={styles.exitText}>
-            Exit
-          </Text>
-
-        </Pressable>
-
-      </View>
-
-
-      {/* =================================================
-          PROFILE BOTTOM SHEET
-          IMPORTANT:
-          This is a MODAL.
-          It is NOT permanently rendered.
-          ================================================= */}
+   
 
       <Modal
         visible={profileOpen}
