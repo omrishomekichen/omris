@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Minus, Plus, ShoppingBag, Trash2, Truck } from "lucide-react";
 import { useCart } from "../../components/CartContext";
+import { useAuth } from "../../(auth)/AuthContext";
 import "../css/cart.css";
 
 const formatCurrency = (value: number) =>
@@ -13,7 +15,17 @@ const formatCurrency = (value: number) =>
   }).format(value);
 
 export default function CartPage() {
+  const router = useRouter();
+  const auth = useAuth();
   const { items, subtotal, updateQuantity, removeItem } = useCart();
+
+  const handleCheckout = () => {
+    if (!auth?.user) {
+      router.push("/login");
+      return;
+    }
+    router.push("/checkout");
+  };
 
   if (!items.length) {
     return (
@@ -84,9 +96,9 @@ export default function CartPage() {
             <div className="cart-summary-row"><span>Subtotal</span><strong>{formatCurrency(subtotal)}</strong></div>
             <div className="cart-summary-row"><span>Shipping</span><span>Calculated at checkout</span></div>
             <div className="cart-summary-total"><span>Total</span><strong>{formatCurrency(subtotal)}</strong></div>
-            <Link href="/checkout" className="cart-primary-action cart-checkout-action">
+            <button type="button" onClick={handleCheckout} className="cart-primary-action cart-checkout-action">
               Proceed to checkout <ArrowRight size={18} />
-            </Link>
+            </button>
             <p className="cart-shipping-info"><Truck size={17} /> Freshly packed and shipped with care.</p>
           </aside>
         </div>

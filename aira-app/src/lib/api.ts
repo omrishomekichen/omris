@@ -128,6 +128,50 @@ export async function  apiGetAdminOrders(token?: string) {
   return res.json();
 }
 
+export async function apiVerifyOrderPayment(orderId: string, token?: string) {
+  const res = await fetch(
+    `${API_BASE_URL}/api/admin-orders/${encodeURIComponent(orderId)}/verify-payment`,
+    {
+      method: 'PATCH',
+      headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    },
+  );
+  return res.json();
+}
+
+export async function apiUpdateOrderStatus(
+  orderId: string,
+  status: string,
+  token?: string,
+  profile?: unknown,
+) {
+  const res = await fetch(
+    `${API_BASE_URL}/api/admin-orders/${encodeURIComponent(orderId)}/status`,
+    {
+      method: 'PATCH',
+      headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ status, profile }),
+    },
+  );
+  return res.json();
+}
+
+export async function apiDeleteOrder(
+  orderId: string,
+  token?: string,
+  profile?: unknown,
+) {
+  const res = await fetch(
+    `${API_BASE_URL}/api/admin-orders/${encodeURIComponent(orderId)}`,
+    {
+      method: 'DELETE',
+      headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ profile }),
+    },
+  );
+  return res.json();
+}
+
 
 export async function apiGetRecentPendingOrders(token?: string) {
   const res = await fetch(`${API_BASE_URL}/api/recent-pending-orders`, {
@@ -172,6 +216,18 @@ export async function apiGetAdminReviews(token?: string) {
   });
   if (!res.ok) return null;
   return res.json();
+}
+
+export async function apiDeleteAdminReview(id: string, token?: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin-reviews/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { ...headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    return await res.json();
+  } catch (error: any) {
+    return { success: false, message: error?.message || 'Network error deleting review' };
+  }
 }
 
 

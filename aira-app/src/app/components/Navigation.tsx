@@ -14,8 +14,6 @@ import {
   ShoppingBag,
   UtensilsCrossed,
   Star,
-  Users,
-  Zap,
 } from 'lucide-react-native';
 import type { NavigationProps, TabItem } from '../types';
 
@@ -51,7 +49,6 @@ export const Navigation: React.FC<NavigationProps> = ({
     {
       key: 'orders',
       label: 'Orders',
-      badge: 2,
       icon: (
         <ShoppingBag
           size={19}
@@ -78,18 +75,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         <Star
           size={19}
           color={activeTab === 'reviews' ? '#650700' : '#8d706b'}
-        />
-      ),
-    },
-
-   
-    {
-      key: 'team',
-      label: 'Team',
-      icon: (
-        <Users
-          size={19}
-          color={activeTab === 'team' ? '#650700' : '#8d706b'}
         />
       ),
     },

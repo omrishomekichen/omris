@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Pressable,
+   ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -21,19 +22,6 @@ import {
 import { apiGetAdminOrders } from '@/lib/api';
 import { useAuth } from '../../Context/AuthContext';
 import type { AdminOrder, FilterTab, OrderCardProps, OrdersScreenProps } from '../types';
-
-
-/* =====================================================
-   BRANCHES
-   ===================================================== */
-
-const BRANCHES = [
-  'Central',
-  'Mysore',
-  'Hyderabad',
-  'Mangalore',
-];
-
 
 /* =====================================================
    orders SCREEN
@@ -52,21 +40,37 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
   const [branchFilter, setBranchFilter] = useState('all');
 
   const [orders, setOrders] = useState<AdminOrder[]>([]);
-
-
-
+  const [dynamicBranches, setDynamicBranches] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrdersAndBranches = async () => {
       try {
-        const response = await apiGetAdminOrders(session?.token);
-        setOrders(response?.orders ?? []);
+        const ordersRes = await apiGetAdminOrders(session?.token);
+
+        const fetchedOrders: AdminOrder[] = ordersRes?.orders ?? [];
+        setOrders(fetchedOrders);
+
+        const branchSet = new Set<string>();
+
+        // Add branches from orders
+        fetchedOrders.forEach((o) => {
+          const b = o.branch?.trim();
+          if (b && b.toLowerCase() !== 'unassigned') {
+            branchSet.add(b);
+          }
+        });
+
+        const list = Array.from(branchSet).sort((a, b) => a.localeCompare(b));
+        setDynamicBranches(list);
       } catch (error) {
-        console.error('Error fetching admin orders:', error);
+        console.error('Error fetching admin orders or branches:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchOrders();
+    fetchOrdersAndBranches();
   }, [session?.token]);
 
 
@@ -129,7 +133,7 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
               return false;
             }
 
-          } else if (order.branch !== branchFilter) {
+          } else if ((order.branch || '').trim().toLowerCase() !== branchFilter.trim().toLowerCase()) {
 
             return false;
 
@@ -451,35 +455,35 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
               </Pressable>
 
 
-              {/* BRANCHES */}
+              {/* DYNAMIC BRANCHES */}
 
-              {BRANCHES.map((branch) => (
-
-                <Pressable
-                  key={branch}
-                  onPress={() =>
-                    setBranchFilter(branch)
-                  }
-                  style={[
-                    styles.branchChip,
-                    branchFilter === branch &&
-                    styles.branchChipActive,
-                  ]}
-                >
-
-                  <Text
+              {dynamicBranches.map((branch) => {
+                const count = orders.filter((o) => (o.branch || '').trim().toLowerCase() === branch.trim().toLowerCase()).length;
+                const isSelected = branchFilter.trim().toLowerCase() === branch.trim().toLowerCase();
+                return (
+                  <Pressable
+                    key={branch}
+                    onPress={() =>
+                      setBranchFilter(branch)
+                    }
                     style={[
-                      styles.branchChipText,
-                      branchFilter === branch &&
-                      styles.branchChipTextActive,
+                      styles.branchChip,
+                      isSelected &&
+                      styles.branchChipActive,
                     ]}
                   >
-                    {branch}
-                  </Text>
-
-                </Pressable>
-
-              ))}
+                    <Text
+                      style={[
+                        styles.branchChipText,
+                        isSelected &&
+                        styles.branchChipTextActive,
+                      ]}
+                    >
+                      {branch}{count > 0 ? ` (${count})` : ''}
+                    </Text>
+                  </Pressable>
+                );
+              })}
 
             </ScrollView>
 
@@ -571,6 +575,12 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
             ORDER LIST
             ================================================= */}
 
+{loading ? (
+          <View style={styles.loading}>
+            <ActivityIndicator size="large" color="#650700" />
+          </View>
+        ) : (
+
         <View style={styles.orderList}>
 
           {filteredOrders.length === 0 ? (
@@ -630,6 +640,7 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
           )}
 
         </View>
+        )}
 
 
         <View style={{ height: 25 }} />
@@ -1551,6 +1562,12 @@ const styles = StyleSheet.create({
       },
     ],
   },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
 
 });
 

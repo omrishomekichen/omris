@@ -46,7 +46,7 @@ export interface Profile {
   id: string;
   name: string;
   email: string;
-  role: 'owner' | 'manager' | 'staff';
+  role: 'admin';
   branch: string | null;
   status: 'active' | 'inactive';
 }
@@ -59,6 +59,19 @@ export interface User {
   lastName?: string;
   email: string;
   verified?: boolean;
+  role?: string;
+  branch?: string | null;
+}
+
+function profileFromUser(user: User): Profile {
+  return {
+    id: user.id || user._id || 'admin',
+    name: user.name || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Aira Admin'),
+    email: user.email || 'admin@airapickles.com',
+    role: 'admin',
+    branch: typeof user.branch === 'string' && user.branch.trim() ? user.branch.trim() : null,
+    status: 'active',
+  };
 }
 
 interface AuthContextType {
@@ -116,14 +129,7 @@ export function AuthProvider({
           const parsedUser = JSON.parse(savedUserStr);
           setUser(parsedUser);
           setSession({ user: parsedUser, token: savedToken });
-          setProfile({
-            id: parsedUser.id || parsedUser._id || 'admin',
-            name: parsedUser.name || 'Aira Admin',
-            email: parsedUser.email || 'admin@airapickles.com',
-            role: 'owner',
-            branch: null,
-            status: 'active',
-          });
+          setProfile(profileFromUser(parsedUser));
         } catch {}
       }
 
@@ -133,14 +139,7 @@ export function AuthProvider({
         if (meRes && meRes.status === 'success' && meRes.user) {
           setUser(meRes.user);
           setSession({ user: meRes.user, token: savedToken });
-          setProfile({
-            id: meRes.user.id || meRes.user._id,
-            name: meRes.user.name || 'Aira Admin',
-            email: meRes.user.email,
-            role: 'owner',
-            branch: null,
-            status: 'active',
-          });
+          setProfile(profileFromUser(meRes.user));
         }
       }
     } catch (e) {
@@ -169,14 +168,7 @@ export function AuthProvider({
 
       setUser(currentUser);
       setSession({ user: currentUser, token });
-      setProfile({
-        id: currentUser.id || currentUser._id || 'admin',
-        name: currentUser.name || 'Aira Admin',
-        email: currentUser.email,
-        role: 'owner',
-        branch: null,
-        status: 'active',
-      });
+      setProfile(profileFromUser(currentUser));
 
       return {
         success: true,
@@ -222,14 +214,7 @@ export function AuthProvider({
 
       setUser(currentUser);
       setSession({ user: currentUser, token });
-      setProfile({
-        id: currentUser.id || currentUser._id || 'admin',
-        name: currentUser.name || 'Aira Admin',
-        email: currentUser.email,
-        role: 'owner',
-        branch: null,
-        status: 'active',
-      });
+      setProfile(profileFromUser(currentUser));
 
       return {
         success: true,

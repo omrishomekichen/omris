@@ -7,7 +7,7 @@ export interface IBranchUser extends Document {
   password: string;
   agreeToTerms: boolean;
   verified?: boolean;
-  role?: "admin" | "StoreOwner";
+  role?: "admin" | "manager" | "staff" | "StoreOwner";
   branch?: string; 
 }
 
@@ -18,7 +18,7 @@ const userSchema: Schema<IBranchUser> = new Schema<IBranchUser>({
   password: { type: String, required: true },
   agreeToTerms: { type: Boolean, required: true },
   verified: { type: Boolean, default: false },
-  role: { type: String, enum: ["admin", "StoreOwner"], default: "StoreOwner" },
+  role: { type: String, enum: ["admin", "manager", "staff", "StoreOwner"], default: "staff" },
   branch: { type: String }
 });
 

@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Receipt,
   Utensils,
+  ShieldCheck,
   ArrowRight,
   RotateCcw,
   ShoppingBag,
@@ -151,13 +152,13 @@ export default function OrdersPage() {
         return 2;
 
       case "processing":
-        return 2;
-
-      case "shipped":
         return 3;
 
-      case "delivered":
+      case "shipped":
         return 4;
+
+      case "delivered":
+        return 5;
 
       case "cancelled":
       case "rejected":
@@ -437,7 +438,7 @@ export default function OrdersPage() {
                             const progressWidth =
                               currentStep > 0
                                 ? ((currentStep - 1) /
-                                    3) *
+                                    4) *
                                   100
                                 : 0;
 
@@ -558,6 +559,24 @@ export default function OrdersPage() {
                                     >
 
                                       <div className="step-icon-circle">
+                                        <ShieldCheck size={16} />
+                                      </div>
+
+                                      <span className="step-label">
+                                        Payment Verified
+                                      </span>
+
+                                    </div>
+
+                                    <div
+                                      className={`step-item ${
+                                        currentStep >= 3
+                                          ? "completed"
+                                          : ""
+                                      }`}
+                                    >
+
+                                      <div className="step-icon-circle">
                                         <Utensils size={16} />
                                       </div>
 
@@ -571,7 +590,7 @@ export default function OrdersPage() {
 
                                     <div
                                       className={`step-item ${
-                                        currentStep >= 3
+                                        currentStep >= 4
                                           ? "completed"
                                           : ""
                                       }`}
@@ -591,7 +610,7 @@ export default function OrdersPage() {
 
                                     <div
                                       className={`step-item ${
-                                        currentStep >= 4
+                                        currentStep >= 5
                                           ? "completed"
                                           : ""
                                       }`}

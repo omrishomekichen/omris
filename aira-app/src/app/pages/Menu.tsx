@@ -11,6 +11,7 @@ import {
   Image,
   Alert,
   Switch,
+  ActivityIndicator
 } from "react-native";
 
 import {
@@ -186,6 +187,7 @@ export default function MenuScreen() {
 
   const [editingItem, setEditingItem] =
     useState<MenuItem | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -213,9 +215,13 @@ export default function MenuScreen() {
       }
     };
 
-    loadMenuItems().catch(() => {
-      // Keep the local sample menu visible when the API is unavailable.
-    });
+    loadMenuItems()
+      .catch(() => {
+        // Keep the menu empty when the API is unavailable.
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -657,12 +663,14 @@ export default function MenuScreen() {
         {/* =================================================
             PRODUCT LIST
         ================================================= */}
-
         <View
           style={styles.productGrid}
         >
-          {filteredItems.length ===
-          0 ? (
+          {loading ? (
+            <View style={styles.loadingList}>
+              <ActivityIndicator size="large" color="#650700" />
+            </View>
+          ) : filteredItems.length === 0 ? (
             <View
               style={styles.emptyCard}
             >
@@ -3056,6 +3064,13 @@ const styles = StyleSheet.create({
 
   productGrid: {
     gap: 10,
+    minHeight: 300,
+  },
+
+  loadingList: {
+    minHeight: 300,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   productCard: {

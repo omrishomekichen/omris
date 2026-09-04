@@ -22,6 +22,8 @@ const buildUserResponse = (user: any) => ({
   name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Customer",
   email: user.email,
   verified: user.verified ?? false,
+  role: user.role,
+  branch: user.branch,
 });
 
 /* ==========================================================================

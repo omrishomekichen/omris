@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import Order from "../../model/order";
 import { Review } from "../../model/review";
+import { requireAuth } from "../../middleware/auth";
 
 const admindashboardRouter: express.Router = express.Router();
 
@@ -108,4 +109,32 @@ admindashboardRouter.get(
       }
     }
   );
+
+  admindashboardRouter.delete(
+    "/admin-reviews/:id",
+    requireAuth,
+    async (req: Request, res: Response) => {
+      try {
+        const review = await Review.findByIdAndDelete(req.params.id);
+        if (!review) {
+          return res.status(404).json({
+            success: false,
+            message: "Review not found",
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Review deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error deleting admin review:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete review",
+        });
+      }
+    }
+  );
+
 export default admindashboardRouter;

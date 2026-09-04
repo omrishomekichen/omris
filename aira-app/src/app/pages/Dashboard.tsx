@@ -27,7 +27,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateTab,
   onSelectOrder,
 }) => {
-  const { session } = useAuth();
+  const { session, profile, user } = useAuth();
   /* =====================================================
      STATIC DESIGN DATA
      No API / Context / Database logic
@@ -95,30 +95,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
 
 
-
-  const inventory = [
-    {
-      name: 'Mango Pickle',
-      quantity: 12,
-      unit: 'jars',
-      percentage: 30,
-      low: true,
-    },
-    {
-      name: 'Avakaya Pickle',
-      quantity: 32,
-      unit: 'jars',
-      percentage: 70,
-      low: false,
-    },
-    {
-      name: 'Gongura Pickle',
-      quantity: 18,
-      unit: 'jars',
-      percentage: 48,
-      low: false,
-    },
-  ];
 
 
 
@@ -239,7 +215,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </Text>
 
             </Pressable>
-
 
           </View>
 

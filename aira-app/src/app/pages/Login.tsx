@@ -31,12 +31,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const AIRA_LOGO = require('../../../assets/images/aira-pickles-logo.png');
 
 /* =====================================================
-   DEMO OPERATORS
-   ===================================================== */
-
-
-
-/* =====================================================
    LOGIN SCREEN
    ===================================================== */
 
@@ -100,7 +94,7 @@ export default function LoginScreen() {
         setInfoMessage(null);
 
         if (!email.trim()) {
-            setErrorMessage('Operator email address is required.');
+            setErrorMessage('Admin email address is required.');
             return;
         }
 
@@ -274,11 +268,11 @@ export default function LoginScreen() {
                             <View style={styles.loginHeaderText}>
 
                                 <Text style={styles.loginTitle}>
-                                    Operator Sign In
+                                    Admin Sign In
                                 </Text>
 
                                 <Text style={styles.loginSubtitle}>
-                                    Authenticate with your assigned staff clearance
+                                    Sign in to your administrator dashboard
                                 </Text>
 
                             </View>
@@ -377,7 +371,7 @@ export default function LoginScreen() {
                         {/* EMAIL INPUT */}
                         <View style={styles.inputGroup}>
                             <Text style={styles.inputLabel}>
-                                Operator Email
+                                Admin Email
                             </Text>
 
                             <View style={styles.inputContainer}>
@@ -494,7 +488,7 @@ export default function LoginScreen() {
                                     ) : (
                                         <>
                                             <Text style={styles.loginButtonText}>
-                                                Authenticate Operator
+                                                Authenticate Admin
                                             </Text>
                                             <ArrowRight size={17} color="#ffffff" />
                                         </>
@@ -642,17 +636,11 @@ export default function LoginScreen() {
                     <View style={styles.securityFooter}>
 
                         <Text style={styles.rbacTitle}>
-                            Role-Based Access Control (RBAC) enforced
+                            Authorized Administrator Access
                         </Text>
 
                         <Text style={styles.rbacText}>
-                            • Super Admin: Omni-access across all
-                            branches & multi-account switching.
-                        </Text>
-
-                        <Text style={styles.rbacText}>
-                            • Branch Operators / Staff: Authorized
-                            for local branch orders.
+                            Single administrative console for managing store operations, orders, and catalog.
                         </Text>
 
                     </View>
@@ -1237,155 +1225,6 @@ const styles = StyleSheet.create({
         color: '#a8a29e',
 
         fontSize: 8,
-    },
-
-
-    /* OPERATOR */
-
-    operatorCard: {
-        flexDirection: 'row',
-
-        alignItems: 'center',
-
-        minHeight: 58,
-
-        paddingHorizontal: 10,
-
-        paddingVertical: 8,
-
-        borderRadius: 13,
-
-        borderWidth: 1,
-
-        borderColor: '#e7e5e4',
-
-        backgroundColor: '#fafaf9',
-
-        marginBottom: 7,
-    },
-
-    operatorCardSelected: {
-        backgroundColor: '#fffbeb',
-
-        borderColor: '#fcd34d',
-    },
-
-    avatar: {
-        width: 32,
-
-        height: 32,
-
-        borderRadius: 16,
-
-        backgroundColor: '#57534e',
-
-        alignItems: 'center',
-
-        justifyContent: 'center',
-
-        marginRight: 9,
-    },
-
-    adminAvatar: {
-        backgroundColor: '#650700',
-    },
-
-    managerAvatar: {
-        backgroundColor: '#b45309',
-    },
-
-    avatarText: {
-        color: '#ffffff',
-
-        fontSize: 9,
-
-        fontWeight: '900',
-    },
-
-    operatorInfo: {
-        flex: 1,
-
-        minWidth: 0,
-    },
-
-    operatorNameRow: {
-        flexDirection: 'row',
-
-        alignItems: 'center',
-
-        gap: 5,
-
-        flexWrap: 'wrap',
-    },
-
-    operatorName: {
-        color: '#1c1917',
-
-        fontSize: 10,
-
-        fontWeight: '800',
-
-        maxWidth: '55%',
-    },
-
-    roleBadge: {
-        borderRadius: 5,
-
-        paddingHorizontal: 5,
-
-        paddingVertical: 2,
-    },
-
-    adminBadge: {
-        backgroundColor: '#650700',
-    },
-
-    managerBadge: {
-        backgroundColor: '#fef3c7',
-
-        borderWidth: 1,
-
-        borderColor: '#fcd34d',
-    },
-
-    staffBadge: {
-        backgroundColor: '#e7e5e4',
-    },
-
-    roleText: {
-        fontSize: 6.5,
-
-        fontWeight: '900',
-    },
-
-    adminRoleText: {
-        color: '#ffffff',
-    },
-
-    managerRoleText: {
-        color: '#78350f',
-    },
-
-    staffRoleText: {
-        color: '#44403c',
-    },
-
-    branchText: {
-        color: '#78716c',
-
-        fontSize: 8,
-
-        marginTop: 3,
-    },
-
-    autofillText: {
-        color: '#a8a29e',
-
-        fontSize: 8,
-
-        fontWeight: '700',
-
-        marginLeft: 5,
     },
 
 

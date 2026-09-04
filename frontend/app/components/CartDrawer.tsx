@@ -3,13 +3,22 @@
 import { useEffect } from "react";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2, Truck, X } from "lucide-react";
 import { useCart } from "./CartContext";
+import { useAuth } from "../(auth)/AuthContext";
+import { useRouter } from "next/navigation";
 import "./css/cart-drawer.css";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
 
 export default function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const auth = useAuth();
   const { items, subtotal, updateQuantity, removeItem } = useCart();
+
+  const handleCheckout = () => {
+    onClose();
+    router.push(auth?.user ? "/checkout" : "/login");
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -82,10 +91,7 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
             <button
               type="button"
               className="cart-checkout-button"
-              onClick={() => {
-                onClose();
-                window.location.href = "/checkout";
-              }}
+              onClick={handleCheckout}
             >
               PROCEED TO CHECKOUT <ArrowRight size={19} />
             </button>

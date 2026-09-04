@@ -58,6 +58,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    paymentVerified: {
+      type: Boolean,
+      default: false,
+    },
 
     paymentScreenshot: {
       data: {

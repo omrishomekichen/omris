@@ -6,6 +6,9 @@ import {
   ScrollView,
   TextInput,
   Pressable,
+  ActivityIndicator,
+  Alert,
+  Platform,
 } from 'react-native';
 
 import {
@@ -14,10 +17,11 @@ import {
   X,
   CheckCircle2,
   MessageSquare,
+  Trash2,
 } from 'lucide-react-native';
 import type { Review, ReviewCardProps } from '../types';
 import { useAuth } from '../../Context/AuthContext';
-import { apiGetAdminReviews } from '../../lib/api';
+import { apiGetAdminReviews, apiDeleteAdminReview } from '../../lib/api';
 
 
 /* =====================================================
@@ -40,7 +44,39 @@ export default function ReviewsScreen() {
 
   const [searchQuery, setSearchQuery] =
     useState('');
+const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const handleDeleteReview = async (review: Review) => {
+    const doDelete = async () => {
+      setDeletingId(review.id);
+      try {
+        const res = await apiDeleteAdminReview(review.id, session?.token);
+        if (res?.success) {
+          setReviews(current => current.filter(r => r.id !== review.id));
+        } else {
+          Alert.alert('Delete Failed', (res as { message?: string })?.message || 'Unable to delete review');
+        }
+      } finally {
+        setDeletingId(null);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete this review by ${review.customerName}?`)) {
+        await doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete Review?',
+        `Remove review by ${review.customerName}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete },
+        ],
+      );
+    }
+  };
   useEffect(() => {
     let isMounted = true;
 
@@ -49,6 +85,7 @@ export default function ReviewsScreen() {
       const fetchedReviews = response?.reviews;
 
       if (isMounted && response?.success && Array.isArray(fetchedReviews)) {
+        setLoading(false);
         setReviews(
           fetchedReviews.map((review: Record<string, unknown>) => ({
             id: String(review._id ?? review.id),
@@ -478,7 +515,11 @@ export default function ReviewsScreen() {
         {/* =================================================
             REVIEW LIST
             ================================================= */}
-
+{loading ? (
+          <View style={styles.loading}>
+            <ActivityIndicator size="large" color="#650700" />
+          </View>
+        ) : (
         <View style={styles.reviewList}>
 
           {filteredReviews.length === 0 ? (
@@ -512,6 +553,8 @@ export default function ReviewsScreen() {
               <ReviewCard
                 key={review.id}
                 review={review}
+                onDelete={handleDeleteReview}
+                isDeleting={deletingId === review.id}
               />
 
             ))
@@ -520,6 +563,7 @@ export default function ReviewsScreen() {
 
         </View>
 
+        )}
 
         <View style={{ height: 30 }} />
 
@@ -538,6 +582,8 @@ const ReviewCard: React.FC<
   ReviewCardProps
 > = ({
   review,
+  onDelete,
+  isDeleting,
 }) => {
 
   return (
@@ -649,6 +695,18 @@ const ReviewCard: React.FC<
         <Text style={styles.reviewProduct}>
           {review.menuItemName}
         </Text>
+
+        {onDelete && (
+          <Pressable
+            onPress={() => onDelete(review)}
+            disabled={isDeleting}
+            style={styles.deleteReviewButton}
+          >
+            {isDeleting
+              ? <ActivityIndicator size="small" color="#b91c1c" />
+              : <Trash2 size={14} color="#b91c1c" />}
+          </Pressable>
+        )}
 
       </View>
 
@@ -1048,6 +1106,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
     marginTop: 5,
+  },
+    loading: {
+    width: '100%',
+    minHeight: 240,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  deleteReviewButton: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#fef2f2',
+    marginLeft: 'auto',
   },
 
 });

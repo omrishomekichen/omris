@@ -25,6 +25,7 @@ export interface Order {
   customerName: string;
   customerPhone?: string;
   createdAt: string;
+  paymentMethod?: string;
   paymentVerified?: boolean;
   paymentScreenshotUrl?: string;
   utrNumber?: string;
@@ -227,12 +228,15 @@ export interface Review {
 
 export interface ReviewCardProps {
   review: Review;
+  onDelete?: (review: Review) => void;
+  isDeleting?: boolean;
 }
 
 export interface NativeMobileHeaderProps {
   activeTab?: string;
   isOrderDetail?: boolean;
   onBackFromOrder?: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
 export interface NavigationProps {

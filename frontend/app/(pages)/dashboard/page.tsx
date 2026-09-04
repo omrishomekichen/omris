@@ -23,6 +23,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import Api from "../../__apis/api";
+import { DEFAULT_MENU_ITEMS } from "../../data/defaultMenu";
 import { useCart } from "../../components/CartContext";
 import toast from "react-hot-toast";
 
@@ -61,7 +62,9 @@ export default function DashboardPage() {
           ? response
           : response?.data && Array.isArray(response.data)
             ? response.data
-            : [];
+            : response?.menu && Array.isArray(response.menu)
+              ? response.menu
+              : DEFAULT_MENU_ITEMS;
 
 
         let featuredList = list.filter(
@@ -73,6 +76,10 @@ export default function DashboardPage() {
 
         if (featuredList.length < 3) {
           featuredList = list.slice(0, 8);
+        }
+
+        if (featuredList.length === 0) {
+          featuredList = DEFAULT_MENU_ITEMS.slice(0, 8);
         }
 
         const formatted = featuredList.map((item: any) => {

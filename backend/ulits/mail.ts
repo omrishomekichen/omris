@@ -223,6 +223,20 @@ class MailService {
     );
   }
 
+  async sendOrderStatusUpdateEmail(
+    email: string,
+    orderId: string,
+    customerName: string,
+    status: string,
+  ) {
+    const label = status.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    return sendMail(
+      email,
+      `Order Update #${orderId}: ${label}`,
+      `Hello ${customerName || "Customer"}, your order #${orderId} is now ${label}.`,
+    );
+  }
+
 
 
 

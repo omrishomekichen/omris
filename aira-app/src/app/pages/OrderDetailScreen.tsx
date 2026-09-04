@@ -13,6 +13,7 @@ import {
   Dimensions,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
+import Constants from "expo-constants";
 
 import type {
   ForwardOrderSheetProps,
@@ -24,7 +25,7 @@ import type {
 } from "@/app/types";
 
 import { useAuth } from "../../Context/AuthContext";
-import { apiGetAdminOrders } from "../../lib/api";
+import { apiDeleteOrder, apiGetAdminOrders, apiUpdateOrderStatus } from "../../lib/api";
 
 import {
   ArrowLeft,
@@ -44,6 +45,7 @@ import {
   Truck,
   CircleCheck,
   Eye,
+  Trash2,
 } from "lucide-react-native";
 
 /* =========================================================
@@ -247,13 +249,13 @@ const ForwardOrderSheet: React.FC<
   const [selectedBranch, setSelectedBranch] =
     useState(order.branch || "");
 
-  const branches = [
+  const [branches] = useState<string[]>([
     "Hyderabad Central",
     "Secunderabad",
     "Kukatpally",
     "Madhapur",
     "Gachibowli",
-  ];
+  ]);
 
   const handleRoute = () => {
     if (!selectedBranch) {
@@ -458,7 +460,6 @@ export const OrderDetailScreen: React.FC<
   OrderDetailScreenProps
 > = ({ orderId, onBack }) => {
   const { profile, session } = useAuth();
-  const isOwner = profile?.role === "owner";
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -471,6 +472,11 @@ export const OrderDetailScreen: React.FC<
   ] = useState(false);
 
   const [copiedUtr, setCopiedUtr] = useState(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState<0 | 1 | 2>(0);
+  const [deletingOrder, setDeletingOrder] = useState(false);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -560,6 +566,10 @@ export const OrderDetailScreen: React.FC<
     );
   }
 
+  const paymentMethod = order.paymentMethod?.trim() || "Online";
+  const isCod = /^(cod|cash\s*on\s*delivery)$/i.test(paymentMethod);
+  const paymentMethodLabel = isCod ? "Cash on Delivery (COD)" : "Online";
+
   /* -------------------------------------------------------
      COPY UTR
   ------------------------------------------------------- */
@@ -628,28 +638,133 @@ export const OrderDetailScreen: React.FC<
     }
   };
 
-  const handleVerifyPayment = () => {
-    Alert.alert(
-      "Verify Payment",
-      `Approve payment of ₹${order.totalAmount.toLocaleString(
-        "en-IN"
-      )}?`,
-      [
+  const handleVerifyPayment = async () => {
+    if (verifyingPayment) return;
+
+    setVerifyingPayment(true);
+    try {
+      const apiBaseUrl = (
+        Constants.expoConfig?.extra?.apiUrl ??
+        process.env.EXPO_PUBLIC_API_URL ??
+        ""
+      ).replace(/\/$/, "");
+      const verificationResponse = await fetch(
+        `${apiBaseUrl}/api/admin-orders/${encodeURIComponent(order.id)}/verify-payment`,
         {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Approve",
-          onPress: () => {
-            Alert.alert(
-              "Payment verification unavailable",
-              "The backend does not currently expose a payment verification endpoint."
-            );
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(session?.token
+              ? { Authorization: `Bearer ${session.token}` }
+              : {}),
           },
+          body: JSON.stringify({
+            profile,
+          }),
         },
-      ]
-    );
+      );
+      const response = await verificationResponse.json();
+
+      if (!response?.success) {
+        throw new Error(response?.message || "Payment verification failed");
+      }
+
+      setOrders((currentOrders) =>
+        currentOrders.map((currentOrder) =>
+          currentOrder.id === order.id
+            ? {
+                ...currentOrder,
+                paymentVerified: true,
+                status: response.order?.status || "confirmed",
+              }
+            : currentOrder,
+        ),
+      );
+      Alert.alert("Payment Verified", "The payment has been approved.");
+    } catch (error) {
+      Alert.alert(
+        "Verification Failed",
+        error instanceof Error ? error.message : "Unable to verify payment.",
+      );
+    } finally {
+      setVerifyingPayment(false);
+    }
+  };
+
+  const statusFlow = ["pending", "confirmed", "processing", "shipped", "delivered"];
+  const currentStatusIndex = statusFlow.indexOf(order.status?.toLowerCase());
+  const nextStatus = currentStatusIndex >= 0 ? statusFlow[currentStatusIndex + 1] : undefined;
+  const nextStatusLabel = nextStatus
+    ? nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)
+    : undefined;
+  const paymentRequiredBeforeConfirmation =
+    nextStatus === "confirmed" && !order.paymentVerified;
+
+  const handleAdvanceStatus = () => {
+    if (!nextStatus || updatingStatus || paymentRequiredBeforeConfirmation) return;
+    setStatusConfirmOpen(true);
+  };
+
+  const confirmAdvanceStatus = async () => {
+    if (!nextStatus || updatingStatus) return;
+    setStatusConfirmOpen(false);
+    setUpdatingStatus(true);
+    try {
+      const response = await apiUpdateOrderStatus(
+        order.id,
+        nextStatus,
+        session?.token,
+        profile,
+      );
+      if (!response?.success) {
+        throw new Error(response?.message || "Status update failed");
+      }
+      setOrders((currentOrders) =>
+        currentOrders.map((currentOrder) =>
+          currentOrder.id === order.id
+            ? {
+                ...currentOrder,
+                status: response.order?.status || nextStatus,
+                branch: response.order?.branch || currentOrder.branch,
+              }
+            : currentOrder,
+        ),
+      );
+    } catch (error) {
+      Alert.alert(
+        "Status Update Failed",
+        error instanceof Error ? error.message : "Unable to update order status.",
+      );
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (deletingOrder) return;
+    if (deleteConfirmStep === 1) {
+      setDeleteConfirmStep(2);
+      return;
+    }
+    if (deleteConfirmStep !== 2) return;
+
+    setDeletingOrder(true);
+    try {
+      const response = await apiDeleteOrder(order.id, session?.token, profile);
+      if (!response?.success) {
+        throw new Error(response?.message || "Unable to delete order.");
+      }
+      setDeleteConfirmStep(0);
+      setOrders((currentOrders) => currentOrders.filter((item) => item.id !== order.id));
+      onBack();
+    } catch (error) {
+      Alert.alert(
+        "Delete Failed",
+        error instanceof Error ? error.message : "Unable to delete order.",
+      );
+    } finally {
+      setDeletingOrder(false);
+    }
   };
 
   const isUnassigned =
@@ -696,7 +811,7 @@ export const OrderDetailScreen: React.FC<
 
           <View style={styles.divider} />
 
-          <View style={styles.orderHeader}>
+            <View style={styles.orderHeader}>
             <View style={styles.orderInfo}>
               <View style={styles.orderTitleRow}>
                 <Text style={styles.orderTitle}>
@@ -726,41 +841,50 @@ export const OrderDetailScreen: React.FC<
               </View>
             </View>
 
-            {isOwner && (
-              <Pressable
-                onPress={() =>
-                  setForwardSheetOpen(true)
-                }
-                style={[
-                  styles.routeButton,
+            <Pressable
+              onPress={() =>
+                setForwardSheetOpen(true)
+              }
+              style={[
+                styles.routeButton,
+                isUnassigned
+                  ? styles.routeButtonUnassigned
+                  : styles.routeButtonAssigned,
+              ]}
+            >
+              <Send
+                size={14}
+                color={
                   isUnassigned
-                    ? styles.routeButtonUnassigned
-                    : styles.routeButtonAssigned,
+                    ? "#fff"
+                    : "#2C4A7C"
+                }
+              />
+
+              <Text
+                style={[
+                  styles.routeButtonText,
+                  isUnassigned
+                    ? styles.routeButtonTextWhite
+                    : styles.routeButtonTextBlue,
                 ]}
               >
-                <Send
-                  size={14}
-                  color={
-                    isUnassigned
-                      ? "#fff"
-                      : "#2C4A7C"
-                  }
-                />
+                {isAssigned
+                  ? "Re-Route"
+                  : "Route"}
+              </Text>
+            </Pressable>
 
-                <Text
-                  style={[
-                    styles.routeButtonText,
-                    isUnassigned
-                      ? styles.routeButtonTextWhite
-                      : styles.routeButtonTextBlue,
-                  ]}
-                >
-                  {isAssigned
-                    ? "Re-Route"
-                    : "Route"}
-                </Text>
-              </Pressable>
-            )}
+            <Pressable
+              style={styles.deleteOrderButton}
+              onPress={() => setDeleteConfirmStep(1)}
+              disabled={deletingOrder}
+              accessibilityRole="button"
+              accessibilityLabel="Delete order"
+            >
+              <Trash2 size={16} color="#b91c1c" />
+              <Text style={styles.deleteOrderText}>Delete</Text>
+            </Pressable>
           </View>
 
           {/* ASSIGNMENT */}
@@ -808,6 +932,37 @@ export const OrderDetailScreen: React.FC<
 
         <StatusStepper order={order} />
 
+        {nextStatus && (
+          <Pressable
+            style={({ pressed }) => [
+              styles.statusActionButton,
+              pressed && styles.statusActionButtonPressed,
+              (updatingStatus || paymentRequiredBeforeConfirmation) &&
+                styles.statusActionButtonDisabled,
+            ]}
+            onPress={handleAdvanceStatus}
+            disabled={updatingStatus || paymentRequiredBeforeConfirmation}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={
+              paymentRequiredBeforeConfirmation
+                ? "Verify payment before confirming this order"
+                : `Move order status to ${nextStatusLabel}`
+            }
+          >
+            {updatingStatus ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : null}
+            <Text style={styles.statusActionText}>
+              {updatingStatus
+                ? "Updating Status..."
+                : paymentRequiredBeforeConfirmation
+                  ? "Verify Payment to Confirm"
+                  : `Move to ${nextStatusLabel}`}
+            </Text>
+          </Pressable>
+        )}
+
         {/* =================================================
             PAYMENT VERIFICATION
         ================================================= */}
@@ -821,11 +976,11 @@ export const OrderDetailScreen: React.FC<
               />
 
               <Text style={styles.sectionTitle}>
-                UPI Payment Verification
+                Payment Details
               </Text>
             </View>
 
-            {order.paymentVerified ? (
+            {!isCod && order.paymentVerified ? (
               <View style={styles.verifiedBadge}>
                 <CheckCircle2
                   size={12}
@@ -845,9 +1000,14 @@ export const OrderDetailScreen: React.FC<
             )}
           </View>
 
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>PAYMENT METHOD</Text>
+            <Text style={styles.utrText}>{paymentMethodLabel}</Text>
+          </View>
+
           {/* UTR */}
 
-          <View style={styles.infoBox}>
+          {!isCod && <View style={styles.infoBox}>
             <Text style={styles.label}>
               CUSTOMER UTR / UPI REF
             </Text>
@@ -877,11 +1037,11 @@ export const OrderDetailScreen: React.FC<
                 </Pressable>
               )}
             </View>
-          </View>
+          </View>}
 
           {/* SCREENSHOT */}
 
-          <View
+          {!isCod && <View
             style={[
               styles.infoBox,
               { marginTop: 10 },
@@ -920,25 +1080,24 @@ export const OrderDetailScreen: React.FC<
                 </Pressable>
               )}
             </View>
-          </View>
+          </View>}
 
           {/* VERIFY BUTTON */}
 
-          {!order.paymentVerified && (
+          {!isCod && !order.paymentVerified && (
             <Pressable
               style={styles.verifyButton}
               onPress={handleVerifyPayment}
+              disabled={verifyingPayment}
             >
-              <CheckCircle2
-                size={16}
-                color="#fff"
-              />
+              {verifyingPayment ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <CheckCircle2 size={16} color="#fff" />
+              )}
 
               <Text style={styles.verifyText}>
-                Approve Payment ₹
-                {order.totalAmount.toLocaleString(
-                  "en-IN"
-                )}
+                {verifyingPayment ? "Verifying Payment..." : `Approve Payment ₹${order.totalAmount.toLocaleString("en-IN")}`}
               </Text>
             </Pressable>
           )}
@@ -1074,6 +1233,7 @@ export const OrderDetailScreen: React.FC<
                 </Text>
               </Pressable>
             </View>
+
           </View>
 
           {/* ADDRESS */}
@@ -1122,6 +1282,80 @@ export const OrderDetailScreen: React.FC<
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={deleteConfirmStep > 0}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteConfirmStep(0)}
+      >
+        <View style={styles.statusConfirmOverlay}>
+          <View style={styles.statusConfirmCard}>
+            <Text style={styles.statusConfirmTitle}>
+              {deleteConfirmStep === 1 ? "Delete Order?" : "Confirm Permanent Deletion"}
+            </Text>
+            <Text style={styles.statusConfirmMessage}>
+              {deleteConfirmStep === 1
+                ? "Are you sure you want to delete this order?"
+                : "This cannot be undone. Delete this order permanently?"}
+            </Text>
+            <View style={styles.statusConfirmActions}>
+              <Pressable
+                style={styles.statusCancelButton}
+                onPress={() => setDeleteConfirmStep(0)}
+                disabled={deletingOrder}
+              >
+                <Text style={styles.statusCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={styles.deleteConfirmButton}
+                onPress={handleDeleteOrder}
+                disabled={deletingOrder}
+              >
+                {deletingOrder && <ActivityIndicator size="small" color="#fff" />}
+                <Text style={styles.statusConfirmText}>
+                  {deleteConfirmStep === 1 ? "Continue" : deletingOrder ? "Deleting..." : "Delete"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={statusConfirmOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setStatusConfirmOpen(false)}
+      >
+        <View style={styles.statusConfirmOverlay}>
+          <View style={styles.statusConfirmCard}>
+            <Text style={styles.statusConfirmTitle}>Update Order Status</Text>
+            <Text style={styles.statusConfirmMessage}>
+              Move this order to {nextStatusLabel}?
+            </Text>
+            <View style={styles.statusConfirmActions}>
+              <Pressable
+                style={styles.statusCancelButton}
+                onPress={() => setStatusConfirmOpen(false)}
+                disabled={updatingStatus}
+              >
+                <Text style={styles.statusCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={styles.statusConfirmButton}
+                onPress={confirmAdvanceStatus}
+                disabled={updatingStatus}
+              >
+                {updatingStatus && <ActivityIndicator size="small" color="#fff" />}
+                <Text style={styles.statusConfirmText}>
+                  {updatingStatus ? "Updating..." : "Confirm"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* ===================================================
           FORWARD SHEET
@@ -1558,6 +1792,128 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 11,
     fontWeight: "800",
+  },
+
+  statusActionButton: {
+    minHeight: 46,
+    marginBottom: 14,
+    backgroundColor: "#2C4A7C",
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+  },
+
+  statusActionButtonPressed: {
+    opacity: 0.8,
+  },
+
+  statusActionButtonDisabled: {
+    opacity: 0.6,
+  },
+
+  statusActionText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+
+  deleteOrderButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "#fef2f2",
+  },
+
+  deleteOrderText: {
+    color: "#b91c1c",
+    fontSize: 11,
+    fontWeight: "800",
+  },
+
+  deleteConfirmButton: {
+    minWidth: 100,
+    height: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderRadius: 12,
+    backgroundColor: "#b91c1c",
+  },
+
+  statusConfirmOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+
+  statusConfirmCard: {
+    width: "100%",
+    maxWidth: 380,
+    padding: 22,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+  },
+
+  statusConfirmTitle: {
+    color: "#1c1917",
+    fontSize: 18,
+    fontWeight: "900",
+  },
+
+  statusConfirmMessage: {
+    color: "#57534e",
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 8,
+  },
+
+  statusConfirmActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 22,
+  },
+
+  statusCancelButton: {
+    minWidth: 90,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#d6d3d1",
+  },
+
+  statusCancelText: {
+    color: "#57534e",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  statusConfirmButton: {
+    minWidth: 100,
+    height: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderRadius: 12,
+    backgroundColor: "#650700",
+  },
+
+  statusConfirmText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "900",
   },
 
   /* ITEMS */

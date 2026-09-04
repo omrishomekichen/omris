@@ -70,6 +70,11 @@ export default function CheckoutPage() {
 
 
   useEffect(() => {
+    if (!auth?.loading && !auth?.user) {
+      router.replace("/login");
+      return;
+    }
+
     if (auth?.user) {
       setFormData((prev) => ({
         ...prev,

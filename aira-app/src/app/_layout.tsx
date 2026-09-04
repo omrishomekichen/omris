@@ -14,7 +14,6 @@ import DashboardScreen from './pages/Dashboard';
 import OrdersScreen from './pages/Orders';
 import Menu from './pages/Menu';
 import ReviewsScreen from './pages/Reviews';
-import TeamScreen from './pages/Team';
 import { OrderDetailScreen } from './pages/OrderDetailScreen';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {healthCheck} from '../lib/api';
@@ -79,8 +78,6 @@ function AppShell() {
         return <Menu />;
       case 'reviews':
         return <ReviewsScreen />;
-      case 'team':
-        return <TeamScreen />;
       case 'home':
       default:
         return (
@@ -98,6 +95,10 @@ function AppShell() {
         activeTab={activeTab}
         isOrderDetail={Boolean(selectedOrderId)}
         onBackFromOrder={() => setSelectedOrderId(null)}
+        onNavigateTab={(tab) => {
+          setSelectedOrderId(null);
+          setActiveTab(tab);
+        }}
       />
       <StatusBar barStyle="light-content" backgroundColor="#650700" />
       <View style={{ flex: 1, paddingBottom: TAB_BAR_HEIGHT + insets.bottom }}>

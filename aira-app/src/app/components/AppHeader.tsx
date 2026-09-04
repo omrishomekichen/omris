@@ -16,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Bell,
   ChevronLeft,
-  Crown,
   Database,
   LogOut,
   Sparkles,
@@ -34,6 +33,7 @@ const NativeMobileHeader = ({
   activeTab = 'home',
   isOrderDetail = false,
   onBackFromOrder,
+  onNavigateTab,
 }: NativeMobileHeaderProps) => {
 
   /* =====================================================
@@ -41,7 +41,7 @@ const NativeMobileHeader = ({
      ===================================================== */
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const { login , session,  profile,logout} = useAuth();
+  const { login, session, profile, user, logout } = useAuth();
 
   // Logout loading state
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -57,7 +57,6 @@ const NativeMobileHeader = ({
     menu: 'Menu Catalog',
     reviews: 'Customer Reviews',
     simple: 'Kitchen Counter',
-    team: 'Team & Roles',
   };
 
   const screenTitle = isOrderDetail
@@ -267,7 +266,7 @@ const NativeMobileHeader = ({
                   <View style={styles.profileDetails}>
 
                     <Text style={styles.profileName}>
-                      Aira Admin
+                      {profile?.name || user?.name || (user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Aira Admin')}
                     </Text>
 
                     <View style={styles.profileMeta}>
@@ -280,13 +279,13 @@ const NativeMobileHeader = ({
                         />
 
                         <Text style={styles.roleBadgeText}>
-                          Owner
+                          Admin
                         </Text>
 
                       </View>
 
                       <Text style={styles.email}>
-                        admin@airapickles.com
+                        {profile?.email || user?.email || 'admin@airapickles.com'}
                       </Text>
 
                     </View>
@@ -449,55 +448,7 @@ const NativeMobileHeader = ({
               </Pressable>
 
 
-              {/* =========================================
-                  ACTIVE ACCOUNT
-                  ========================================= */}
 
-              <View style={styles.accountHeader}>
-
-                <Text style={styles.sectionTitle}>
-                  SWITCH ACTIVE ACCOUNT
-                </Text>
-
-                <Crown
-                  size={14}
-                  color="#d97706"
-                />
-
-              </View>
-
-
-              {/* ACCOUNT */}
-
-              <View style={styles.accountCard}>
-
-                <View style={styles.accountLeft}>
-
-                  <Image
-                    source={AIRA_LOGO}
-                    style={styles.accountAvatar}
-                    resizeMode="cover"
-                  />
-
-                  <View>
-
-                    <Text style={styles.accountName}>
-                      Aira Admin
-                    </Text>
-
-                    <Text style={styles.accountRole}>
-                      OWNER • CENTRAL HQ
-                    </Text>
-
-                  </View>
-
-                </View>
-
-                <Text style={styles.currentText}>
-                  ✓ Current
-                </Text>
-
-              </View>
 
 
               {/* =========================================
