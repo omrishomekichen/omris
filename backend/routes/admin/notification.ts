@@ -18,7 +18,6 @@ adminnotificationRouter.post("/push-notification-token", async (req: Request, re
       { $set: { platform: "android", lastSeenAt: new Date() } },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
-    console.log(`[FCM] Device token stored: ${token}`);
     return res.sendStatus(204);
   } catch (error) {
     console.error("Failed to store Firebase device token:", error);
