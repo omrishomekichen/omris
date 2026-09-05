@@ -13,6 +13,7 @@ import Order from "../model/order";
 import { User } from "../model/user";
 import MailService from "../ulits/mail";
 import { getAuthToken, JWT_SECRET } from "../config/security";
+import { sendNewOrderPushNotification } from "../services/pushNotifications";
 
 const ADMIN_EMAIL =
   process.env.ADMIN_EMAIL ||
@@ -315,7 +316,15 @@ orderRouter.post(
 
 
       void (async () => {
-
+        try {
+          await sendNewOrderPushNotification({
+            orderId: order.orderId,
+            customerName: order.customerName,
+            totalPrice: order.totalPrice,
+          });
+        } catch (pushError) {
+          console.error("[FCM] New-order notification error:", pushError);
+        }
 
         try {
 
