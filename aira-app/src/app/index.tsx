@@ -13,17 +13,6 @@ import DashboardScreen from './pages/Dashboard';
 export default function Index() {
   const { session, loading } = useAuth();
 
-  // Authentication is still loading
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator
-          size="large"
-          color="#650700"
-        />
-      </View>
-    );
-  }
 
   // User is not logged in
   if (!session) {

@@ -5,6 +5,21 @@ import {
   setBackgroundMessageHandler,
 } from '@react-native-firebase/messaging';
 
+let defaultMessaging: ReturnType<typeof getMessaging> | null = null;
+
+// Register this while the JavaScript bundle is loading. Registering from a
+// component effect is too late for Android's Firebase headless task.
+if (Platform.OS === 'android') {
+  try {
+    defaultMessaging = getMessaging();
+    setBackgroundMessageHandler(defaultMessaging, async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+    });
+  } catch (error) {
+    console.error('Unable to register Firebase background handler:', error);
+  }
+}
+
 /**
  * Configures native Firebase Messaging and returns the current device token.
  * React Native Firebase Messaging is not available in the Expo web runtime.
@@ -26,11 +41,7 @@ export async function initializeFirebaseMessaging(): Promise<string | null> {
       }
     }
 
-    const firebaseMessaging = getMessaging();
-
-    setBackgroundMessageHandler(firebaseMessaging, async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
-    });
+    const firebaseMessaging = defaultMessaging ?? getMessaging();
 
     return await getToken(firebaseMessaging);
   } catch (error) {

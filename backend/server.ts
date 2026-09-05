@@ -10,6 +10,7 @@ import reviewRouter from "./routes/review";
 import admindashboardRouter from "./routes/admin/dashboard";
 import adminorderRouter from "./routes/admin/orders";
 import adminmenuRouter from "./routes/admin/menu";
+import adminnotificationRouter from "./routes/admin/notification";
 
 
 dotenv.config();
@@ -51,16 +52,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.post("/api/push-notification-token", (req: Request, res: Response) => {
-  const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
-
-  if (!token) {
-    return res.status(400).json({ success: false, message: "Firebase token is required" });
-  }
-
-  console.log(`[FCM] Device token: ${token}`);
-  return res.sendStatus(204);
-});
 
 app.use("/api", authRouter);
 app.use("/api", menuRouter);
@@ -69,6 +60,7 @@ app.use("/api", reviewRouter);
 app.use("/api", admindashboardRouter);
 app.use("/api", adminorderRouter);
 app.use("/api", adminmenuRouter);
+app.use("/api", adminnotificationRouter);
 async function connectDatabase(): Promise<void> {
   let uri: string | undefined = process.env.MONGODB_URI;
 
