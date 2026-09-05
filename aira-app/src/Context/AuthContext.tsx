@@ -47,7 +47,6 @@ export interface Profile {
   name: string;
   email: string;
   role: 'admin';
-  branch: string | null;
   status: 'active' | 'inactive';
 }
 
@@ -59,8 +58,6 @@ export interface User {
   lastName?: string;
   email: string;
   verified?: boolean;
-  role?: string;
-  branch?: string | null;
 }
 
 function profileFromUser(user: User): Profile {
@@ -69,7 +66,6 @@ function profileFromUser(user: User): Profile {
     name: user.name || (user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Aira Admin'),
     email: user.email || 'admin@airapickles.com',
     role: 'admin',
-    branch: typeof user.branch === 'string' && user.branch.trim() ? user.branch.trim() : null,
     status: 'active',
   };
 }

@@ -1,49 +1,11 @@
 import express, { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import Order from "../../model/order";
-import { BranchUser } from "../../model/branchuser";
 import { User } from "../../model/user";
 import { requireAuth } from "../../middleware/auth";
 import { MailService } from "../../ulits/mail";
 
 const adminorderRouter: express.Router = express.Router();
 const mailService = new MailService();
-
-adminorderRouter.get("/admin-team", requireAuth, async (_req, res) => {
-    const members = await BranchUser.find({}, "firstName lastName email role branch verified").sort({ firstName: 1 }).lean();
-    return res.json({ success: true, members });
-});
-
-adminorderRouter.post("/admin-team", requireAuth, async (req, res) => {
-    try {
-        const { firstName, lastName, email, password, role = "admin", branch = "" } = req.body || {};
-        if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !password || password.length < 6) {
-            return res.status(400).json({ success: false, message: "Name, email and a 6+ character password are required" });
-        }
-        if (!["admin", "manager", "staff", "StoreOwner"].includes(role)) return res.status(400).json({ success: false, message: "Invalid role" });
-        const member = await BranchUser.create({ firstName: firstName.trim(), lastName: lastName.trim(), email: email.toLowerCase().trim(), password: await bcrypt.hash(password, 10), role, branch: String(branch || "").trim(), verified: true, agreeToTerms: true });
-        return res.status(201).json({ success: true, member: { ...member.toObject(), password: undefined } });
-    } catch (error: any) {
-        return res.status(error?.code === 11000 ? 409 : 500).json({ success: false, message: error?.code === 11000 ? "Email already exists" : "Failed to create team member" });
-    }
-});
-
-adminorderRouter.patch("/admin-team/:id", requireAuth, async (req, res) => {
-    const { firstName, lastName, role, branch, verified } = req.body || {};
-    const member = await BranchUser.findByIdAndUpdate(req.params.id, { $set: { firstName, lastName, role, branch, verified } }, { new: true, runValidators: true }).select("firstName lastName email role branch verified");
-    if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
-    return res.json({ success: true, member });
-});
-
-adminorderRouter.delete("/admin-team/:id", requireAuth, async (req, res) => {
-    try {
-        const member = await BranchUser.findByIdAndDelete(req.params.id);
-        if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
-        return res.json({ success: true, message: "Team member deleted" });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, message: error?.message || "Failed to delete team member" });
-    }
-});
 
 async function notifyCustomerStatus(order: any, status: string) {
     try {

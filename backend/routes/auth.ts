@@ -10,7 +10,6 @@ import {
   JWT_SECRET,
   getAuthToken,
 } from "../config/security";
-import { BranchUser } from "../model/branchuser";
 
 const authRouter: express.Router = express.Router();
 
@@ -22,8 +21,6 @@ const buildUserResponse = (user: any) => ({
   name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Customer",
   email: user.email,
   verified: user.verified ?? false,
-  role: user.role,
-  branch: user.branch,
 });
 
 /* ==========================================================================
@@ -665,93 +662,6 @@ const handleGetMe = async (req: Request, res: Response) => {
   }
 };
 
-
-
-authRouter.post("/adminlogin", async (req: Request, res: Response) => {
-  const { email, password } = req.body || {};
-
-  if (!email || !password) {
-    return res.status(400).json({
-      status: "error",
-      message: "Missing email or password",
-    });
-  }
-
-  const cleanEmail = email.toLowerCase().trim();
-
-  try {
-    const user = await  BranchUser.findOne({ email: cleanEmail });
-    if (!user) {
-      return res.status(401).json({
-        status: "error",
-        message: "Invalid email or password",
-      });
-    }
-
-    const passwordMatches = await bcrypt.compare(password, user.password);
-    if (!passwordMatches) {
-      return res.status(401).json({
-        status: "error",
-        message: "Invalid email or password",
-      });
-    }
-
-    if (!user.verified) {
-      return res.status(403).json({
-        status: "error",
-        message: "Please verify your email address before logging in.",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-      },
-      JWT_SECRET,
-      { expiresIn: "7d" },
-    );
-    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
-
-    try {
-      const userAgent = req.headers["user-agent"] || "Web Browser";
-      const deviceType = userAgent.includes("Mobile")
-        ? "Mobile Device"
-        : "Desktop Browser";
-      const loginTime = new Date().toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      });
-      await sendMail(
-        user.email,
-        "Security Alert: New Sign-In",
-        `We noticed a new login to your Aira Pickles account at ${loginTime}.`,
-        undefined,
-        "login_alert",
-        {
-          device: deviceType,
-          location: "India",
-          time: loginTime,
-          name: `${user.firstName} ${user.lastName}`.trim(),
-        },
-      );
-    } catch (e) {
-      console.error("Failed to send login alert email:", e);
-    }
-
-    return res.status(200).json({
-      status: "success",
-      user: buildUserResponse(user),
-      token,
-    });
-  } catch (error: any) {
-    console.error("Login error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: error?.message || "Internal server error",
-    });
-  }
-});
 
 
 authRouter.get("/auth/me", handleGetMe);
