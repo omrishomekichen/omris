@@ -434,11 +434,6 @@ orderRouter.post(
         },
       });
     } catch (error) {
-      console.error(
-        "Place order error:",
-        error,
-      );
-
       return res.status(500).json({
         success: false,
 
@@ -476,7 +471,6 @@ orderRouter.post("/user/orders", async (req: Request, res: Response) => {
       orders,
     });
   } catch (error) {
-    console.error("Error fetching user orders:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch orders",
@@ -525,7 +519,6 @@ const handleGetSingleOrder = async (req: Request, res: Response) => {
       order,
     });
   } catch (error) {
-    console.error("Error fetching single order details:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch order details",

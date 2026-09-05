@@ -86,7 +86,6 @@ authRouter.post("/register", async (req: Request, res: Response) => {
         { otp: verificationCode, name: fullName.trim() },
       );
     } catch (mailError) {
-      console.error("Verification email error:", mailError);
       await User.deleteOne({ _id: user._id });
       await Otp.deleteMany({ email: user.email });
       return res.status(500).json({
@@ -103,7 +102,6 @@ authRouter.post("/register", async (req: Request, res: Response) => {
       email: user.email,
     });
   } catch (error: any) {
-    console.error("Registration error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",
@@ -189,7 +187,6 @@ authRouter.post("/verify", async (req: Request, res: Response) => {
       token,
     });
   } catch (error: any) {
-    console.error("Verification error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",
@@ -244,7 +241,6 @@ const handleSendLoginOtp = async (req: Request, res: Response) => {
         },
       );
     } catch (mailErr) {
-      console.error("[Mail Error on Login OTP]", mailErr);
       await Otp.deleteMany({ email: cleanEmail });
       return res.status(500).json({
         status: "error",
@@ -258,7 +254,6 @@ const handleSendLoginOtp = async (req: Request, res: Response) => {
       email: cleanEmail,
     });
   } catch (error: any) {
-    console.error("Send login OTP error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",
@@ -365,7 +360,6 @@ const handleVerifyLoginOtp = async (req: Request, res: Response) => {
       token,
     });
   } catch (error: any) {
-    console.error("Verify login OTP error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",
@@ -517,7 +511,6 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
         { otp: resetCode, name: `${user.firstName} ${user.lastName}`.trim() },
       );
     } catch (mailError) {
-      console.error("Password reset email error:", mailError);
       await Otp.deleteMany({ email: user.email });
       return res.status(500).json({
         status: "error",
@@ -531,7 +524,6 @@ authRouter.post("/forgot-password", async (req: Request, res: Response) => {
       email: user.email,
     });
   } catch (error: any) {
-    console.error("Forgot password error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",
@@ -604,7 +596,6 @@ authRouter.post("/reset-password", async (req: Request, res: Response) => {
       message: "Password reset successfully",
     });
   } catch (error: any) {
-    console.error("Reset password error:", error);
     return res.status(500).json({
       status: "error",
       message: error?.message || "Internal server error",

@@ -143,7 +143,7 @@ export function AuthProvider({
         }
       }
     } catch (e) {
-      console.error('Session load error:', e);
+      // Ignore session restoration errors and fall back to signed-out state
     } finally {
       setLoading(false);
     }

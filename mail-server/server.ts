@@ -4,8 +4,9 @@ import { app } from "./api/mail";
 
 dotenv.config();
 
+
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const start = Date.now();
+    const start = Date.now();
 
   res.on("finish", () => {
     console.log(
@@ -16,8 +17,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-const port = Number(process.env.PORT) || 6000;
+const port = Number(process.env.PORT) ;
 
-app.listen(port, () => {
-  console.log(`Mail server listening on http://localhost:${port}`);
-});
+app.listen(port, () => {});

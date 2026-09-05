@@ -8,9 +8,6 @@ const hasMailCredentials = Boolean(
   process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD,
 );
 
-if (!hasMailCredentials) {
-  console.warn("GMAIL_USER and GMAIL_APP_PASSWORD are not set.");
-}
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -40,14 +37,11 @@ export const sendMail = async (
       html,
     });
 
-    console.log("📧 Mail sent:", info.messageId);
-
     return {
       success: true,
       messageId: info.messageId,
     };
   } catch (error) {
-    console.error("❌ Mail error:", error);
     throw error;
   }
 };

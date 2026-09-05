@@ -100,7 +100,6 @@ export default function OrderDetailPage() {
           setOrderReviews(map);
         }
       } catch (err) {
-        console.error("Error fetching order details:", err);
         setError("Unable to load order details. Please try again.");
       } finally {
         setLoading(false);

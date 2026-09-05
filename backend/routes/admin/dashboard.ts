@@ -38,8 +38,6 @@ admindashboardRouter.get(
         totalRevenue,
       });
     } catch (error) {
-      console.error("Error fetching unassigned orders:", error);
-
       return res.status(500).json({
         success: false,
         message: "Failed to fetch unassigned orders",
@@ -72,8 +70,6 @@ admindashboardRouter.get(
                 reviews,
             });
         } catch (error) {
-            console.error("Error fetching latest reviews:", error);
-
             return res.status(500).json({
                 success: false,
                 message: "Failed to fetch latest reviews",
@@ -100,8 +96,6 @@ admindashboardRouter.get(
           reviews,
         });
       } catch (error) {
-        console.error("Error fetching admin reviews:", error);
-
         return res.status(500).json({
           success: false,
           message: "Failed to fetch reviews",
@@ -128,7 +122,6 @@ admindashboardRouter.get(
           message: "Review deleted successfully",
         });
       } catch (error) {
-        console.error("Error deleting admin review:", error);
         return res.status(500).json({
           success: false,
           message: "Failed to delete review",

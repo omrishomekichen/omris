@@ -113,7 +113,6 @@ reviewRouter.post("/reviews", async (req: Request, res: Response) => {
       review,
     });
   } catch (error: any) {
-    console.error("Error submitting review:", error);
     return res.status(500).json({
       success: false,
       message: error?.message || "Failed to submit review. Please try again.",
@@ -134,7 +133,6 @@ reviewRouter.get("/reviews/recent", async (_req: Request, res: Response) => {
       reviews: dbReviews || [],
     });
   } catch (error) {
-    console.error("Error fetching recent reviews:", error);
     return res.status(200).json({
       success: true,
       reviews: [],

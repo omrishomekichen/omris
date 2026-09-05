@@ -51,7 +51,6 @@ adminRouter.get("/orders", async (_req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, orders: formattedOrders });
   } catch (error) {
-    console.error("Error fetching admin orders:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch orders",

@@ -41,14 +41,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const start = Date.now();
-
-  res.on("finish", () => {
-    console.log(
-      `[${new Date().toLocaleTimeString()}] ${req.method} ${req.originalUrl} → ${res.statusCode} (${Date.now() - start}ms)`,
-    );
-  });
-
   next();
 });
 
@@ -67,10 +59,6 @@ async function connectDatabase(): Promise<void> {
       throw new Error("MONGODB_URI must be set in production.");
     }
 
-    console.log(
-      "MONGODB_URI not set, starting in-memory MongoDB for development...",
-    );
-
     const mongod = await MongoMemoryServer.create({
       binary: {
         version: "7.0.5",
@@ -78,13 +66,9 @@ async function connectDatabase(): Promise<void> {
     });
 
     uri = mongod.getUri();
-
-    console.log("In-memory MongoDB started at", uri);
   }
 
   await mongoose.connect(uri);
-
-  console.log("Connected to MongoDB");
 }
 
 connectDatabase().catch((err: unknown) => {
@@ -104,9 +88,7 @@ const PORT = Number(process.env.PORT ?? 5000);
 
 const HOST = "0.0.0.0";
 
-const server = app.listen(PORT, HOST, () => {
-  console.log(`Server running on ${HOST}:${PORT}`);
-});
+const server = app.listen(PORT, HOST, () => {});
 
 server.on("error", (error: NodeJS.ErrnoException) => {
   console.error(`Unable to listen on ${HOST}:${PORT}:`, error);

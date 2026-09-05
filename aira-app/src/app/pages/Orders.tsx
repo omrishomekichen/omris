@@ -13,9 +13,6 @@ import {
 import {
   Search,
   X,
-  PlusCircle,
-  Building2,
-  Inbox,
   ChevronRight,
   Package,
 } from 'lucide-react-native';
@@ -37,152 +34,74 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [branchFilter, setBranchFilter] = useState('all');
-
   const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [dynamicBranches, setDynamicBranches] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrdersAndBranches = async () => {
+    const fetchOrders = async () => {
       try {
         const ordersRes = await apiGetAdminOrders(session?.token);
-
-        const fetchedOrders: AdminOrder[] = ordersRes?.orders ?? [];
-        setOrders(fetchedOrders);
-
-        const branchSet = new Set<string>();
-
-        // Add branches from orders
-        fetchedOrders.forEach((o) => {
-          const b = o.branch?.trim();
-          if (b && b.toLowerCase() !== 'unassigned') {
-            branchSet.add(b);
-          }
-        });
-
-        const list = Array.from(branchSet).sort((a, b) => a.localeCompare(b));
-        setDynamicBranches(list);
+        setOrders(ordersRes?.orders ?? []);
       } catch (error) {
-        console.error('Error fetching admin orders or branches:', error);
+        console.error('Error fetching admin orders:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrdersAndBranches();
+    fetchOrders();
   }, [session?.token]);
 
 
 
   const filteredOrders = useMemo(() => {
-
-      return orders.filter((order) => {
-
-        /* TAB FILTER */
-
-        if (activeTab === 'needs_verification') {
-
-          if (
-            order.status !== 'pending' &&
-            order.status !== 'payment_verification'
-          ) {
-            return false;
-          }
-
-        } else if (activeTab === 'needs_routing') {
-
-          if (
-            order.assigned ||
-            order.status !== 'pending'
-          ) {
-            return false;
-          }
-
-        } else if (activeTab === 'processing') {
-
-          if (
-            order.status !== 'processing' &&
-            order.status !== 'confirmed'
-          ) {
-            return false;
-          }
-
-        } else if (activeTab === 'shipped') {
-
-          if (order.status !== 'shipped') {
-            return false;
-          }
-
-        } else if (activeTab === 'delivered') {
-
-          if (order.status !== 'delivered') {
-            return false;
-          }
-
+    return orders.filter((order) => {
+      if (activeTab === 'needs_verification') {
+        if (
+          order.status !== 'pending' &&
+          order.status !== 'payment_verification'
+        ) {
+          return false;
         }
-
-
-        /* BRANCH FILTER */
-
-        if (branchFilter !== 'all') {
-
-          if (branchFilter === 'unassigned') {
-
-            if (order.assigned) {
-              return false;
-            }
-
-          } else if ((order.branch || '').trim().toLowerCase() !== branchFilter.trim().toLowerCase()) {
-
-            return false;
-
-          }
-
+      } else if (activeTab === 'needs_routing') {
+        if (order.assigned || order.status !== 'pending') {
+          return false;
         }
-
-
-        /* SEARCH */
-
-        if (searchQuery.trim()) {
-
-          const query = searchQuery
-            .toLowerCase()
-            .trim();
-
-          const matches =
-            order.orderNumber
-              .toLowerCase()
-              .includes(query) ||
-
-            order.customerName
-              .toLowerCase()
-              .includes(query) ||
-
-            order.customerPhone
-              .includes(query) ||
-
-            order.city
-              .toLowerCase()
-              .includes(query) ||
-
-            order.pincode.includes(query);
-
-          if (!matches) {
-            return false;
-          }
+      } else if (activeTab === 'processing') {
+        if (
+          order.status !== 'processing' &&
+          order.status !== 'confirmed'
+        ) {
+          return false;
         }
+      } else if (activeTab === 'shipped') {
+        if (order.status !== 'shipped') {
+          return false;
+        }
+      } else if (activeTab === 'delivered') {
+        if (order.status !== 'delivered') {
+          return false;
+        }
+      }
 
-        return true;
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
 
-      });
+        const matches =
+          order.orderNumber.toLowerCase().includes(query) ||
+          order.customerName.toLowerCase().includes(query) ||
+          order.customerPhone.includes(query) ||
+          order.city.toLowerCase().includes(query) ||
+          order.pincode.includes(query);
 
-  }, [
-    orders,
-    activeTab,
-    searchQuery,
-    branchFilter,
-  ]);
+        if (!matches) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [orders, activeTab, searchQuery]);
 
   /* ===================================================
      COUNTS
@@ -269,13 +188,8 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
      =================================================== */
 
   const clearFilters = () => {
-
     setActiveTab('all');
-
     setSearchQuery('');
-
-    setBranchFilter('all');
-
   };
 
 
@@ -301,52 +215,20 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
         <View style={styles.headerCard}>
 
-          <View style={styles.headerTop}>
+          <View style={styles.headerText}>
 
-            <View style={styles.headerText}>
+            <Text style={styles.title}>
+              Live Orders Queue
+            </Text>
 
-              <Text style={styles.title}>
-                Live Orders Queue
-              </Text>
-
-              <Text style={styles.subtitle}>
-                {filteredOrders.length}{' '}
-                order
-                {filteredOrders.length !== 1
-                  ? 's'
-                  : ''}{' '}
-                matching current filters
-              </Text>
-
-            </View>
-
-
-            {/* SIMULATE BUTTON */}
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.simulateButton,
-                pressed && styles.pressed,
-              ]}
-            >
-
-              <PlusCircle
-                size={14}
-                color="#ffffff"
-              />
-
-              <Text style={styles.simulateText}>
-                Simulate
-              </Text>
-
-            </Pressable>
+            <Text style={styles.subtitle}>
+              {filteredOrders.length}{' '}
+              order
+              {filteredOrders.length !== 1 ? 's' : ''}{' '}
+              matching current filters
+            </Text>
 
           </View>
-
-
-          {/* =================================================
-              SEARCH
-              ================================================= */}
 
           <View style={styles.searchContainer}>
 
@@ -380,112 +262,6 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
               </Pressable>
 
             )}
-
-          </View>
-
-
-          {/* =================================================
-              BRANCH FILTER
-              ================================================= */}
-
-          <View style={styles.branchSection}>
-
-            <Building2
-              size={15}
-              color="#a8a29e"
-            />
-
-            <Text style={styles.branchLabel}>
-              Branch
-            </Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.branchList}
-            >
-
-              {/* ALL */}
-
-              <Pressable
-                onPress={() => setBranchFilter('all')}
-                style={[
-                  styles.branchChip,
-                  branchFilter === 'all' &&
-                  styles.branchChipActive,
-                ]}
-              >
-
-                <Text
-                  style={[
-                    styles.branchChipText,
-                    branchFilter === 'all' &&
-                    styles.branchChipTextActive,
-                  ]}
-                >
-                  All Branches
-                </Text>
-
-              </Pressable>
-
-
-              {/* UNASSIGNED */}
-
-              <Pressable
-                onPress={() =>
-                  setBranchFilter('unassigned')
-                }
-                style={[
-                  styles.branchChip,
-                  branchFilter === 'unassigned' &&
-                  styles.branchChipActive,
-                ]}
-              >
-
-                <Text
-                  style={[
-                    styles.branchChipText,
-                    branchFilter === 'unassigned' &&
-                    styles.branchChipTextActive,
-                  ]}
-                >
-                  ⚠️ Unassigned
-                </Text>
-
-              </Pressable>
-
-
-              {/* DYNAMIC BRANCHES */}
-
-              {dynamicBranches.map((branch) => {
-                const count = orders.filter((o) => (o.branch || '').trim().toLowerCase() === branch.trim().toLowerCase()).length;
-                const isSelected = branchFilter.trim().toLowerCase() === branch.trim().toLowerCase();
-                return (
-                  <Pressable
-                    key={branch}
-                    onPress={() =>
-                      setBranchFilter(branch)
-                    }
-                    style={[
-                      styles.branchChip,
-                      isSelected &&
-                      styles.branchChipActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.branchChipText,
-                        isSelected &&
-                        styles.branchChipTextActive,
-                      ]}
-                    >
-                      {branch}{count > 0 ? ` (${count})` : ''}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-
-            </ScrollView>
 
           </View>
 
@@ -642,8 +418,6 @@ const OrdersScreen: React.FC<OrdersScreenProps> = ({
         </View>
         )}
 
-
-        <View style={{ height: 25 }} />
 
       </ScrollView>
 
@@ -947,16 +721,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
 
-  headerTop: {
-    flexDirection: 'row',
-
-    justifyContent: 'space-between',
-
-    alignItems: 'center',
-
-    gap: 10,
-  },
-
   headerText: {
     flex: 1,
   },
@@ -975,39 +739,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
 
     marginTop: 3,
-  },
-
-
-  /* ===================================================
-     SIMULATE
-     =================================================== */
-
-  simulateButton: {
-    flexDirection: 'row',
-
-    alignItems: 'center',
-
-    justifyContent: 'center',
-
-    gap: 5,
-
-    backgroundColor: '#650700',
-
-    paddingHorizontal: 11,
-
-    paddingVertical: 9,
-
-    borderRadius: 14,
-
-    elevation: 2,
-  },
-
-  simulateText: {
-    color: '#ffffff',
-
-    fontSize: 10,
-
-    fontWeight: '800',
   },
 
 
@@ -1049,77 +780,6 @@ const styles = StyleSheet.create({
 
   clearButton: {
     padding: 4,
-  },
-
-
-  /* ===================================================
-     BRANCH
-     =================================================== */
-
-  branchSection: {
-    flexDirection: 'row',
-
-    alignItems: 'center',
-
-    marginTop: 12,
-
-    gap: 8,
-  },
-
-  branchLabel: {
-    color: '#57534e',
-
-    fontSize: 10,
-
-    fontWeight: '800',
-  },
-
-  branchList: {
-    gap: 6,
-
-    paddingRight: 8,
-  },
-
-  branchChip: {
-    backgroundColor: '#f7f3f1',
-
-    borderWidth: 1,
-
-    borderColor: '#e7e2df',
-
-    paddingHorizontal: 10,
-
-    paddingVertical: 7,
-
-    borderRadius: 11,
-  },
-
-  branchChipActive: {
-    backgroundColor: '#650700',
-
-    borderColor: '#650700',
-
-    shadowColor: '#650700',
-
-    shadowOpacity: 0.18,
-
-    shadowRadius: 8,
-
-    shadowOffset: { width: 0, height: 4 },
-  },
-
-  branchChipText: {
-    color: '#57534e',
-
-    fontSize: 9,
-
-    fontWeight: '700',
-  },
-
-  branchChipTextActive: {
-    color: '#ffffff',
-
-    fontWeight: '800',
   },
 
 

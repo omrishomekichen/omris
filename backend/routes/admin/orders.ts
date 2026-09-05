@@ -108,7 +108,6 @@ adminorderRouter.patch("/admin-orders/:id/verify-payment", requireAuth, async (r
             order,
         });
     } catch (error) {
-        console.error("Payment verification error:", error);
         return res.status(500).json({ success: false, message: "Failed to verify payment" });
     }
 });
@@ -159,7 +158,6 @@ adminorderRouter.patch("/admin-orders/:id/status", requireAuth, async (req: Requ
         void notifyCustomerStatus(order, status);
         return res.status(200).json({ success: true, message: "Order status updated", order });
     } catch (error) {
-        console.error("Order status update error:", error);
         return res.status(500).json({ success: false, message: "Failed to update order status" });
     }
 });
@@ -179,7 +177,6 @@ adminorderRouter.delete("/admin-orders/:id", requireAuth, async (req: Request, r
         }
         return res.status(200).json({ success: true, message: "Order deleted successfully" });
     } catch (error) {
-        console.error("Order delete error:", error);
         return res.status(500).json({ success: false, message: "Failed to delete order" });
     }
 });
@@ -309,8 +306,6 @@ adminorderRouter.get("/admin-orders", async (_req: Request, res: Response) => {
             orders: formattedOrders,
         });
     } catch (error) {
-        console.error("Error fetching admin orders:", error);
-
         return res.status(500).json({
             success: false,
             message: "Failed to fetch admin orders",
@@ -419,8 +414,6 @@ adminorderRouter.get("/recent-pending-orders", async (req: Request, res: Respons
             orders: formattedOrders,
         });
     } catch (error) {
-        console.error("Error fetching admin orders:", error);
-
         return res.status(500).json({
             success: false,
             message: "Failed to fetch admin orders",

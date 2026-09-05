@@ -13,7 +13,6 @@ adminmenuRouter.get("/menu-items", async (_req: Request, res: Response) => {
             menuItems,
         });
     } catch (error) {
-        console.error("Error fetching menu items:", error);
         return res.status(500).json({
             success: false,
             message: "Failed to fetch menu items",
