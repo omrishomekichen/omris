@@ -7,6 +7,7 @@ import React, {
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { apiLogin, apiLogout, apiMe } from '../lib/api';
+import { registerForOrderPushNotifications } from '../lib/pushNotifications';
 
 const TOKEN_KEY = 'aira_auth_token';
 const USER_KEY = 'aira_auth_user';
@@ -118,6 +119,12 @@ export function AuthProvider({
   useEffect(() => {
     loadSession();
   }, []);
+
+  useEffect(() => {
+    if (session?.token) {
+      void registerForOrderPushNotifications(session.token);
+    }
+  }, [session?.token]);
 
   async function loadSession() {
     try {

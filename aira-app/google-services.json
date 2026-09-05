@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "879060094781",
+    "project_id": "airapickles",
+    "storage_bucket": "airapickles.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:879060094781:android:837a8e3efcb315f3bf3f54",
+        "android_client_info": {
+          "package_name": "com.anonymous.aira"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo1uUQqkyZ8AKDQ1eHLDC6uOfdEdfRIX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

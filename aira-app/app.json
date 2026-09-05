@@ -14,11 +14,13 @@
         "monochromeImage": "./assets/images/aira-pickles-logo.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.aira"
+      "package": "com.anonymous.aira",
+      "googleServicesFile": "./google-services.json"
     },
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/images/aira-pickles-logo.png"
+      "icon": "./assets/images/aira-pickles-logo.png",
+      "bundleIdentifier": "com.anonymous.aira"
     },
     "web": {
       "output": "single",
@@ -37,7 +39,14 @@
         }
       ],
       "expo-secure-store",
-      "expo-image"
+      "expo-image",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/aira-pickles-logo.png",
+          "color": "#4A0500"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

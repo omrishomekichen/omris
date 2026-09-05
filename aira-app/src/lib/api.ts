@@ -110,6 +110,22 @@ export async function apiMe(token?: string) {
   return res.json();
 }
 
+export async function apiRegisterPushToken(
+  token: string,
+  platform: string,
+  sessionToken?: string,
+) {
+  const res = await fetch(`${API_BASE_URL}/api/register-push-token`, {
+    method: 'POST',
+    headers: {
+      ...headers,
+      ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+    },
+    body: JSON.stringify({ token, platform }),
+  });
+  return res.json();
+}
+
 
 export async function dashboardkpis(token?: string) {
   const res = await fetch(`${API_BASE_URL}/api/admin-dashboard-kpis`, {

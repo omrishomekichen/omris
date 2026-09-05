@@ -12,6 +12,7 @@ import jwt from "jsonwebtoken";
 import Order from "../model/order";
 import { User } from "../model/user";
 import MailService from "../ulits/mail";
+import { sendPushToAdmins } from "../ulits/push";
 import { getAuthToken, JWT_SECRET } from "../config/security";
 
 const ADMIN_EMAIL =
@@ -290,6 +291,12 @@ orderRouter.post(
 
 
       await order.save();
+
+      void sendPushToAdmins(
+        "New order received",
+        `${order.customerName} placed an order for ₹${order.totalPrice}`,
+        { orderId: order.orderId, type: "new_order" },
+      );
 
       const customerEmail =
         user.email;
