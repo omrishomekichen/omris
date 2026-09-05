@@ -8,6 +8,9 @@
     "scheme": "aira",
     "userInterfaceStyle": "light",
     "android": {
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#4A0500",
         "foregroundImage": "./assets/images/aira-pickles-logo.png",

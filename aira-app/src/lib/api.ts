@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 /**
  * API client for the Aira backend.
@@ -16,7 +17,15 @@ function resolveApiBaseUrl() {
     );
   }
 
-  return configuredUrl.trim().replace(/\/$/, '');
+  const apiUrl = configuredUrl.trim().replace(/\/$/, '');
+
+  // Android emulators run in a separate network namespace. Their loopback
+  // address is the emulator, not this development machine.
+  if (Platform.OS === 'android') {
+    return apiUrl.replace(/:\/\/(localhost|127\.0\.0\.1)(?=[:/]|$)/, '://10.0.2.2');
+  }
+
+  return apiUrl;
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
@@ -33,8 +42,16 @@ export async function healthCheck() {
   return res.json();
 }
 
+export async function apiLogFirebaseToken(token: string) {
+  await fetch(`${API_BASE_URL}/api/push-notification-token`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ token }),
+  });
+}
+
 export async function apiLogin(email: string, password: string) {
-  const res = await fetch(`${API_BASE_URL}/api/adminlogin`, {
+  const res = await fetch(`${API_BASE_URL}/api/login`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ email, password }),

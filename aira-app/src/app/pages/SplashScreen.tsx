@@ -15,7 +15,7 @@ import {
   Smartphone,
   HardDrive,
 } from 'lucide-react-native';
-import type { SplashScreenProps } from '../types';
+import type { SplashScreenProps } from '../../types';
 
 const { width, height } = Dimensions.get('window');
 

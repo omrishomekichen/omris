@@ -19,7 +19,7 @@ import {
   MessageSquare,
   Trash2,
 } from 'lucide-react-native';
-import type { Review, ReviewCardProps } from '../types';
+import type { Review, ReviewCardProps } from '../../types';
 import { useAuth } from '../../Context/AuthContext';
 import { apiGetAdminReviews, apiDeleteAdminReview } from '../../lib/api';
 

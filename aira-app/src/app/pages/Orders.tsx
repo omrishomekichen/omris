@@ -18,7 +18,7 @@ import {
 } from 'lucide-react-native';
 import { apiGetAdminOrders } from '@/lib/api';
 import { useAuth } from '../../Context/AuthContext';
-import type { AdminOrder, FilterTab, OrderCardProps, OrdersScreenProps } from '../types';
+import type { AdminOrder, FilterTab, OrderCardProps, OrdersScreenProps } from '../../types';
 
 /* =====================================================
    orders SCREEN

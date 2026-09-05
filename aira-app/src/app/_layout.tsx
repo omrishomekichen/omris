@@ -14,9 +14,10 @@ import DashboardScreen from './pages/Dashboard';
 import OrdersScreen from './pages/Orders';
 import Menu from './pages/Menu';
 import ReviewsScreen from './pages/Reviews';
-import { OrderDetailScreen } from './pages/OrderDetailScreen';
+import { OrderDetailScreen } from '../screens/OrderDetailScreen';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import {healthCheck} from '../lib/api';
+import { apiLogFirebaseToken, healthCheck } from '../lib/api';
+import { initializeFirebaseMessaging } from '../lib/firebaseMessaging';
 
 // Height of the tab bar's own content (paddingTop 5 + paddingBottom 7 + tab minHeight 54)
 const TAB_BAR_HEIGHT = 66;
@@ -36,20 +37,25 @@ function AppShell() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await healthCheck();
+        await healthCheck();
       } catch (error) {
       }
 
     };
     checkHealth();
   }, []);
-  if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#650700" />
-      </View>
-    );
-  }
+
+  useEffect(() => {
+    const registerForPushNotifications = async () => {
+      const token = await initializeFirebaseMessaging();
+      if (token) {
+        await apiLogFirebaseToken(token);
+      }
+    };
+
+    void registerForPushNotifications();
+  }, []);
+
 
   // Not logged in — show login screen
   if (!session) {

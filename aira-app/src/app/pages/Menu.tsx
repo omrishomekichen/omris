@@ -42,7 +42,7 @@ import type {
   InputLabelProps,
   FormSectionTitleProps,
   UnitSelectorProps,
-} from "../types";
+} from "../../types";
 import { apiGetMenuItems } from "../../lib/api";
 import { useAuth } from "../../Context/AuthContext";
 

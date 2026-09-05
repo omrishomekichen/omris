@@ -25,7 +25,7 @@ import {
   Shield,
 } from 'lucide-react-native';
 import {useAuth} from '../../Context/AuthContext'
-import type { NativeMobileHeaderProps } from '../types';
+import type { NativeMobileHeaderProps } from '../../types';
 
 const AIRA_LOGO = require('../../../assets/images/aira-pickles-logo.png');
 

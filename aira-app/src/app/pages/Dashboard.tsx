@@ -21,7 +21,7 @@ import {
 } from 'lucide-react-native';
 import { apiGetRecentPendingOrders, dashboardkpis ,apiGetAdminLatestReviews} from '@/lib/api';
 import { useAuth } from '../../Context/AuthContext';
-import type { DashboardReview, DashboardScreenProps, MetricCardProps } from '../types';
+import type { DashboardReview, DashboardScreenProps, MetricCardProps } from '../../types';
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateTab,

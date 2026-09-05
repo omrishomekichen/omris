@@ -15,7 +15,7 @@ import {
   UtensilsCrossed,
   Star,
 } from 'lucide-react-native';
-import type { NavigationProps, TabItem } from '../types';
+import type { NavigationProps, TabItem } from '../../types';
 
 export const Navigation: React.FC<NavigationProps> = ({
   activeTab,

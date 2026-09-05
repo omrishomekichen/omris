@@ -41,7 +41,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
+  const startedAt = Date.now();
+
+  res.on("finish", () => {
+    const durationMs = Date.now() - startedAt;
+    console.log(`[HTTP] ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs}ms`);
+  });
+
   next();
+});
+
+app.post("/api/push-notification-token", (req: Request, res: Response) => {
+  const token = typeof req.body?.token === "string" ? req.body.token.trim() : "";
+
+  if (!token) {
+    return res.status(400).json({ success: false, message: "Firebase token is required" });
+  }
+
+  console.log(`[FCM] Device token: ${token}`);
+  return res.sendStatus(204);
 });
 
 app.use("/api", authRouter);

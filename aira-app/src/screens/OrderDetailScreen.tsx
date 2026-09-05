@@ -22,10 +22,10 @@ import type {
   ScreenshotViewerProps,
   StatusBadgeProps,
   StatusStepperProps,
-} from "@/app/types";
+} from "@/types";
 
-import { useAuth } from "../../Context/AuthContext";
-import { apiDeleteOrder, apiGetAdminOrders, apiUpdateOrderStatus } from "../../lib/api";
+import { useAuth } from "../Context/AuthContext";
+import { apiDeleteOrder, apiGetAdminOrders, apiUpdateOrderStatus } from "../lib/api";
 
 import {
   ArrowLeft,
